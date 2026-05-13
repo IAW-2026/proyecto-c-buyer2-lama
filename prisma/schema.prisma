@@ -1,0 +1,111 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Comprador {
+  id                 String   @id @default(cuid())
+  clerkUserId        String   @unique
+  email              String   @unique
+  nombreComprador    String
+  dni                String?
+  telefono           String?
+  direccionEnvio     String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  preferencias       PreferenciaComprador?
+  pedidos            Pedido[]
+  itemsCarrito       ItemCarrito[]
+}
+
+model PreferenciaComprador {
+  id                    String   @id @default(cuid())
+  compradorId           String   @unique
+  comprador             Comprador @relation(fields: [compradorId], references: [id], onDelete: Cascade)
+  tallesPreferidos      String[]
+  categoriasPreferidas  String[]
+  vendedoresPreferidos  String[]
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+}
+
+model Producto {
+  id           String   @id @default(cuid())
+  titulo       String
+  descripcion  String
+  precio       Float
+  imagenUrl    String
+  categoria    String
+  talle        String
+  marca        String
+  estado       String
+  stock        Int
+  vendedorId   String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  itemsCarrito ItemCarrito[]
+  itemsPedido  ItemPedido[]
+}
+
+model ItemCarrito {
+  id             String   @id @default(cuid())
+  compradorId    String
+  comprador      Comprador @relation(fields: [compradorId], references: [id], onDelete: Cascade)
+  productoId     String
+  producto       Producto @relation(fields: [productoId], references: [id], onDelete: Cascade)
+  cantidad       Int      @default(1)
+  precioUnitario Float
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([compradorId, productoId])
+}
+
+model Pedido {
+  id               String   @id @default(cuid())
+  compradorId      String
+  comprador        Comprador @relation(fields: [compradorId], references: [id])
+  numeroOrden      String   @unique
+  estado           String
+  montoTotal       Float
+  montoProducto    Float
+  montoEnvio       Float
+  metodoPago       String?
+  direccionEnvio   String
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  items            ItemPedido[]
+  estadoEnvio      EstadoEnvio?
+}
+
+model ItemPedido {
+  id             String   @id @default(cuid())
+  pedidoId       String
+  pedido         Pedido   @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
+  productoId     String
+  producto       Producto @relation(fields: [productoId], references: [id])
+  cantidad       Int
+  precioUnitario Float
+
+  @@unique([pedidoId, productoId])
+}
+
+model EstadoEnvio {
+  id                 String   @id @default(cuid())
+  pedidoId           String   @unique
+  pedido             Pedido   @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
+  codigoSeguimiento  String
+  empresaLogistica   String
+  estado             String
+  historialEstados   String[]
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
