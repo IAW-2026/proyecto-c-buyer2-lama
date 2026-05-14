@@ -1,7 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
 import { syncUserToDB } from '@/lib/clerk';
 import { itemCarritoSchema, actualizarItemCarritoSchema } from '@/lib/validation';
+import {
+  actualizarItemCarritoMock,
+  agregarItemCarritoMock,
+  removerItemCarritoMock,
+} from '@/lib/mockExternalServices';
+
+export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
   try {
@@ -17,43 +23,17 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const validated = itemCarritoSchema.parse(body);
 
-    const producto = await prisma.producto.findUnique({
-      where: { id: validated.productoId },
-    });
+    const item = agregarItemCarritoMock(
+      comprador.id,
+      validated.productoId,
+      validated.cantidad
+    );
 
-    if (!producto || producto.stock < validated.cantidad) {
+    if (!item) {
       return NextResponse.json(
         { error: 'Producto no disponible' },
         { status: 400 }
       );
-    }
-
-    const existing = await prisma.itemCarrito.findUnique({
-      where: {
-        compradorId_productoId: {
-          compradorId: comprador.id,
-          productoId: validated.productoId,
-        },
-      },
-    });
-
-    let item;
-    if (existing) {
-      item = await prisma.itemCarrito.update({
-        where: { id: existing.id },
-        data: { cantidad: existing.cantidad + validated.cantidad },
-        include: { producto: true },
-      });
-    } else {
-      item = await prisma.itemCarrito.create({
-        data: {
-          compradorId: comprador.id,
-          productoId: validated.productoId,
-          cantidad: validated.cantidad,
-          precioUnitario: producto.precio,
-        },
-        include: { producto: true },
-      });
     }
 
     return NextResponse.json(item, { status: 201 });
@@ -82,11 +62,14 @@ export async function PUT(request: NextRequest) {
 
     const validated = actualizarItemCarritoSchema.parse({ cantidad });
 
-    const item = await prisma.itemCarrito.update({
-      where: { id: itemId },
-      data: { cantidad: validated.cantidad },
-      include: { producto: true },
-    });
+    const item = actualizarItemCarritoMock(comprador.id, itemId, validated.cantidad);
+
+    if (!item) {
+      return NextResponse.json(
+        { error: 'Item no encontrado o cantidad no disponible' },
+        { status: 404 }
+      );
+    }
 
     return NextResponse.json(item);
   } catch (error) {
@@ -112,9 +95,7 @@ export async function DELETE(request: NextRequest) {
     const body = await request.json();
     const { itemId } = body;
 
-    await prisma.itemCarrito.delete({
-      where: { id: itemId },
-    });
+    removerItemCarritoMock(comprador.id, itemId);
 
     return NextResponse.json({ message: 'Item removido del carrito' });
   } catch (error) {

@@ -1,12 +1,17 @@
 import { NextResponse } from 'next/server';
-import type { Prisma, Producto } from '@prisma/client';
 import { syncUserToDB } from '@/lib/clerk';
 import { prisma } from '@/lib/prisma';
+import {
+  listarProductosMock,
+  type ProductoMock,
+} from '@/lib/mockExternalServices';
+
+export const dynamic = 'force-dynamic';
 
 const MAX_RECOMENDADOS = 6;
 
 function calcularScore(
-  producto: Producto,
+  producto: ProductoMock,
   preferencias: {
     tallesPreferidos: string[];
     categoriasPreferidas: string[];
@@ -53,34 +58,16 @@ export async function GET() {
       return NextResponse.json({ productos: [], hasPreferences: false });
     }
 
-    const preferenceConditions: Prisma.ProductoWhereInput[] = [];
+    const { productos } = listarProductosMock({ limit: 100 });
+    const productosFiltrados = productos.filter(
+      (producto) =>
+        producto.stock > 0 &&
+        (tallesPreferidos.includes(producto.talle) ||
+          categoriasPreferidas.includes(producto.categoria) ||
+          vendedoresPreferidos.includes(producto.vendedorId))
+    );
 
-    if (tallesPreferidos.length > 0) {
-      preferenceConditions.push({ talle: { in: tallesPreferidos } });
-    }
-
-    if (categoriasPreferidas.length > 0) {
-      preferenceConditions.push({
-        categoria: { in: categoriasPreferidas },
-      });
-    }
-
-    if (vendedoresPreferidos.length > 0) {
-      preferenceConditions.push({
-        vendedorId: { in: vendedoresPreferidos },
-      });
-    }
-
-    const productos = await prisma.producto.findMany({
-      where: {
-        stock: { gt: 0 },
-        OR: preferenceConditions,
-      },
-      take: 24,
-      orderBy: { createdAt: 'desc' },
-    });
-
-    const productosOrdenados = productos
+    const productosOrdenados = productosFiltrados
       .map((producto) => ({
         producto,
         score: calcularScore(producto, {

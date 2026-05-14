@@ -1,25 +1,17 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { obtenerStatsOrdenesMock } from '@/lib/mockExternalServices';
+
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    const [totalCompradores, pedidos] = await Promise.all([
-      prisma.comprador.count(),
-      prisma.pedido.findMany({
-        select: {
-          montoTotal: true,
-        },
-      }),
-    ]);
-
-    const ingresosTotales = pedidos.reduce(
-      (sum, p) => sum + p.montoTotal,
-      0
-    );
+    const totalCompradores = await prisma.comprador.count();
+    const { totalPedidos, ingresosTotales } = obtenerStatsOrdenesMock();
 
     return NextResponse.json({
       total: totalCompradores,
-      totalPedidos: pedidos.length,
+      totalPedidos,
       ingresosTotales,
     });
   } catch (error) {

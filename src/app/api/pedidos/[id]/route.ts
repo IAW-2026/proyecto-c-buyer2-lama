@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
 import { syncUserToDB } from '@/lib/clerk';
 import { agregarEstadosContrato } from '@/lib/orderStatus';
+import { obtenerPedidoPorCompradorMock } from '@/lib/mockExternalServices';
+
+export const dynamic = 'force-dynamic';
 
 export async function GET(
   _request: NextRequest,
@@ -17,15 +19,9 @@ export async function GET(
       );
     }
 
-    const pedido = await prisma.pedido.findUnique({
-      where: { id: params.id },
-      include: {
-        items: { include: { producto: true } },
-        estadoEnvio: true,
-      },
-    });
+    const pedido = obtenerPedidoPorCompradorMock(params.id, comprador.id);
 
-    if (!pedido || pedido.compradorId !== comprador.id) {
+    if (!pedido) {
       return NextResponse.json(
         { error: 'Pedido no encontrado' },
         { status: 404 }

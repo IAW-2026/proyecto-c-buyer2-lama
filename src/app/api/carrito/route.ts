@@ -1,6 +1,11 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
 import { syncUserToDB } from '@/lib/clerk';
+import {
+  obtenerCarritoMock,
+  vaciarCarritoMock,
+} from '@/lib/mockExternalServices';
+
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
@@ -13,21 +18,7 @@ export async function GET() {
       );
     }
 
-    const items = await prisma.itemCarrito.findMany({
-      where: { compradorId: comprador.id },
-      include: { producto: true },
-    });
-
-    const total = items.reduce(
-      (sum, item) => sum + item.precioUnitario * item.cantidad,
-      0
-    );
-
-    return NextResponse.json({
-      items,
-      total,
-      cantidad: items.reduce((sum, item) => sum + item.cantidad, 0),
-    });
+    return NextResponse.json(obtenerCarritoMock(comprador.id));
   } catch (error) {
     console.error('Error fetching carrito:', error);
     return NextResponse.json(
@@ -48,9 +39,7 @@ export async function DELETE() {
       );
     }
 
-    await prisma.itemCarrito.deleteMany({
-      where: { compradorId: comprador.id },
-    });
+    vaciarCarritoMock(comprador.id);
 
     return NextResponse.json({ message: 'Carrito vaciado' });
   } catch (error) {

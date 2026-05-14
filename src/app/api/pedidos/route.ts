@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
 import { syncUserToDB } from '@/lib/clerk';
 import { crearPedidoSchema } from '@/lib/validation';
-import { simularRespuestaEstadoEnvio } from '@/lib/mockData';
 import { agregarEstadosContrato } from '@/lib/orderStatus';
+import {
+  crearPedidoMock,
+  listarPedidosPorCompradorMock,
+} from '@/lib/mockExternalServices';
+
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
@@ -16,14 +20,7 @@ export async function GET() {
       );
     }
 
-    const pedidos = await prisma.pedido.findMany({
-      where: { compradorId: comprador.id },
-      include: {
-        items: { include: { producto: true } },
-        estadoEnvio: true,
-      },
-      orderBy: { createdAt: 'desc' },
-    });
+    const pedidos = listarPedidosPorCompradorMock(comprador.id);
 
     return NextResponse.json(pedidos.map(agregarEstadosContrato));
   } catch (error) {
@@ -48,76 +45,20 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
     const validated = crearPedidoSchema.parse(body);
-
-    // Obtener items del carrito
-    const itemsCarrito = await prisma.itemCarrito.findMany({
-      where: { compradorId: comprador.id },
-      include: { producto: true },
+    const pedido = crearPedidoMock({
+      compradorId: comprador.id,
+      metodoPago: validated.metodoPago,
+      direccionEnvio: validated.direccionEnvio,
     });
 
-    if (itemsCarrito.length === 0) {
+    if (!pedido) {
       return NextResponse.json(
-        { error: 'El carrito está vacío' },
+        { error: 'El carrito esta vacio' },
         { status: 400 }
       );
     }
 
-    // Calcular totales
-    const montoProducto = itemsCarrito.reduce(
-      (sum, item) => sum + item.precioUnitario * item.cantidad,
-      0
-    );
-    const montoEnvio = 15.0; // Envío fijo
-    const montoTotal = montoProducto + montoEnvio;
-
-    // Crear pedido
-    const numeroOrden = `ORD-${Date.now()}`;
-    const pedido = await prisma.pedido.create({
-      data: {
-        compradorId: comprador.id,
-        numeroOrden,
-        estado: 'pendiente_pago',
-        montoProducto,
-        montoEnvio,
-        montoTotal,
-        metodoPago: validated.metodoPago,
-        direccionEnvio: validated.direccionEnvio,
-        items: {
-          create: itemsCarrito.map((item) => ({
-            productoId: item.productoId,
-            cantidad: item.cantidad,
-            precioUnitario: item.precioUnitario,
-          })),
-        },
-      },
-      include: { items: { include: { producto: true } } },
-    });
-
-    // Crear estado de envío simulado
-    const estadoEnvioMock = simularRespuestaEstadoEnvio(pedido.id);
-    const historialEstados = estadoEnvioMock.historial_estados.map((historial) =>
-      JSON.stringify(historial)
-    );
-
-    const estadoEnvio = await prisma.estadoEnvio.create({
-      data: {
-        pedidoId: pedido.id,
-        codigoSeguimiento: estadoEnvioMock.codigo_seguimiento,
-        empresaLogistica: estadoEnvioMock.empresa_logistica,
-        estado: 'pendiente',
-        historialEstados,
-      },
-    });
-
-    // Limpiar carrito
-    await prisma.itemCarrito.deleteMany({
-      where: { compradorId: comprador.id },
-    });
-
-    return NextResponse.json(
-      agregarEstadosContrato({ ...pedido, estadoEnvio }),
-      { status: 201 }
-    );
+    return NextResponse.json(agregarEstadosContrato(pedido), { status: 201 });
   } catch (error) {
     console.error('Error creating pedido:', error);
     return NextResponse.json(

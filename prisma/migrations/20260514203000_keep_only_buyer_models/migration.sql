@@ -1,0 +1,12 @@
+ALTER TABLE IF EXISTS "EstadoEnvio" DROP CONSTRAINT IF EXISTS "EstadoEnvio_pedidoId_fkey";
+ALTER TABLE IF EXISTS "ItemPedido" DROP CONSTRAINT IF EXISTS "ItemPedido_pedidoId_fkey";
+ALTER TABLE IF EXISTS "ItemPedido" DROP CONSTRAINT IF EXISTS "ItemPedido_productoId_fkey";
+ALTER TABLE IF EXISTS "Pedido" DROP CONSTRAINT IF EXISTS "Pedido_compradorId_fkey";
+ALTER TABLE IF EXISTS "ItemCarrito" DROP CONSTRAINT IF EXISTS "ItemCarrito_compradorId_fkey";
+ALTER TABLE IF EXISTS "ItemCarrito" DROP CONSTRAINT IF EXISTS "ItemCarrito_productoId_fkey";
+
+DROP TABLE IF EXISTS "EstadoEnvio";
+DROP TABLE IF EXISTS "ItemPedido";
+DROP TABLE IF EXISTS "Pedido";
+DROP TABLE IF EXISTS "ItemCarrito";
+DROP TABLE IF EXISTS "Producto";

@@ -14,7 +14,6 @@ interface CartItemProps {
 }
 
 export function CartItem({
-  id,
   titulo,
   precio,
   imagenUrl,

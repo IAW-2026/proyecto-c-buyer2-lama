@@ -3,6 +3,8 @@ import { syncUserToDB } from '@/lib/clerk';
 import { prisma } from '@/lib/prisma';
 import { preferenciaSchema } from '@/lib/validation';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     const comprador = await syncUserToDB();

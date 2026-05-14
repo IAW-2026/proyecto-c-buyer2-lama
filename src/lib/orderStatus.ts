@@ -1,5 +1,3 @@
-import type { EstadoEnvio, Pedido } from '@prisma/client';
-
 export type EstadoGeneral =
   | 'Pago Pendiente'
   | 'Pagada'
@@ -17,8 +15,13 @@ export type EstadoEnvioContrato =
   | 'Entregado'
   | 'Cancelado';
 
-type PedidoConEstadoEnvio = Pedido & {
-  estadoEnvio?: EstadoEnvio | null;
+type PedidoConEstadoEnvio = {
+  estado: string;
+  numeroOrden: string;
+  updatedAt: Date | string;
+  estadoEnvio?: {
+    estado?: string | null;
+  } | null;
 };
 
 const estadoGeneralMap: Record<string, EstadoGeneral> = {

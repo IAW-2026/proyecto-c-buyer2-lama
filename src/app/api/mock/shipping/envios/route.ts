@@ -4,11 +4,12 @@ import { generarCodigoSeguimiento, empresasLogisticasMock } from '@/lib/mockData
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { order_id, direccion_destino, empresa_logistica } = body;
+    const { orden_id, order_id, direccion_destino, empresa_logistica } = body;
+    const ordenId = orden_id || order_id;
 
-    if (!order_id || !direccion_destino) {
+    if (!ordenId || !direccion_destino) {
       return NextResponse.json(
-        { error: 'order_id y direccion_destino son requeridos' },
+        { error: 'orden_id y direccion_destino son requeridos' },
         { status: 400 }
       );
     }
@@ -17,7 +18,7 @@ export async function POST(request: NextRequest) {
       envio_id: 'env_' + Math.random().toString(36).substring(7),
       codigo_seguimiento: generarCodigoSeguimiento(),
       estado: 'pendiente',
-      orden_id: order_id,
+      orden_id: ordenId,
       direccion_destino,
       empresa_logistica: empresa_logistica || empresasLogisticasMock[0],
       fecha_creacion: new Date().toISOString(),

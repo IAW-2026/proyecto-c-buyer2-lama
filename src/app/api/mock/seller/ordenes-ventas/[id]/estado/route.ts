@@ -1,20 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
 import { crearRespuestaEstadoOrden } from '@/lib/orderStatus';
+import { obtenerPedidoMock } from '@/lib/mockExternalServices';
+
+export const dynamic = 'force-dynamic';
 
 export async function GET(
   _request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    const pedido = await prisma.pedido.findFirst({
-      where: {
-        OR: [{ id: params.id }, { numeroOrden: params.id }],
-      },
-      include: {
-        estadoEnvio: true,
-      },
-    });
+    const pedido = obtenerPedidoMock(params.id);
 
     if (!pedido) {
       return NextResponse.json(

@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { listarProductosMock } from '@/lib/mockExternalServices';
+
+export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   try {
@@ -12,48 +14,15 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '12');
 
-    const skip = (page - 1) * limit;
-
-    const where: any = {
-      AND: [],
-    };
-
-    if (q) {
-      where.AND.push({
-        OR: [
-          { titulo: { contains: q, mode: 'insensitive' } },
-          { descripcion: { contains: q, mode: 'insensitive' } },
-          { marca: { contains: q, mode: 'insensitive' } },
-        ],
-      });
-    }
-
-    if (categoria) {
-      where.AND.push({ categoria });
-    }
-
-    if (talle) {
-      where.AND.push({ talle });
-    }
-
-    where.AND.push({
-      precio: {
-        gte: precioMin,
-        lte: precioMax,
-      },
+    const { productos: resultados, total } = listarProductosMock({
+      search: q,
+      categoria,
+      talle,
+      precioMin,
+      precioMax,
+      page,
+      limit,
     });
-
-    const [resultados, total] = await Promise.all([
-      prisma.producto.findMany({
-        where: where.AND.length > 0 ? where : undefined,
-        skip,
-        take: limit,
-        orderBy: { createdAt: 'desc' },
-      }),
-      prisma.producto.count({
-        where: where.AND.length > 0 ? where : undefined,
-      }),
-    ]);
 
     return NextResponse.json({
       resultados,

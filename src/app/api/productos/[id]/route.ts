@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { obtenerProductoMock } from '@/lib/mockExternalServices';
+
+export const dynamic = 'force-dynamic';
 
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    const producto = await prisma.producto.findUnique({
-      where: { id: params.id },
-    });
+    const producto = obtenerProductoMock(params.id);
 
     if (!producto) {
       return NextResponse.json(

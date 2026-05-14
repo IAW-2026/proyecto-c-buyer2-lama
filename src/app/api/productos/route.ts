@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import type { Prisma } from '@prisma/client';
+import {
+  crearProductoMock,
+  listarCategoriasYTallesMock,
+  listarProductosMock,
+} from '@/lib/mockExternalServices';
+
+export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   try {
@@ -13,59 +18,16 @@ export async function GET(request: NextRequest) {
     const precioMin = parseFloat(searchParams.get('precioMin') || '0');
     const precioMax = parseFloat(searchParams.get('precioMax') || '10000');
 
-    const skip = (page - 1) * limit;
-
-    const conditions: Prisma.ProductoWhereInput[] = [];
-
-    if (search) {
-      conditions.push({
-        OR: [
-          { titulo: { contains: search, mode: 'insensitive' } },
-          { descripcion: { contains: search, mode: 'insensitive' } },
-          { marca: { contains: search, mode: 'insensitive' } },
-        ],
-      });
-    }
-
-    if (categoria) {
-      conditions.push({ categoria });
-    }
-
-    if (talle) {
-      conditions.push({ talle });
-    }
-
-    conditions.push({
-      precio: {
-        gte: precioMin,
-        lte: precioMax,
-      },
+    const { productos, total } = listarProductosMock({
+      search,
+      categoria,
+      talle,
+      precioMin,
+      precioMax,
+      page,
+      limit,
     });
-
-    const where: Prisma.ProductoWhereInput | undefined =
-      conditions.length > 0 ? { AND: conditions } : undefined;
-
-    const [productos, total, categorias, talles] = await Promise.all([
-      prisma.producto.findMany({
-        where,
-        skip,
-        take: limit,
-        orderBy: { createdAt: 'desc' },
-      }),
-      prisma.producto.count({
-        where,
-      }),
-      prisma.producto.findMany({
-        select: { categoria: true },
-        distinct: ['categoria'],
-        orderBy: { categoria: 'asc' },
-      }),
-      prisma.producto.findMany({
-        select: { talle: true },
-        distinct: ['talle'],
-        orderBy: { talle: 'asc' },
-      }),
-    ]);
+    const { categorias, talles } = listarCategoriasYTallesMock();
 
     return NextResponse.json({
       productos,
@@ -73,8 +35,8 @@ export async function GET(request: NextRequest) {
       page,
       limit,
       pages: Math.ceil(total / limit),
-      categorias: categorias.map((producto) => producto.categoria),
-      talles: talles.map((producto) => producto.talle),
+      categorias,
+      talles,
     });
   } catch (error) {
     console.error('Error fetching productos:', error);
@@ -97,19 +59,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const producto = await prisma.producto.create({
-      data: {
-        titulo,
-        descripcion: descripcion || '',
-        precio: parseFloat(precio),
-        imagenUrl: imagenUrl || '',
-        categoria,
-        talle,
-        marca,
-        estado: estado || 'buen estado',
-        stock: stock || 1,
-        vendedorId: vendedorId || 'admin',
-      },
+    const producto = crearProductoMock({
+      titulo,
+      descripcion: descripcion || '',
+      precio: parseFloat(precio),
+      imagenUrl: imagenUrl || '',
+      categoria,
+      talle,
+      marca,
+      estado: estado || 'buen estado',
+      stock: stock || 1,
+      vendedorId: vendedorId || 'seller_mock',
     });
 
     return NextResponse.json(producto, { status: 201 });
