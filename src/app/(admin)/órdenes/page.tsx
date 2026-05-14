@@ -54,11 +54,12 @@ export default function OrdenesAdminPage() {
 
   const getEstadoColor = (estado: string) => {
     const colors: { [key: string]: string } = {
-      pendiente: 'bg-yellow-100 text-yellow-700',
-      pagado: 'bg-blue-100 text-blue-700',
-      enviado: 'bg-purple-100 text-purple-700',
-      entregado: 'bg-green-100 text-green-700',
-      cancelado: 'bg-red-100 text-red-700',
+      pendiente_pago: 'bg-yellow-100 text-yellow-700',
+      pagada: 'bg-blue-100 text-blue-700',
+      en_preparacion: 'bg-orange-100 text-orange-700',
+      despachada: 'bg-purple-100 text-purple-700',
+      finalizada: 'bg-green-100 text-green-700',
+      cancelada: 'bg-red-100 text-red-700',
     };
     return colors[estado] || 'bg-gray-100 text-gray-700';
   };
@@ -93,11 +94,12 @@ export default function OrdenesAdminPage() {
             className="input-base w-full max-w-md"
           >
             <option value="">Todos los estados</option>
-            <option value="pendiente">Pendiente</option>
-            <option value="pagado">Pagado</option>
-            <option value="enviado">Enviado</option>
-            <option value="entregado">Entregado</option>
-            <option value="cancelado">Cancelado</option>
+            <option value="pendiente_pago">Pendiente pago</option>
+            <option value="pagada">Pagada</option>
+            <option value="en_preparacion">En preparacion</option>
+            <option value="despachada">Despachada</option>
+            <option value="finalizada">Finalizada</option>
+            <option value="cancelada">Cancelada</option>
           </select>
         </div>
 

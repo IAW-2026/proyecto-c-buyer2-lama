@@ -1,5 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { agregarEstadosContrato } from '@/lib/orderStatus';
+
+const estadosLegacyPorContrato: Record<string, string[]> = {
+  pendiente_pago: ['pendiente_pago', 'pendiente'],
+  pagada: ['pagada', 'pagado'],
+  en_preparacion: ['en_preparacion'],
+  despachada: ['despachada', 'enviado'],
+  finalizada: ['finalizada', 'entregado'],
+  cancelada: ['cancelada', 'cancelado'],
+};
 
 export async function GET(request: NextRequest) {
   try {
@@ -12,7 +22,9 @@ export async function GET(request: NextRequest) {
 
     const where: any = {};
     if (estado) {
-      where.estado = estado;
+      where.estado = {
+        in: estadosLegacyPorContrato[estado] || [estado],
+      };
     }
 
     const [ordenes, total] = await Promise.all([
@@ -25,6 +37,7 @@ export async function GET(request: NextRequest) {
               email: true,
             },
           },
+          estadoEnvio: true,
         },
         skip,
         take: limit,
@@ -34,7 +47,7 @@ export async function GET(request: NextRequest) {
     ]);
 
     return NextResponse.json({
-      ordenes,
+      ordenes: ordenes.map(agregarEstadosContrato),
       total,
       page,
       limit,

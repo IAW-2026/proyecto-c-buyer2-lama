@@ -21,7 +21,13 @@ export const metodoPagosMock = [
 
 export const empresasLogisticasMock = ['DHL', 'FedEx', 'OCA', 'Correo Argentino', 'Andreani'];
 
-export const estadosEnvioMock = ['preparando', 'en_transito', 'entregado', 'devuelto'];
+export const estadosEnvioMock = [
+  'pendiente',
+  'en_preparacion',
+  'despachado',
+  'entregado',
+  'cancelado',
+];
 
 export function generarCodigoSeguimiento(): string {
   return 'TRK' + Math.random().toString(36).substring(2, 15).toUpperCase();
@@ -40,11 +46,11 @@ export function simularRespuestaEstadoEnvio(ordenId: string) {
     estado: estadosEnvioMock[Math.floor(Math.random() * estadosEnvioMock.length)],
     historial_estados: [
       {
-        estado: 'preparando',
+        estado: 'en_preparacion',
         fecha: new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString(),
       },
       {
-        estado: 'en_transito',
+        estado: 'despachado',
         fecha: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
       },
     ],

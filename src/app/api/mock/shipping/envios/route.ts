@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
     const envio = {
       envio_id: 'env_' + Math.random().toString(36).substring(7),
       codigo_seguimiento: generarCodigoSeguimiento(),
-      estado: 'pending',
+      estado: 'pendiente',
       orden_id: order_id,
       direccion_destino,
       empresa_logistica: empresa_logistica || empresasLogisticasMock[0],

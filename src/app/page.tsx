@@ -1,10 +1,52 @@
 'use client';
 
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
 import { useUser } from '@clerk/nextjs';
+import { ProductCard } from '@/components/ProductCard';
+
+interface Producto {
+  id: string;
+  titulo: string;
+  precio: number;
+  imagenUrl: string;
+  marca: string;
+  talle: string;
+  estado: string;
+  categoria: string;
+}
 
 export default function Home() {
   const { isSignedIn } = useUser();
+  const [productosRecomendados, setProductosRecomendados] = useState<
+    Producto[]
+  >([]);
+
+  useEffect(() => {
+    async function fetchRecomendados() {
+      if (!isSignedIn) {
+        setProductosRecomendados([]);
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/productos/recomendados');
+        const data = await response.json();
+
+        if (!response.ok) {
+          setProductosRecomendados([]);
+          return;
+        }
+
+        setProductosRecomendados(data.productos || []);
+      } catch (error) {
+        console.error('Error fetching recomendados:', error);
+        setProductosRecomendados([]);
+      }
+    }
+
+    fetchRecomendados();
+  }, [isSignedIn]);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -59,6 +101,27 @@ export default function Home() {
               >
                 Explorar Tienda
               </Link>
+
+              {productosRecomendados.length > 0 && (
+                <section className="mt-12">
+                  <div className="flex items-center justify-between gap-4 mb-6">
+                    <h3 className="text-2xl font-bold text-lama-dark">
+                      Basado en tus intereses
+                    </h3>
+                    <Link
+                      href="/productos"
+                      className="text-sm font-semibold text-lama-secondary hover:text-lama-dark"
+                    >
+                      Ver tienda
+                    </Link>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {productosRecomendados.map((producto) => (
+                      <ProductCard key={producto.id} {...producto} />
+                    ))}
+                  </div>
+                </section>
+              )}
             </div>
           ) : (
             <div className="text-center">

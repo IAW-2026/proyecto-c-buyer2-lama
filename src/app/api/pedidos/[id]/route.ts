@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { syncUserToDB } from '@/lib/clerk';
+import { agregarEstadosContrato } from '@/lib/orderStatus';
 
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
@@ -31,7 +32,7 @@ export async function GET(
       );
     }
 
-    return NextResponse.json(pedido);
+    return NextResponse.json(agregarEstadosContrato(pedido));
   } catch (error) {
     console.error('Error fetching pedido:', error);
     return NextResponse.json(

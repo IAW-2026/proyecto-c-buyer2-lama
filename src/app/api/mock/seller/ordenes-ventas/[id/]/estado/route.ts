@@ -1,13 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { crearRespuestaEstadoOrden } from '@/lib/orderStatus';
 
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    const pedido = await prisma.pedido.findUnique({
-      where: { id: params.id },
+    const pedido = await prisma.pedido.findFirst({
+      where: {
+        OR: [{ id: params.id }, { numeroOrden: params.id }],
+      },
       include: {
         estadoEnvio: true,
       },
@@ -20,13 +23,7 @@ export async function GET(
       );
     }
 
-    return NextResponse.json({
-      orden_id: pedido.id,
-      estado_general: pedido.estado,
-      estado_pago: 'aprobado',
-      estado_envio: pedido.estadoEnvio?.estado || 'pendiente',
-      fecha_actualizacion: pedido.updatedAt,
-    });
+    return NextResponse.json(crearRespuestaEstadoOrden(pedido));
   } catch (error) {
     console.error('Error fetching seller orden:', error);
     return NextResponse.json(

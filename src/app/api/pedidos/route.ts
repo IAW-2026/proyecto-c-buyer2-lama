@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { syncUserToDB } from '@/lib/clerk';
 import { crearPedidoSchema } from '@/lib/validation';
 import { simularRespuestaEstadoEnvio } from '@/lib/mockData';
+import { agregarEstadosContrato } from '@/lib/orderStatus';
 
 export async function GET() {
   try {
@@ -24,7 +25,7 @@ export async function GET() {
       orderBy: { createdAt: 'desc' },
     });
 
-    return NextResponse.json(pedidos);
+    return NextResponse.json(pedidos.map(agregarEstadosContrato));
   } catch (error) {
     console.error('Error fetching pedidos:', error);
     return NextResponse.json(
@@ -75,7 +76,7 @@ export async function POST(request: NextRequest) {
       data: {
         compradorId: comprador.id,
         numeroOrden,
-        estado: 'pendiente',
+        estado: 'pendiente_pago',
         montoProducto,
         montoEnvio,
         montoTotal,
@@ -94,13 +95,17 @@ export async function POST(request: NextRequest) {
 
     // Crear estado de envío simulado
     const estadoEnvioMock = simularRespuestaEstadoEnvio(pedido.id);
+    const historialEstados = estadoEnvioMock.historial_estados.map((historial) =>
+      JSON.stringify(historial)
+    );
+
     const estadoEnvio = await prisma.estadoEnvio.create({
       data: {
         pedidoId: pedido.id,
         codigoSeguimiento: estadoEnvioMock.codigo_seguimiento,
         empresaLogistica: estadoEnvioMock.empresa_logistica,
-        estado: 'preparando',
-        historialEstados: JSON.stringify(estadoEnvioMock.historial_estados),
+        estado: 'pendiente',
+        historialEstados,
       },
     });
 
@@ -110,7 +115,7 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json(
-      { ...pedido, estadoEnvio },
+      agregarEstadosContrato({ ...pedido, estadoEnvio }),
       { status: 201 }
     );
   } catch (error) {

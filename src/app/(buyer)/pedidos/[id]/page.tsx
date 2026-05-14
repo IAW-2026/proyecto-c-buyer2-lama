@@ -76,11 +76,12 @@ export default function PedidoDetailPage({
 
   const getEstadoColor = (estado: string) => {
     const colors: { [key: string]: string } = {
-      pendiente: 'bg-yellow-100 text-yellow-700',
-      pagado: 'bg-blue-100 text-blue-700',
-      enviado: 'bg-purple-100 text-purple-700',
-      entregado: 'bg-green-100 text-green-700',
-      cancelado: 'bg-red-100 text-red-700',
+      pendiente_pago: 'bg-yellow-100 text-yellow-700',
+      pagada: 'bg-blue-100 text-blue-700',
+      en_preparacion: 'bg-orange-100 text-orange-700',
+      despachada: 'bg-purple-100 text-purple-700',
+      finalizada: 'bg-green-100 text-green-700',
+      cancelada: 'bg-red-100 text-red-700',
     };
     return colors[estado] || 'bg-gray-100 text-gray-700';
   };

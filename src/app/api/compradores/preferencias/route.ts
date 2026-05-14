@@ -47,13 +47,18 @@ export async function PUT(request: Request) {
 
     const body = await request.json();
     const validated = preferenciaSchema.parse(body);
+    const preferenciasData = {
+      tallesPreferidos: validated.tallesPreferidos || [],
+      categoriasPreferidas: validated.categoriasPreferidas || [],
+      vendedoresPreferidos: validated.vendedoresPreferidos || [],
+    };
 
     const preferencias = await prisma.preferenciaComprador.upsert({
       where: { compradorId: comprador.id },
-      update: validated,
+      update: preferenciasData,
       create: {
         compradorId: comprador.id,
-        ...validated,
+        ...preferenciasData,
       },
     });
 

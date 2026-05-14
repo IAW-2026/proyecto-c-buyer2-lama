@@ -48,9 +48,15 @@ export const productoSchema = z.object({
 });
 
 export const actualizarPedidoSchema = z.object({
-  estado: z.enum(['pendiente', 'pagado', 'enviado', 'entregado', 'cancelado']),
+  estado: z.enum([
+    'pendiente_pago',
+    'pagada',
+    'en_preparacion',
+    'despachada',
+    'finalizada',
+    'cancelada',
+  ]),
 });
 
 export type ProductoInput = z.infer<typeof productoSchema>;
 export type ActualizarPedidoInput = z.infer<typeof actualizarPedidoSchema>;
-
