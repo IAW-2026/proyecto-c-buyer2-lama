@@ -1,25 +1,30 @@
-import type { Config } from 'tailwindcss'
+import type { Config } from "tailwindcss";
 
 const config: Config = {
   content: [
-    './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
-    './src/components/**/*.{js,ts,jsx,tsx,mdx}',
-    './src/app/**/*.{js,ts,jsx,tsx,mdx}',
+    "./app/**/*.{js,ts,jsx,tsx,mdx}",
+    "./components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./lib/**/*.{js,ts,jsx,tsx,mdx}"
   ],
   theme: {
     extend: {
       colors: {
-        'lama-primary': '#8fa18d',
-        'lama-secondary': '#6f7f6d',
-        'lama-light': '#f6f1e7',
-        'lama-card': '#ede6d8',
-        'lama-dark': '#37413d',
+        lama: {
+          header: "#8fa18d",
+          detail: "#6f7f6d",
+          cream: "#f6f1e7",
+          card: "#ede6d8",
+          ink: "#37413d",
+          line: "#d8cebd"
+        }
       },
-      spacing: {
-        '128': '32rem',
-      },
-    },
+      boxShadow: {
+        soft: "0 18px 50px rgba(55, 65, 61, 0.12)"
+      }
+    }
   },
-  plugins: [],
-}
-export default config
+  plugins: []
+};
+
+export default config;
+

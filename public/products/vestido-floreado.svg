@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 675" role="img" aria-labelledby="title desc">
+  <title id="title">Vestido floreado midi</title>
+  <desc id="desc">Ilustracion de vestido midi con flores.</desc>
+  <rect width="900" height="675" fill="#f6f1e7"/>
+  <rect x="75" y="70" width="750" height="535" rx="28" fill="#ede6d8"/>
+  <path d="M385 125h130l40 118 104 302H241l104-302z" fill="#bd7f73"/>
+  <path d="M385 125c15 39 37 58 65 58s50-19 65-58" fill="#f6f1e7"/>
+  <path d="M345 243h210M306 438h288" stroke="#37413d" stroke-width="10" stroke-linecap="round" opacity=".35"/>
+  <g fill="#f6f1e7">
+    <circle cx="350" cy="330" r="18"/><circle cx="520" cy="365" r="18"/><circle cx="430" cy="455" r="18"/>
+    <circle cx="485" cy="285" r="15"/><circle cx="575" cy="488" r="15"/>
+  </g>
+  <g fill="#6f7f6d">
+    <circle cx="350" cy="330" r="7"/><circle cx="520" cy="365" r="7"/><circle cx="430" cy="455" r="7"/>
+    <circle cx="485" cy="285" r="6"/><circle cx="575" cy="488" r="6"/>
+  </g>
+</svg>
+

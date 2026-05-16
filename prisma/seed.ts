@@ -1,9 +1,17 @@
+import { PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient();
+
 async function main() {
-  console.log('Buyer DB seed: no external app data is persisted here.');
-  console.log('Seller, shipping and payments data are served from mocks.');
+  console.info("Seed vacio: los compradores se registran desde Clerk.");
 }
 
-main().catch((error) => {
-  console.error('Error seeding Buyer database:', error);
-  process.exit(1);
-});
+main()
+  .then(async () => {
+    await prisma.$disconnect();
+  })
+  .catch(async (error) => {
+    console.error(error);
+    await prisma.$disconnect();
+    process.exit(1);
+  });

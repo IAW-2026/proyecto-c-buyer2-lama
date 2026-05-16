@@ -8,25 +8,27 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-model Comprador {
-  id                 String   @id @default(cuid())
-  clerkUserId        String   @unique
-  email              String   @unique
-  nombreComprador    String
-  dni                String?
-  telefono           String?
-  direccionEnvio     String?
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+model comprador {
+  clerk_user_id_comprador String                  @id
+  email                   String                  @unique
+  nombre_comprador        String
+  DNI                     String?
+  telefono                String?
+  direccion_envio         String?
+  fecha_creacion          DateTime                @default(now())
+  fecha_actualizacion     DateTime                @updatedAt
+  preferencias            preferencias_comprador?
 
-  preferencias       PreferenciaComprador?
+  @@map("comprador")
 }
 
-model PreferenciaComprador {
-  id                    String   @id @default(cuid())
-  compradorId           String   @unique
-  comprador             Comprador @relation(fields: [compradorId], references: [id], onDelete: Cascade)
-  tallesPreferidos      String[]
-  categoriasPreferidas  String[]
-  vendedoresPreferidos  String[]
+model preferencias_comprador {
+  preferencia_id           String    @id @default(cuid())
+  clerk_user_id_comprador  String    @unique
+  talles_preferidos        String[]
+  categorias_preferidas    String[]
+  vendedores_preferidos    String[]
+  comprador                comprador @relation(fields: [clerk_user_id_comprador], references: [clerk_user_id_comprador], onDelete: Cascade)
+
+  @@map("preferencias_comprador")
 }
