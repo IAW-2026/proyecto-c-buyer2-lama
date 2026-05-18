@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { ArrowLeft, Calendar, Ruler, Store } from "lucide-react";
+import { AddToCartButton } from "@/components/AddToCartButton";
 import { CheckoutForm } from "@/components/CheckoutForm";
 import { ButtonLink, Card, PageShell, StatusBadge } from "@/components/ui";
 import { getAuthContext } from "@/lib/auth";
@@ -96,19 +97,22 @@ export default async function ProductPage({
           </Card>
 
           {authContext.userId && authContext.email ? (
-            <CheckoutForm
-              product={product}
-              methods={methods}
-              buyer={{
-                clerk_user_id_comprador: authContext.userId,
-                nombre: authContext.name ?? "Comprador lama",
-                email: authContext.email,
-                direccion_envio: buyerProfile?.direccion_envio ?? "Pendiente de completar"
-              }}
-            />
+            <>
+              <AddToCartButton product={product} />
+              <CheckoutForm
+                product={product}
+                methods={methods}
+                buyer={{
+                  clerk_user_id_comprador: authContext.userId,
+                  nombre: authContext.name ?? "Comprador lama",
+                  email: authContext.email,
+                  direccion_envio: buyerProfile?.direccion_envio ?? "Pendiente de completar"
+                }}
+              />
+            </>
           ) : (
             <Card>
-              <p className="font-bold">Necesitas iniciar sesion para comprar.</p>
+              <p className="font-bold">Necesitas iniciar sesion para comprar o agregar al carrito.</p>
               <div className="mt-4 flex flex-wrap gap-2">
                 <ButtonLink href="/sign-in">Iniciar sesion</ButtonLink>
                 <ButtonLink href="/sign-up" className="bg-lama-cream text-lama-ink hover:bg-white">

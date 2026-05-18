@@ -29,7 +29,7 @@ export default async function PurchasesPage() {
               <div className="grid gap-5 lg:grid-cols-[1fr_300px]">
                 <div className="space-y-4">
                   <div className="flex flex-wrap items-center gap-3">
-                    <h2 className="text-xl font-bold">{order.nro_orden}</h2>
+                    <h2 className="text-xl font-bold">Nro. Orden: {order.nro_orden}</h2>
                     <StatusBadge>{status.estado_general}</StatusBadge>
                     <StatusBadge>Pago {status.estado_pago}</StatusBadge>
                   </div>
@@ -40,7 +40,7 @@ export default async function PurchasesPage() {
                       <dd>{currency.format(order.total)}</dd>
                     </div>
                     <div>
-                      <dt className="font-bold">Direccion</dt>
+                      <dt className="font-bold">Dirección</dt>
                       <dd>{order.direccion_envio}</dd>
                     </div>
                     <div>
@@ -56,8 +56,8 @@ export default async function PurchasesPage() {
                       <Truck className="h-5 w-5 text-lama-detail" aria-hidden="true" />
                       Envio
                     </div>
-                    <p className="mt-2 text-sm">{shipping.empresa_logistica}</p>
-                    <p className="text-sm font-bold">{shipping.codigo_seguimiento}</p>
+                    <p className="mt-2 text-sm font-bold">Empresa a cargo del envio: {shipping.empresa_logistica}</p>
+                    <p className="text-sm font-semibold">Código de Seguimiento: {shipping.codigo_seguimiento}</p>
                     <ol className="mt-4 space-y-3">
                       {shipping.historial_estados.map((event) => (
                         <li key={`${event.estado}-${event.fecha}`} className="text-sm">
@@ -76,7 +76,7 @@ export default async function PurchasesPage() {
           ))}
         </div>
       ) : (
-        <EmptyState title="Todavia no hay compras" text="Cuando compres una prenda, la orden y el envio apareceran aca." />
+        <EmptyState title="Todavía no hay compras" text="Cuando compres una prenda, la orden y el envio apareceran aca." />
       )}
     </PageShell>
   );

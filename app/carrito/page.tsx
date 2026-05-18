@@ -1,0 +1,38 @@
+import { CartClient } from "@/components/CartClient";
+import { ButtonLink, Card, PageShell } from "@/components/ui";
+import { getAuthContext } from "@/lib/auth";
+import { getBuyer } from "@/lib/buyer-store";
+import { fetchInternalApi } from "@/lib/external-client";
+import type { PaymentMethod } from "@/lib/types";
+
+export default async function CartPage() {
+  const authContext = await getAuthContext();
+  const methods = authContext.userId ? await fetchInternalApi<PaymentMethod[]>("/api/metodos-pago") : [];
+  const buyerProfile = authContext.userId ? await getBuyer(authContext.userId) : null;
+
+  return (
+    <PageShell title="Mi carrito" eyebrow="Productos guardados">
+      {authContext.userId && authContext.email ? (
+        <CartClient
+          methods={methods}
+          buyer={{
+            clerk_user_id_comprador: authContext.userId,
+            nombre: authContext.name ?? "Comprador lama",
+            email: authContext.email,
+            direccion_envio: buyerProfile?.direccion_envio ?? "Pendiente de completar"
+          }}
+        />
+      ) : (
+        <Card>
+          <p className="font-bold">Necesitas iniciar sesion para ver tu carrito.</p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <ButtonLink href="/sign-in">Iniciar sesion</ButtonLink>
+            <ButtonLink href="/sign-up" className="bg-lama-cream text-lama-ink hover:bg-white">
+              Registrarme
+            </ButtonLink>
+          </div>
+        </Card>
+      )}
+    </PageShell>
+  );
+}

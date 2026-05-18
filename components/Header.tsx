@@ -1,10 +1,10 @@
 import Link from "next/link";
-import { Shield, ShoppingBag, UserRound } from "lucide-react";
+import { Shield, ShoppingBag, ShoppingCart, UserRound } from "lucide-react";
 import { canAccessAdmin, getAuthContext, isClerkConfigured } from "@/lib/auth";
 import { AuthButtons } from "@/components/auth/AuthButtons";
 
 const navItems = [
-  /*{ href: "/", label: "Catalogo", icon: ShoppingBag, authOnly: false },*/
+  { href: "/carrito", label: "Mi carrito", icon: ShoppingCart, authOnly: true },
   { href: "/compras", label: "Mis compras", icon: ShoppingBag, authOnly: true },
   { href: "/perfil", label: "Perfil", icon: UserRound, authOnly: true }
 ];
