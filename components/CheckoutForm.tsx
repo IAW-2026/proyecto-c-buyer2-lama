@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { CreditCard, Loader2 } from "lucide-react";
+import { BillingDetailsModal, type BillingDetails } from "@/components/BillingDetailsModal";
 import type { PaymentMethod, Product } from "@/lib/types";
 
 const currency = new Intl.NumberFormat("es-AR", {
@@ -10,30 +12,64 @@ const currency = new Intl.NumberFormat("es-AR", {
   maximumFractionDigits: 0
 });
 
+type CheckoutBuyer = BillingDetails & {
+  clerk_user_id_comprador: string;
+};
+
 export function CheckoutForm({
   product,
   buyer,
   methods
 }: {
   product: Product;
-  buyer: { clerk_user_id_comprador: string; nombre: string; email: string; direccion_envio: string };
+  buyer: CheckoutBuyer;
   methods: PaymentMethod[];
 }) {
+  const router = useRouter();
   const [methodId, setMethodId] = useState(methods[0]?.metodo_pago_id ?? "");
+  const [isBillingOpen, setIsBillingOpen] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const shippingAmount = 4500;
   const total = product.precio + shippingAmount;
 
-  function submitPayment() {
+  function openBillingDetails() {
     setMessage(null);
+    setIsBillingOpen(true);
+  }
+
+  function submitPayment(details: BillingDetails) {
+    const nombre_comprador = `${details.nombre}`.trim();
+
     startTransition(async () => {
+      const profileResponse = await fetch("/api/perfil", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          nombre_comprador,
+          email: details.email,
+          DNI: details.DNI,
+          direccion_envio: details.direccion_envio
+        })
+      });
+
+      if (!profileResponse.ok) {
+        const profileData = await profileResponse.json();
+        setMessage(profileData.error ?? "No se pudieron guardar los datos de facturacion.");
+        return;
+      }
+
       const response = await fetch("/api/pagos", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
           producto_id: product.producto_id,
-          comprador: buyer,
+          comprador: {
+            ...buyer,
+            email: details.email,
+            nombre: nombre_comprador,
+            direccion_envio: details.direccion_envio
+          },
           monto_producto: product.precio,
           monto_envio: shippingAmount,
           monto_total: total,
@@ -42,11 +78,15 @@ export function CheckoutForm({
       });
 
       const data = await response.json();
-      setMessage(
-        response.ok
-          ? `Pago ${data.estado_pago}. Orden ${data.nro_orden}. Comprobante ${data.pago_id}.`
-          : data.error ?? "No se pudo procesar el pago."
-      );
+
+      if (!response.ok) {
+        setMessage(data.error ?? "No se pudo procesar el pago.");
+        return;
+      }
+
+      setIsBillingOpen(false);
+      setMessage("Compra realizada con exito. Te estamos llevando a Mis compras.");
+      window.setTimeout(() => router.push("/compras"), 1200);
     });
   }
 
@@ -86,7 +126,7 @@ export function CheckoutForm({
 
       <button
         type="button"
-        onClick={submitPayment}
+        onClick={openBillingDetails}
         disabled={isPending || !methodId}
         className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-md bg-lama-detail px-4 py-3 text-sm font-bold text-white hover:bg-lama-ink focus:outline-none focus:ring-2 focus:ring-lama-detail focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
       >
@@ -97,6 +137,15 @@ export function CheckoutForm({
         )}
         Pagar compra
       </button>
+
+      {isBillingOpen ? (
+        <BillingDetailsModal
+          initialDetails={buyer}
+          isPending={isPending}
+          onClose={() => setIsBillingOpen(false)}
+          onConfirm={submitPayment}
+        />
+      ) : null}
 
       {message ? (
         <p className="mt-4 rounded-md bg-lama-cream px-3 py-2 text-sm font-semibold" role="status">

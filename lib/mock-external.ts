@@ -4,6 +4,7 @@ type DemoOrder = OrderStatus & {
   nro_orden: string;
   clerk_user_id_comprador: string;
   producto_id: string;
+  producto_ids: string[];
   total: number;
   direccion_envio: string;
   fecha_creacion: string;
@@ -11,7 +12,7 @@ type DemoOrder = OrderStatus & {
 
 type CreateOrderInput = {
   clerkUserId: string;
-  productoId: string;
+  productIds: string[];
   total: number;
   direccionEnvio: string;
 };
@@ -241,7 +242,8 @@ export function createOrder(input: CreateOrderInput) {
     orden_id: `ord_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
     nro_orden: `LAMA-${String(sequence).padStart(4, "0")}`,
     clerk_user_id_comprador: input.clerkUserId,
-    producto_id: input.productoId,
+    producto_id: input.productIds[0],
+    producto_ids: input.productIds,
     total: input.total,
     estado_general: "pagada",
     estado_pago: "aprobado",

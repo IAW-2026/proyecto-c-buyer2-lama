@@ -104,9 +104,10 @@ export default async function ProductPage({
                 methods={methods}
                 buyer={{
                   clerk_user_id_comprador: authContext.userId,
-                  nombre: authContext.name ?? "Comprador lama",
+                  nombre: buyerProfile?.nombre_comprador ?? authContext.name ?? "",
                   email: authContext.email,
-                  direccion_envio: buyerProfile?.direccion_envio ?? "Pendiente de completar"
+                  DNI: buyerProfile?.DNI ?? "",
+                  direccion_envio: buyerProfile?.direccion_envio ?? ""
                 }}
               />
             </>

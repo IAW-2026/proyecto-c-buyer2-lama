@@ -33,18 +33,32 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Metodo de pago no disponible." }, { status: 422 });
   }
 
-  const product = getProductById(data.producto_id);
-  if (!product || product.estado_publicacion !== "activa") {
+  const productIds = data.producto_ids ?? [data.producto_id!];
+  const products = productIds.map((productId) => getProductById(productId));
+
+  if (products.some((product) => !product || product.estado_publicacion !== "activa")) {
     return NextResponse.json({ error: "Producto no disponible." }, { status: 422 });
   }
 
-  if (data.monto_producto !== product.precio || data.monto_total !== product.precio + data.monto_envio) {
+  const availableProducts = products.filter((product) => product !== undefined);
+  const sellerId = availableProducts[0]?.clerk_user_id_vendedor;
+  const allProductsBelongToSameSeller = availableProducts.every(
+    (product) => product.clerk_user_id_vendedor === sellerId
+  );
+
+  if (!allProductsBelongToSameSeller) {
+    return NextResponse.json({ error: "Los productos del carrito deben pertenecer al mismo vendedor." }, { status: 422 });
+  }
+
+  const productsTotal = availableProducts.reduce((sum, product) => sum + product.precio, 0);
+
+  if (data.monto_producto !== productsTotal || data.monto_total !== productsTotal + data.monto_envio) {
     return NextResponse.json({ error: "Los montos de la compra no coinciden con el producto." }, { status: 422 });
   }
 
   const order = createOrder({
     clerkUserId: data.comprador.clerk_user_id_comprador,
-    productoId: product.producto_id,
+    productIds,
     total: data.monto_total,
     direccionEnvio: data.comprador.direccion_envio
   });

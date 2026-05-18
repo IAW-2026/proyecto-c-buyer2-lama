@@ -2,7 +2,9 @@
 
 import { useEffect, useMemo, useState, useTransition } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { CreditCard, Loader2, ShoppingBag, Trash2 } from "lucide-react";
+import { BillingDetailsModal, type BillingDetails } from "@/components/BillingDetailsModal";
 import { EmptyState } from "@/components/ui";
 import type { PaymentMethod, Product } from "@/lib/types";
 
@@ -13,6 +15,10 @@ const currency = new Intl.NumberFormat("es-AR", {
   currency: "ARS",
   maximumFractionDigits: 0
 });
+
+type CartBuyer = BillingDetails & {
+  clerk_user_id_comprador: string;
+};
 
 function readCart(): Product[] {
   try {
@@ -32,12 +38,14 @@ export function CartClient({
   buyer,
   methods
 }: {
-  buyer: { clerk_user_id_comprador: string; nombre: string; email: string; direccion_envio: string };
+  buyer: CartBuyer;
   methods: PaymentMethod[];
 }) {
+  const router = useRouter();
   const [cart, setCart] = useState<Product[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
   const [methodId, setMethodId] = useState(methods[0]?.metodo_pago_id ?? "");
+  const [isBillingOpen, setIsBillingOpen] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
@@ -62,39 +70,61 @@ export function CartClient({
     setMessage(null);
   }
 
-  function submitPayment() {
+  function openBillingDetails() {
     setMessage(null);
+    setIsBillingOpen(true);
+  }
+
+  function submitPayment(details: BillingDetails) {
+
     startTransition(async () => {
-      const results = [];
+      const profileResponse = await fetch("/api/perfil", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          nombre_comprador: details.nombre,
+          email: details.email,
+          DNI: details.DNI,
+          direccion_envio: details.direccion_envio
+        })
+      });
 
-      for (const [index, product] of cart.entries()) {
-        const itemShippingAmount = index === 0 ? shippingAmount : 0;
-        const response = await fetch("/api/pagos", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({
-            producto_id: product.producto_id,
-            comprador: buyer,
-            monto_producto: product.precio,
-            monto_envio: itemShippingAmount,
-            monto_total: product.precio + itemShippingAmount,
-            metodo_pago_id: methodId
-          })
-        });
+      if (!profileResponse.ok) {
+        const profileData = await profileResponse.json();
+        setMessage(profileData.error ?? "No se pudieron guardar los datos de facturacion.");
+        return;
+      }
 
-        const data = await response.json();
+      const response = await fetch("/api/pagos", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          producto_ids: cart.map((product) => product.producto_id),
+          comprador: {
+            ...buyer,
+            nombre: details.nombre,
+            email: details.email,
+            direccion_envio: details.direccion_envio
+          },
+          monto_producto: productsTotal,
+          monto_envio: shippingAmount,
+          monto_total: total,
+          metodo_pago_id: methodId
+        })
+      });
 
-        if (!response.ok) {
-          setMessage(data.error ?? "No se pudo procesar el pago del carrito.");
-          return;
-        }
+      const data = await response.json();
 
-        results.push(data.nro_orden);
+      if (!response.ok) {
+        setMessage(data.error ?? "No se pudo procesar el pago del carrito.");
+        return;
       }
 
       setCart([]);
       saveCart([]);
-      setMessage(`Pago aprobado. Ordenes ${results.join(", ")}.`);
+      setIsBillingOpen(false);
+      setMessage("Compra realizada con exito. Te estamos llevando a Mis compras.");
+      window.setTimeout(() => router.push("/compras"), 1200);
     });
   }
 
@@ -197,7 +227,7 @@ export function CartClient({
 
         <button
           type="button"
-          onClick={submitPayment}
+          onClick={openBillingDetails}
           disabled={isPending || !methodId}
           className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-md bg-lama-detail px-4 py-3 text-sm font-bold text-white hover:bg-lama-ink focus:outline-none focus:ring-2 focus:ring-lama-detail focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
         >
@@ -208,6 +238,15 @@ export function CartClient({
           )}
           Pagar carrito
         </button>
+
+        {isBillingOpen ? (
+          <BillingDetailsModal
+            initialDetails={buyer}
+            isPending={isPending}
+            onClose={() => setIsBillingOpen(false)}
+            onConfirm={submitPayment}
+          />
+        ) : null}
 
         <button
           type="button"

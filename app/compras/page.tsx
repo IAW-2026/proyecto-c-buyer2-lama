@@ -17,14 +17,16 @@ export default async function PurchasesPage() {
     order,
     status: order,
     shipping: getShippingForOrder(order.orden_id),
-    product: getProductById(order.producto_id)
+    products: (order.producto_ids ?? [order.producto_id])
+      .map((productId) => getProductById(productId))
+      .filter((product) => product !== undefined)
   }));
 
   return (
     <PageShell title="Mis compras" eyebrow="Seguimiento">
       {enrichedOrders.length ? (
         <div className="grid gap-5">
-          {enrichedOrders.map(({ order, status, shipping, product }) => (
+          {enrichedOrders.map(({ order, status, shipping, products }) => (
             <Card key={order.orden_id}>
               <div className="grid gap-5 lg:grid-cols-[1fr_300px]">
                 <div className="space-y-4">
@@ -33,7 +35,11 @@ export default async function PurchasesPage() {
                     <StatusBadge>{status.estado_general}</StatusBadge>
                     <StatusBadge>Pago {status.estado_pago}</StatusBadge>
                   </div>
-                  {product ? <ProductMini product={product} /> : null}
+                  <div className="space-y-3">
+                    {products.map((product) => (
+                      <ProductMini key={product.producto_id} product={product} />
+                    ))}
+                  </div>
                   <dl className="grid gap-3 text-sm sm:grid-cols-3">
                     <div>
                       <dt className="font-bold">Total</dt>

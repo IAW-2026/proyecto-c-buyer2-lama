@@ -17,7 +17,8 @@ export const preferencesSchema = z.object({
 });
 
 export const paymentSchema = z.object({
-  producto_id: z.string().min(3),
+  producto_id: z.string().min(3).optional(),
+  producto_ids: z.array(z.string().min(3)).min(1).optional(),
   comprador: z.object({
     clerk_user_id_comprador: z.string().min(3),
     nombre: z.string().min(3),
@@ -28,6 +29,9 @@ export const paymentSchema = z.object({
   monto_envio: z.number().min(0),
   monto_total: z.number().positive(),
   metodo_pago_id: z.string().min(3)
+}).refine((data) => Boolean(data.producto_id || data.producto_ids?.length), {
+  message: "Debe indicarse al menos un producto.",
+  path: ["producto_id"]
 });
 
 export function splitFormList(value: FormDataEntryValue | null) {
