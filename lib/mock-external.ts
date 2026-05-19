@@ -1,14 +1,4 @@
-import type { OrderStatus, PaymentMethod, Product, ShippingInfo } from "@/lib/types";
-
-type DemoOrder = OrderStatus & {
-  nro_orden: string;
-  clerk_user_id_comprador: string;
-  producto_id: string;
-  producto_ids: string[];
-  total: number;
-  direccion_envio: string;
-  fecha_creacion: string;
-};
+import type { PaymentMethod, Product, SalesOrder, ShippingInfo } from "@/lib/types";
 
 type CreateOrderInput = {
   clerkUserId: string;
@@ -18,7 +8,7 @@ type CreateOrderInput = {
 };
 
 const globalForMockExternal = globalThis as unknown as {
-  lamaOrders?: DemoOrder[];
+  lamaOrders?: SalesOrder[];
 };
 
 export const sellers = [
@@ -238,7 +228,7 @@ export function getOrderStatus(orderId: string) {
 export function createOrder(input: CreateOrderInput) {
   const createdAt = new Date().toISOString();
   const sequence = orders.length + 1;
-  const order: DemoOrder = {
+  const order: SalesOrder = {
     orden_id: `ord_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
     nro_orden: `LAMA-${String(sequence).padStart(4, "0")}`,
     clerk_user_id_comprador: input.clerkUserId,

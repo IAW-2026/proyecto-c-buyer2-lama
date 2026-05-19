@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { CreditCard, Loader2 } from "lucide-react";
 import { BillingDetailsModal, type BillingDetails } from "@/components/BillingDetailsModal";
+import { savePurchase } from "@/lib/purchases-storage";
 import type { PaymentMethod, Product } from "@/lib/types";
 
 const currency = new Intl.NumberFormat("es-AR", {
@@ -83,6 +84,22 @@ export function CheckoutForm({
         setMessage(data.error ?? "No se pudo procesar el pago.");
         return;
       }
+
+      const now = new Date().toISOString();
+      savePurchase({
+        orden_id: data.orden_id,
+        nro_orden: data.nro_orden,
+        clerk_user_id_comprador: buyer.clerk_user_id_comprador,
+        producto_ids: [product.producto_id],
+        total,
+        direccion_envio: details.direccion_envio,
+        estado_general: "pagada",
+        estado_pago: "aprobado",
+        estado_envio: "pendiente",
+        fecha_creacion: data.fecha_creacion ?? now,
+        fecha_actualizacion: data.fecha_creacion ?? now,
+        products: [product]
+      });
 
       setIsBillingOpen(false);
       setMessage("Compra realizada con exito. Te estamos llevando a Mis compras.");

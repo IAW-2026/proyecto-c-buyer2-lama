@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
-import { getOrderStatus } from "@/lib/mock-external";
+import { getSalesOrderStatus } from "@/lib/order-service";
 
 export async function GET(
   _request: Request,
   context: { params: Promise<{ orden_id: string }> }
 ) {
   const { orden_id } = await context.params;
-  const order = getOrderStatus(orden_id);
+  const order = await getSalesOrderStatus(orden_id);
 
   if (!order) {
     return NextResponse.json({ error: "Orden no encontrada." }, { status: 404 });
@@ -20,4 +20,3 @@ export async function GET(
     fecha_actualizacion: order.fecha_actualizacion
   });
 }
-

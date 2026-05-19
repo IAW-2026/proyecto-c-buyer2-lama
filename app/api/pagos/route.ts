@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getAuthContext } from "@/lib/auth";
-import { createOrder, getProductById, paymentMethods } from "@/lib/mock-external";
+import { getProductById, paymentMethods } from "@/lib/mock-external";
+import { createSalesOrder } from "@/lib/order-service";
 import { paymentSchema } from "@/lib/validation";
 
 export async function POST(request: Request) {
@@ -56,7 +57,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Los montos de la compra no coinciden con el producto." }, { status: 422 });
   }
 
-  const order = createOrder({
+  const order = await createSalesOrder({
     clerkUserId: data.comprador.clerk_user_id_comprador,
     productIds,
     total: data.monto_total,

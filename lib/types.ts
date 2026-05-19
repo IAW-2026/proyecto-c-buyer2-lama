@@ -44,6 +44,16 @@ export type OrderStatus = {
   fecha_actualizacion: string;
 };
 
+export type SalesOrder = OrderStatus & {
+  nro_orden: string;
+  clerk_user_id_comprador: string;
+  producto_id: string;
+  producto_ids: string[];
+  total: number;
+  direccion_envio: string;
+  fecha_creacion: string;
+};
+
 export type ShippingInfo = {
   envio_id: string;
   orden_id: string;
@@ -63,4 +73,3 @@ export type PaymentMethod = {
   descripcion: string;
   esta_activo: boolean;
 };
-

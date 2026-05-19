@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { CreditCard, Loader2, ShoppingBag, Trash2 } from "lucide-react";
 import { BillingDetailsModal, type BillingDetails } from "@/components/BillingDetailsModal";
 import { EmptyState } from "@/components/ui";
+import { savePurchase } from "@/lib/purchases-storage";
 import type { PaymentMethod, Product } from "@/lib/types";
 
 const CART_STORAGE_KEY = "lama-cart";
@@ -119,6 +120,22 @@ export function CartClient({
         setMessage(data.error ?? "No se pudo procesar el pago del carrito.");
         return;
       }
+
+      const now = new Date().toISOString();
+      savePurchase({
+        orden_id: data.orden_id,
+        nro_orden: data.nro_orden,
+        clerk_user_id_comprador: buyer.clerk_user_id_comprador,
+        producto_ids: cart.map((product) => product.producto_id),
+        total,
+        direccion_envio: details.direccion_envio,
+        estado_general: "pagada",
+        estado_pago: "aprobado",
+        estado_envio: "pendiente",
+        fecha_creacion: data.fecha_creacion ?? now,
+        fecha_actualizacion: data.fecha_creacion ?? now,
+        products: cart
+      });
 
       setCart([]);
       saveCart([]);
