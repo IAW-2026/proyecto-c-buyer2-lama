@@ -10,7 +10,7 @@ export default async function CartPage() {
   const authContext = await getAuthContext();
   const hasBuyerRole = canAccessBuyerApp(authContext);
 
-  if (authContext.userId && !hasBuyerRole) {
+  if (authContext.userId && authContext.roles.length === 0) {
     redirect("/onboarding/buyer");
   }
 
@@ -32,7 +32,7 @@ export default async function CartPage() {
         />
       ) : authContext.userId ? (
         <Card>
-          <p className="font-bold">Necesitas rol buyer para ver tu carrito.</p>
+          <p className="font-bold">Este usuario ya tiene otro rol asignado y no puede acceder al carrito de comprador.</p>
         </Card>
       ) : (
         <Card>

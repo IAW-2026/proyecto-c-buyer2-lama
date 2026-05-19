@@ -7,7 +7,7 @@ export default async function PurchasesPage() {
   const authContext = await getAuthContext();
   const hasBuyerRole = canAccessBuyerApp(authContext);
 
-  if (authContext.userId && !hasBuyerRole) {
+  if (authContext.userId && authContext.roles.length === 0) {
     redirect("/onboarding/buyer");
   }
 
@@ -17,7 +17,7 @@ export default async function PurchasesPage() {
         <PurchasesClient buyerId={authContext.userId} />
       ) : authContext.userId ? (
         <Card>
-          <p className="font-bold">Necesitas rol buyer para ver tus compras.</p>
+          <p className="font-bold">Este usuario ya tiene otro rol asignado y no puede acceder a compras de comprador.</p>
         </Card>
       ) : (
         <Card>

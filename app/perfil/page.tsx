@@ -22,7 +22,7 @@ function emptyBuyer(userId: string, email: string | null, name: string | null): 
 export default async function ProfilePage() {
   const authContext = await getAuthContext();
 
-  if (authContext.userId && !canAccessBuyerApp(authContext)) {
+  if (authContext.userId && authContext.roles.length === 0) {
     redirect("/onboarding/buyer");
   }
 
@@ -30,7 +30,17 @@ export default async function ProfilePage() {
     return (
       <PageShell title="Mi Perfil" eyebrow="Acceso">
         <Card>
-          <p className="font-bold">Necesitas iniciar sesion con rol buyer o super_admin.</p>
+          <p className="font-bold">Necesitas iniciar sesion con rol buyer.</p>
+        </Card>
+      </PageShell>
+    );
+  }
+
+  if (!canAccessBuyerApp(authContext)) {
+    return (
+      <PageShell title="Mi Perfil" eyebrow="Acceso">
+        <Card>
+          <p className="font-bold">Este usuario ya tiene otro rol asignado y no puede acceder como comprador.</p>
         </Card>
       </PageShell>
     );

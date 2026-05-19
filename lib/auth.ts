@@ -18,6 +18,11 @@ export function normalizeEmail(email: string | null | undefined) {
   return email?.trim().toLowerCase() ?? null;
 }
 
+function validEmail(email: string | null | undefined) {
+  const normalizedEmail = normalizeEmail(email);
+  return normalizedEmail && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail) ? normalizedEmail : null;
+}
+
 function metadataObject(metadata: unknown) {
   return metadata && typeof metadata === "object" && !Array.isArray(metadata)
     ? (metadata as Record<string, unknown>)
@@ -37,24 +42,20 @@ export function getRolesFromMetadata(metadata: unknown) {
 }
 
 export function hasBuyerAccess(roles: string[]) {
-  return roles.includes(BUYER_ROLE) || roles.includes(SUPER_ADMIN_ROLE);
+  return roles.includes(BUYER_ROLE);
 }
 
-function mergeRoles(...roleGroups: string[][]) {
-  return [...new Set(roleGroups.flat())];
-}
-
-export async function ensureBuyerRole(userId: string) {
+export async function assignBuyerRoleIfUnassigned(userId: string) {
   const client = await clerkClient();
   const user = await client.users.getUser(userId);
   const publicMetadata = metadataObject(user.publicMetadata);
   const currentRoles = getRolesFromMetadata(publicMetadata);
 
-  if (hasBuyerAccess(currentRoles)) {
+  if (currentRoles.length > 0) {
     return currentRoles;
   }
 
-  const roles = mergeRoles(currentRoles, [BUYER_ROLE]);
+  const roles = [BUYER_ROLE];
 
   await client.users.updateUserMetadata(userId, {
     publicMetadata: {
@@ -80,8 +81,9 @@ export async function getAuthContext(): Promise<AuthContext> {
     const user = await currentUser();
     const claims = session.sessionClaims as Record<string, unknown> | null | undefined;
     const email =
-      normalizeEmail((claims?.email as string | undefined) ?? user?.primaryEmailAddress?.emailAddress) ??
-      normalizeEmail(user?.emailAddresses[0]?.emailAddress);
+      validEmail(claims?.email as string | undefined) ??
+      validEmail(user?.primaryEmailAddress?.emailAddress) ??
+      validEmail(user?.emailAddresses[0]?.emailAddress);
     const name = user?.fullName ?? user?.username ?? null;
     const roles = normalizeRoles(claims?.roles);
     const metadataRoles = getRolesFromMetadata(user?.publicMetadata);
