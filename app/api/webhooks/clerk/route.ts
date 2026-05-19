@@ -2,7 +2,7 @@ import { verifyWebhook } from "@clerk/nextjs/webhooks";
 import type { UserJSON } from "@clerk/nextjs/server";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import { getRolesFromMetadata, hasBuyerAccess } from "@/lib/auth";
+import { ensureBuyerRole, getRolesFromMetadata, hasBuyerAccess } from "@/lib/auth";
 import { ensureBuyerRegistration } from "@/lib/buyer-store";
 import { prisma } from "@/lib/prisma";
 
@@ -19,13 +19,21 @@ function getDisplayName(user: UserJSON) {
   return fullName || user.username || null;
 }
 
+function isBuyerAppSignup(user: UserJSON) {
+  return user.unsafe_metadata?.sourceApp === "buyer";
+}
+
 export async function POST(request: NextRequest) {
   try {
     const event = await verifyWebhook(request);
 
     if (event.type === "user.created" || event.type === "user.updated") {
       const user = event.data as UserJSON;
-      const roles = getRolesFromMetadata(user.public_metadata);
+      let roles = getRolesFromMetadata(user.public_metadata);
+
+      if (!hasBuyerAccess(roles) && isBuyerAppSignup(user)) {
+        roles = await ensureBuyerRole(user.id);
+      }
 
       if (!hasBuyerAccess(roles)) {
         return NextResponse.json({ ok: true, skipped: "El usuario no tiene rol buyer." });

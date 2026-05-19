@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { ProfileForms } from "@/components/ProfileForms";
 import { Card, PageShell, StatusBadge } from "@/components/ui";
 import { canAccessBuyerApp, getAuthContext } from "@/lib/auth";
@@ -21,7 +22,11 @@ function emptyBuyer(userId: string, email: string | null, name: string | null): 
 export default async function ProfilePage() {
   const authContext = await getAuthContext();
 
-  if (!authContext.userId || !canAccessBuyerApp(authContext)) {
+  if (authContext.userId && !canAccessBuyerApp(authContext)) {
+    redirect("/onboarding/buyer");
+  }
+
+  if (!authContext.userId) {
     return (
       <PageShell title="Mi Perfil" eyebrow="Acceso">
         <Card>

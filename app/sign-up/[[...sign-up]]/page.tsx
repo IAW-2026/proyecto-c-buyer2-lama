@@ -31,6 +31,7 @@ export default async function SignUpPage({
           path="/sign-up"
           signInUrl="/sign-in"
           initialValues={{ emailAddress: params.email }}
+          unsafeMetadata={{ sourceApp: "buyer" }}
           forceRedirectUrl="/onboarding/buyer"
           fallbackRedirectUrl="/onboarding/buyer"
         />

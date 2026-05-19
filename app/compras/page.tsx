@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { PurchasesClient } from "@/components/PurchasesClient";
 import { ButtonLink, Card, PageShell } from "@/components/ui";
 import { canAccessBuyerApp, getAuthContext } from "@/lib/auth";
@@ -5,6 +6,10 @@ import { canAccessBuyerApp, getAuthContext } from "@/lib/auth";
 export default async function PurchasesPage() {
   const authContext = await getAuthContext();
   const hasBuyerRole = canAccessBuyerApp(authContext);
+
+  if (authContext.userId && !hasBuyerRole) {
+    redirect("/onboarding/buyer");
+  }
 
   return (
     <PageShell title="Mis compras" eyebrow="Seguimiento">

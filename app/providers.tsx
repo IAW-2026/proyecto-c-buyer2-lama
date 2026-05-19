@@ -9,7 +9,13 @@ export function Providers({ children }: { children: ReactNode }) {
   }
 
   return (
-    <ClerkProvider signInUrl="/sign-in" signUpUrl="/sign-up" afterSignOutUrl="/sign-in">
+    <ClerkProvider
+      signInUrl="/sign-in"
+      signUpUrl="/sign-up"
+      signUpForceRedirectUrl="/onboarding/buyer"
+      signUpFallbackRedirectUrl="/onboarding/buyer"
+      afterSignOutUrl="/sign-in"
+    >
       {children}
     </ClerkProvider>
   );

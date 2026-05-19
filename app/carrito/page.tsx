@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { CartClient } from "@/components/CartClient";
 import { ButtonLink, Card, PageShell } from "@/components/ui";
 import { canAccessBuyerApp, getAuthContext } from "@/lib/auth";
@@ -8,6 +9,11 @@ import type { PaymentMethod } from "@/lib/types";
 export default async function CartPage() {
   const authContext = await getAuthContext();
   const hasBuyerRole = canAccessBuyerApp(authContext);
+
+  if (authContext.userId && !hasBuyerRole) {
+    redirect("/onboarding/buyer");
+  }
+
   const methods = authContext.userId && hasBuyerRole ? await fetchInternalApi<PaymentMethod[]>("/api/metodos-pago") : [];
   const buyerProfile = authContext.userId && hasBuyerRole ? await getBuyer(authContext.userId) : null;
 
