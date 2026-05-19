@@ -14,7 +14,7 @@ export default function NotFound() {
       }
     >
       <p className="max-w-2xl text-lama-ink/75">
-        La ruta solicitada no existe dentro de la Buyer App.
+        La ruta solicitada no existe dentro de la app.
       </p>
     </PageShell>
   );

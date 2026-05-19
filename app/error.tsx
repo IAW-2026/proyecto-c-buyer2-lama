@@ -13,7 +13,7 @@ export default function ErrorPage({
     <div className="mx-auto max-w-3xl px-4 py-12">
       <div className="rounded-lg border border-lama-line bg-lama-card p-6 shadow-soft">
         <p className="text-sm font-bold uppercase text-lama-detail">Manejo de errores</p>
-        <h1 className="mt-2 text-3xl font-bold">Algo no salio bien</h1>
+        <h1 className="mt-2 text-3xl font-bold">Algo no salió bien</h1>
         <p className="mt-3 text-lama-ink/75">{error.message}</p>
         <button
           onClick={reset}
