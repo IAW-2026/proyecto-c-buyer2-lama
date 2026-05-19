@@ -1,18 +1,12 @@
 import Link from "next/link";
-import { Shield, ShoppingBag, ShoppingCart, UserRound } from "lucide-react";
+import { Shield } from "lucide-react";
 import { canAccessAdmin, getAuthContext, isClerkConfigured } from "@/lib/auth";
 import { AuthButtons } from "@/components/auth/AuthButtons";
-
-const navItems = [
-  { href: "/carrito", label: "Mi carrito", icon: ShoppingCart, authOnly: true },
-  { href: "/compras", label: "Mis compras", icon: ShoppingBag, authOnly: true },
-  { href: "/perfil", label: "Perfil", icon: UserRound, authOnly: true }
-];
+import { AuthNavLinks } from "@/components/auth/AuthNavLinks";
 
 export async function Header() {
   const authContext = await getAuthContext();
   const showAdmin = canAccessAdmin(authContext);
-  const isSignedIn = Boolean(authContext.userId);
 
   return (
     <header className="sticky top-0 z-30 border-b border-lama-detail/30 bg-lama-header text-lama-ink shadow-sm">
@@ -30,21 +24,7 @@ export async function Header() {
 </Link>
 
         <nav className="flex flex-wrap items-center gap-2" aria-label="Navegacion principal">
-          {navItems
-            .filter((item) => !item.authOnly || isSignedIn)
-            .map((item) => {
-                const Icon = item.icon;
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className="inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-semibold hover:bg-lama-cream/65 focus:outline-none focus:ring-2 focus:ring-lama-ink"
-                  >
-                    <Icon className="h-4 w-4" aria-hidden="true" />
-                    {item.label}
-                  </Link>
-                );
-              })}
+          <AuthNavLinks />
           {showAdmin ? (
             <Link
               href="/admin"
