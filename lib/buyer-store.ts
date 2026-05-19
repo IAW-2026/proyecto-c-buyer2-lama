@@ -181,15 +181,41 @@ export async function ensureBuyerRegistration(input: ClerkBuyerRegistration) {
       });
     }
 
-    return prisma.comprador.upsert({
+    await prisma.comprador.createMany({
+      data: [data],
+      skipDuplicates: true
+    });
+
+    const createdOrExisting = await prisma.comprador.findUnique({
       where: { clerk_user_id_comprador: data.clerk_user_id_comprador },
-      update: {
-        email: data.email,
-        nombre_comprador: data.nombre_comprador
-      },
-      create: data,
       include: { preferencias: true }
     });
+
+    if (createdOrExisting) {
+      return updateExistingBuyer(createdOrExisting);
+    }
+
+    const existingEmailAfterInsert = await prisma.comprador.findUnique({
+      where: { email: data.email },
+      include: { preferencias: true }
+    });
+
+    if (existingEmailAfterInsert) {
+      return prisma.comprador.update({
+        where: { email: data.email },
+        data: {
+          clerk_user_id_comprador: data.clerk_user_id_comprador,
+          nombre_comprador:
+            existingEmailAfterInsert.nombre_comprador === "Usuario lama" ||
+            existingEmailAfterInsert.nombre_comprador === fallbackName(existingEmailAfterInsert.email)
+              ? data.nombre_comprador
+              : existingEmailAfterInsert.nombre_comprador
+        },
+        include: { preferencias: true }
+      });
+    }
+
+    throw new Error("No pudimos sincronizar el comprador desde Clerk.");
   }
 
   const existing = fallbackBuyers.find(
