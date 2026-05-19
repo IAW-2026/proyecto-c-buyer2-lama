@@ -28,6 +28,10 @@ function fallbackName(email: string) {
   return localPart && localPart.length >= 3 ? localPart : "Usuario lama";
 }
 
+function isUniqueConstraintError(error: unknown) {
+  return (error as { code?: string }).code === "P2002";
+}
+
 function pendingBuyerData({ clerkUserId, email, name }: ClerkBuyerRegistration) {
   return {
     clerk_user_id_comprador: clerkUserId,
@@ -138,24 +142,27 @@ export async function ensureBuyerRegistration(input: ClerkBuyerRegistration) {
   const data = pendingBuyerData(input);
 
   if (shouldUseDatabase()) {
+    const updateExistingBuyer = (existing: BuyerWithPreferences) =>
+      prisma.comprador.update({
+        where: { clerk_user_id_comprador: existing.clerk_user_id_comprador },
+        data: {
+          email: data.email,
+          nombre_comprador:
+            existing.nombre_comprador === "Usuario lama" ||
+            existing.nombre_comprador === fallbackName(existing.email)
+              ? data.nombre_comprador
+              : existing.nombre_comprador
+        },
+        include: { preferencias: true }
+      });
+
     const existingById = await prisma.comprador.findUnique({
       where: { clerk_user_id_comprador: data.clerk_user_id_comprador },
       include: { preferencias: true }
     });
 
     if (existingById) {
-      return prisma.comprador.update({
-        where: { clerk_user_id_comprador: data.clerk_user_id_comprador },
-        data: {
-          email: data.email,
-          nombre_comprador:
-            existingById.nombre_comprador === "Usuario lama" ||
-            existingById.nombre_comprador === fallbackName(existingById.email)
-              ? data.nombre_comprador
-              : existingById.nombre_comprador
-        },
-        include: { preferencias: true }
-      });
+      return updateExistingBuyer(existingById);
     }
 
     const existingByEmail = await prisma.comprador.findUnique({
@@ -178,10 +185,47 @@ export async function ensureBuyerRegistration(input: ClerkBuyerRegistration) {
       });
     }
 
-    return prisma.comprador.create({
-      data,
-      include: { preferencias: true }
-    });
+    try {
+      return await prisma.comprador.create({
+        data,
+        include: { preferencias: true }
+      });
+    } catch (error) {
+      if (!isUniqueConstraintError(error)) {
+        throw error;
+      }
+
+      const buyer = await prisma.comprador.findUnique({
+        where: { clerk_user_id_comprador: data.clerk_user_id_comprador },
+        include: { preferencias: true }
+      });
+
+      if (buyer) {
+        return updateExistingBuyer(buyer);
+      }
+
+      const buyerByEmail = await prisma.comprador.findUnique({
+        where: { email: data.email },
+        include: { preferencias: true }
+      });
+
+      if (buyerByEmail) {
+        return prisma.comprador.update({
+          where: { email: data.email },
+          data: {
+            clerk_user_id_comprador: data.clerk_user_id_comprador,
+            nombre_comprador:
+              buyerByEmail.nombre_comprador === "Usuario lama" ||
+              buyerByEmail.nombre_comprador === fallbackName(buyerByEmail.email)
+                ? data.nombre_comprador
+                : buyerByEmail.nombre_comprador
+          },
+          include: { preferencias: true }
+        });
+      }
+
+      throw error;
+    }
   }
 
   const existing = fallbackBuyers.find(
