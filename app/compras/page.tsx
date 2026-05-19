@@ -1,14 +1,19 @@
 import { PurchasesClient } from "@/components/PurchasesClient";
 import { ButtonLink, Card, PageShell } from "@/components/ui";
-import { getAuthContext } from "@/lib/auth";
+import { canAccessBuyerApp, getAuthContext } from "@/lib/auth";
 
 export default async function PurchasesPage() {
   const authContext = await getAuthContext();
+  const hasBuyerRole = canAccessBuyerApp(authContext);
 
   return (
     <PageShell title="Mis compras" eyebrow="Seguimiento">
-      {authContext.userId ? (
+      {authContext.userId && hasBuyerRole ? (
         <PurchasesClient buyerId={authContext.userId} />
+      ) : authContext.userId ? (
+        <Card>
+          <p className="font-bold">Necesitas rol buyer para ver tus compras.</p>
+        </Card>
       ) : (
         <Card>
           <p className="font-bold">Necesitas iniciar sesion para ver tus compras.</p>

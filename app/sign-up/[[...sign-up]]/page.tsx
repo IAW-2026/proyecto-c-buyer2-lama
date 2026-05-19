@@ -31,8 +31,8 @@ export default async function SignUpPage({
           path="/sign-up"
           signInUrl="/sign-in"
           initialValues={{ emailAddress: params.email }}
-          forceRedirectUrl="/perfil"
-          fallbackRedirectUrl="/perfil"
+          forceRedirectUrl="/onboarding/buyer"
+          fallbackRedirectUrl="/onboarding/buyer"
         />
       ) : (
         <Card>

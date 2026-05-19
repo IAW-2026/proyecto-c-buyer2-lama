@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getAuthContext } from "@/lib/auth";
+import { canAccessBuyerApp, getAuthContext } from "@/lib/auth";
 import { getProductById, paymentMethods } from "@/lib/mock-external";
 import { createSalesOrder } from "@/lib/order-service";
 import { paymentSchema } from "@/lib/validation";
@@ -8,6 +8,10 @@ export async function POST(request: Request) {
   const authContext = await getAuthContext();
   if (!authContext.userId) {
     return NextResponse.json({ error: "Necesitas iniciar sesion para pagar." }, { status: 401 });
+  }
+
+  if (!canAccessBuyerApp(authContext)) {
+    return NextResponse.json({ error: "Necesitas rol buyer para pagar." }, { status: 403 });
   }
 
   const body = await request.json().catch(() => null);

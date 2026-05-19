@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { canAccessAdmin, getAuthContext } from "@/lib/auth";
+import { canAccessAdmin, canAccessBuyerApp, getAuthContext } from "@/lib/auth";
 import { getBuyer, upsertBuyer } from "@/lib/buyer-store";
 import { buyerSchema } from "@/lib/validation";
 
@@ -10,7 +10,10 @@ export async function GET(
   const authContext = await getAuthContext();
   const { clerk_user_id_comprador } = await context.params;
 
-  if (!canAccessAdmin(authContext) && authContext.userId !== clerk_user_id_comprador) {
+  if (
+    !canAccessAdmin(authContext) &&
+    (!canAccessBuyerApp(authContext) || authContext.userId !== clerk_user_id_comprador)
+  ) {
     return NextResponse.json({ error: "No autorizado." }, { status: 403 });
   }
 
@@ -29,7 +32,10 @@ export async function PATCH(
   const authContext = await getAuthContext();
   const { clerk_user_id_comprador } = await context.params;
 
-  if (!canAccessAdmin(authContext) && authContext.userId !== clerk_user_id_comprador) {
+  if (
+    !canAccessAdmin(authContext) &&
+    (!canAccessBuyerApp(authContext) || authContext.userId !== clerk_user_id_comprador)
+  ) {
     return NextResponse.json({ error: "No autorizado." }, { status: 403 });
   }
 
@@ -46,4 +52,3 @@ export async function PATCH(
   const buyer = await upsertBuyer(parsed.data);
   return NextResponse.json(buyer);
 }
-

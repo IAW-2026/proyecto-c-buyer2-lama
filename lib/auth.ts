@@ -1,6 +1,7 @@
-import { auth, currentUser } from "@clerk/nextjs/server";
+import { auth, clerkClient, currentUser } from "@clerk/nextjs/server";
 
-const SUPER_ADMIN_EMAIL = "super_admin@lama.com";
+export const BUYER_ROLE = "buyer";
+export const SUPER_ADMIN_ROLE = "super_admin";
 
 export type AuthContext = {
   userId: string | null;
@@ -17,12 +18,52 @@ export function normalizeEmail(email: string | null | undefined) {
   return email?.trim().toLowerCase() ?? null;
 }
 
-export function isSuperAdminEmail(email: string | null | undefined) {
-  return normalizeEmail(email) === SUPER_ADMIN_EMAIL;
+function metadataObject(metadata: unknown) {
+  return metadata && typeof metadata === "object" && !Array.isArray(metadata)
+    ? (metadata as Record<string, unknown>)
+    : {};
 }
 
-export function getRolesForEmail(email: string | null | undefined) {
-  return isSuperAdminEmail(email) ? ["super_admin"] : ["user"];
+export function normalizeRoles(value: unknown) {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return [...new Set(value.filter((role): role is string => typeof role === "string" && role.trim().length > 0))];
+}
+
+export function getRolesFromMetadata(metadata: unknown) {
+  return normalizeRoles(metadataObject(metadata).roles);
+}
+
+export function hasBuyerAccess(roles: string[]) {
+  return roles.includes(BUYER_ROLE) || roles.includes(SUPER_ADMIN_ROLE);
+}
+
+function mergeRoles(...roleGroups: string[][]) {
+  return [...new Set(roleGroups.flat())];
+}
+
+export async function ensureBuyerRole(userId: string) {
+  const client = await clerkClient();
+  const user = await client.users.getUser(userId);
+  const publicMetadata = metadataObject(user.publicMetadata);
+  const currentRoles = getRolesFromMetadata(publicMetadata);
+
+  if (hasBuyerAccess(currentRoles)) {
+    return currentRoles;
+  }
+
+  const roles = mergeRoles(currentRoles, [BUYER_ROLE]);
+
+  await client.users.updateUserMetadata(userId, {
+    publicMetadata: {
+      ...publicMetadata,
+      roles
+    }
+  });
+
+  return roles;
 }
 
 export async function getAuthContext(): Promise<AuthContext> {
@@ -42,12 +83,14 @@ export async function getAuthContext(): Promise<AuthContext> {
       normalizeEmail((claims?.email as string | undefined) ?? user?.primaryEmailAddress?.emailAddress) ??
       normalizeEmail(user?.emailAddresses[0]?.emailAddress);
     const name = user?.fullName ?? user?.username ?? null;
+    const roles = normalizeRoles(claims?.roles);
+    const metadataRoles = getRolesFromMetadata(user?.publicMetadata);
 
     return {
       userId: session.userId,
       email,
       name,
-      roles: getRolesForEmail(email)
+      roles: roles.length > 0 ? roles : metadataRoles
     };
   } catch {
     return { userId: null, email: null, name: null, roles: [] };
@@ -55,13 +98,9 @@ export async function getAuthContext(): Promise<AuthContext> {
 }
 
 export function canAccessBuyerApp(authContext: AuthContext) {
-  return (
-    authContext.roles.includes("user") ||
-    authContext.roles.includes("buyer") ||
-    authContext.roles.includes("super_admin")
-  );
+  return hasBuyerAccess(authContext.roles);
 }
 
 export function canAccessAdmin(authContext: AuthContext) {
-  return authContext.roles.includes("super_admin");
+  return authContext.roles.includes(SUPER_ADMIN_ROLE);
 }

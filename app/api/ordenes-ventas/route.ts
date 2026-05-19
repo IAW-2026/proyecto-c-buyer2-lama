@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getAuthContext } from "@/lib/auth";
+import { canAccessBuyerApp, getAuthContext } from "@/lib/auth";
 import { getProductById } from "@/lib/mock-external";
 import { getSalesOrdersForBuyer } from "@/lib/order-service";
 
@@ -8,6 +8,10 @@ export async function GET() {
 
   if (!authContext.userId) {
     return NextResponse.json({ error: "Necesitas iniciar sesion para ver tus compras." }, { status: 401 });
+  }
+
+  if (!canAccessBuyerApp(authContext)) {
+    return NextResponse.json({ error: "Necesitas rol buyer para ver tus compras." }, { status: 403 });
   }
 
   const orders = await getSalesOrdersForBuyer(authContext.userId);

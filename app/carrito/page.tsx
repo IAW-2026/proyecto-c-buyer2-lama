@@ -1,18 +1,19 @@
 import { CartClient } from "@/components/CartClient";
 import { ButtonLink, Card, PageShell } from "@/components/ui";
-import { getAuthContext } from "@/lib/auth";
+import { canAccessBuyerApp, getAuthContext } from "@/lib/auth";
 import { getBuyer } from "@/lib/buyer-store";
 import { fetchInternalApi } from "@/lib/external-client";
 import type { PaymentMethod } from "@/lib/types";
 
 export default async function CartPage() {
   const authContext = await getAuthContext();
-  const methods = authContext.userId ? await fetchInternalApi<PaymentMethod[]>("/api/metodos-pago") : [];
-  const buyerProfile = authContext.userId ? await getBuyer(authContext.userId) : null;
+  const hasBuyerRole = canAccessBuyerApp(authContext);
+  const methods = authContext.userId && hasBuyerRole ? await fetchInternalApi<PaymentMethod[]>("/api/metodos-pago") : [];
+  const buyerProfile = authContext.userId && hasBuyerRole ? await getBuyer(authContext.userId) : null;
 
   return (
     <PageShell title="Mi carrito" eyebrow="Productos guardados">
-      {authContext.userId && authContext.email ? (
+      {authContext.userId && authContext.email && hasBuyerRole ? (
         <CartClient
           methods={methods}
           buyer={{
@@ -23,6 +24,10 @@ export default async function CartPage() {
             direccion_envio: buyerProfile?.direccion_envio ?? ""
           }}
         />
+      ) : authContext.userId ? (
+        <Card>
+          <p className="font-bold">Necesitas rol buyer para ver tu carrito.</p>
+        </Card>
       ) : (
         <Card>
           <p className="font-bold">Necesitas iniciar sesion para ver tu carrito.</p>

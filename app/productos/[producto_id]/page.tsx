@@ -3,7 +3,7 @@ import { ArrowLeft, Calendar, Ruler, Store } from "lucide-react";
 import { AddToCartButton } from "@/components/AddToCartButton";
 import { CheckoutForm } from "@/components/CheckoutForm";
 import { ButtonLink, Card, PageShell, StatusBadge } from "@/components/ui";
-import { getAuthContext } from "@/lib/auth";
+import { canAccessBuyerApp, getAuthContext } from "@/lib/auth";
 import { getBuyer } from "@/lib/buyer-store";
 import { fetchInternalApi } from "@/lib/external-client";
 import { categories, sellers } from "@/lib/mock-external";
@@ -31,7 +31,8 @@ export default async function ProductPage({
 
   const methods = await fetchInternalApi<PaymentMethod[]>("/api/metodos-pago");
   const authContext = await getAuthContext();
-  const buyerProfile = authContext.userId ? await getBuyer(authContext.userId) : null;
+  const hasBuyerRole = canAccessBuyerApp(authContext);
+  const buyerProfile = authContext.userId && hasBuyerRole ? await getBuyer(authContext.userId) : null;
   const seller = sellers.find((item) => item.clerk_user_id_vendedor === product.clerk_user_id_vendedor);
   const category = categories.find((item) => item.categoria_producto_id === product.categoria_id);
 
@@ -96,7 +97,7 @@ export default async function ProductPage({
             </dl>
           </Card>
 
-          {authContext.userId && authContext.email ? (
+          {authContext.userId && authContext.email && hasBuyerRole ? (
             <>
               <AddToCartButton product={product} />
               <CheckoutForm
@@ -111,6 +112,10 @@ export default async function ProductPage({
                 }}
               />
             </>
+          ) : authContext.userId ? (
+            <Card>
+              <p className="font-bold">Necesitas rol buyer para comprar o agregar al carrito.</p>
+            </Card>
           ) : (
             <Card>
               <p className="font-bold">Necesitas iniciar sesion para comprar o agregar al carrito.</p>

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getAuthContext } from "@/lib/auth";
+import { canAccessBuyerApp, getAuthContext } from "@/lib/auth";
 import { upsertBuyer } from "@/lib/buyer-store";
 import { buyerSchema } from "@/lib/validation";
 
@@ -8,6 +8,10 @@ export async function POST(request: Request) {
 
   if (!authContext.userId || !authContext.email) {
     return NextResponse.json({ error: "Necesitas iniciar sesion para guardar tus datos." }, { status: 401 });
+  }
+
+  if (!canAccessBuyerApp(authContext)) {
+    return NextResponse.json({ error: "Necesitas rol buyer para guardar tus datos." }, { status: 403 });
   }
 
   const body = await request.json().catch(() => null);

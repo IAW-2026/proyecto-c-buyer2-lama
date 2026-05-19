@@ -2,6 +2,7 @@ import { verifyWebhook } from "@clerk/nextjs/webhooks";
 import type { UserJSON } from "@clerk/nextjs/server";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
+import { getRolesFromMetadata, hasBuyerAccess } from "@/lib/auth";
 import { ensureBuyerRegistration } from "@/lib/buyer-store";
 import { prisma } from "@/lib/prisma";
 
@@ -24,6 +25,12 @@ export async function POST(request: NextRequest) {
 
     if (event.type === "user.created" || event.type === "user.updated") {
       const user = event.data as UserJSON;
+      const roles = getRolesFromMetadata(user.public_metadata);
+
+      if (!hasBuyerAccess(roles)) {
+        return NextResponse.json({ ok: true, skipped: "El usuario no tiene rol buyer." });
+      }
+
       const email = getPrimaryEmail(user);
 
       if (!email) {
