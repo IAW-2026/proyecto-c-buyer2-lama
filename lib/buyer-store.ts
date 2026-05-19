@@ -28,10 +28,6 @@ function fallbackName(email: string) {
   return localPart && localPart.length >= 3 ? localPart : "Usuario lama";
 }
 
-function isUniqueConstraintError(error: unknown) {
-  return (error as { code?: string }).code === "P2002";
-}
-
 function pendingBuyerData({ clerkUserId, email, name }: ClerkBuyerRegistration) {
   return {
     clerk_user_id_comprador: clerkUserId,
@@ -185,47 +181,15 @@ export async function ensureBuyerRegistration(input: ClerkBuyerRegistration) {
       });
     }
 
-    try {
-      return await prisma.comprador.create({
-        data,
-        include: { preferencias: true }
-      });
-    } catch (error) {
-      if (!isUniqueConstraintError(error)) {
-        throw error;
-      }
-
-      const buyer = await prisma.comprador.findUnique({
-        where: { clerk_user_id_comprador: data.clerk_user_id_comprador },
-        include: { preferencias: true }
-      });
-
-      if (buyer) {
-        return updateExistingBuyer(buyer);
-      }
-
-      const buyerByEmail = await prisma.comprador.findUnique({
-        where: { email: data.email },
-        include: { preferencias: true }
-      });
-
-      if (buyerByEmail) {
-        return prisma.comprador.update({
-          where: { email: data.email },
-          data: {
-            clerk_user_id_comprador: data.clerk_user_id_comprador,
-            nombre_comprador:
-              buyerByEmail.nombre_comprador === "Usuario lama" ||
-              buyerByEmail.nombre_comprador === fallbackName(buyerByEmail.email)
-                ? data.nombre_comprador
-                : buyerByEmail.nombre_comprador
-          },
-          include: { preferencias: true }
-        });
-      }
-
-      throw error;
-    }
+    return prisma.comprador.upsert({
+      where: { clerk_user_id_comprador: data.clerk_user_id_comprador },
+      update: {
+        email: data.email,
+        nombre_comprador: data.nombre_comprador
+      },
+      create: data,
+      include: { preferencias: true }
+    });
   }
 
   const existing = fallbackBuyers.find(

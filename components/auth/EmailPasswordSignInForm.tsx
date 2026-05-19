@@ -1,10 +1,10 @@
 "use client";
 
-import { useSignIn } from "@clerk/nextjs";
+import { useAuth, useSignIn } from "@clerk/nextjs";
 import { Chrome, LogIn } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 
 type ClerkError = {
   errors?: Array<{
@@ -39,6 +39,7 @@ function isMissingAccountError(error: unknown) {
 }
 
 export function EmailPasswordSignInForm() {
+  const { isSignedIn } = useAuth();
   const { isLoaded, signIn, setActive } = useSignIn();
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -46,6 +47,12 @@ export function EmailPasswordSignInForm() {
   const [message, setMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+
+  useEffect(() => {
+    if (isSignedIn) {
+      router.replace("/");
+    }
+  }, [isSignedIn, router]);
 
   async function signInWithGoogle() {
     if (!isLoaded) {
@@ -59,7 +66,7 @@ export function EmailPasswordSignInForm() {
       await signIn.authenticateWithRedirect({
         strategy: "oauth_google",
         redirectUrl: "/sso-callback",
-        redirectUrlComplete: "/"
+        redirectUrlComplete: "/onboarding/buyer"
       });
     } catch (error) {
       setIsGoogleLoading(false);
