@@ -1,4 +1,4 @@
-import type { PaymentMethod, Product, SalesOrder, ShippingInfo } from "@/lib/types";
+import type { BuyerPreferences, PaymentMethod, Product, SalesOrder, ShippingInfo } from "@/lib/types";
 
 type CreateOrderInput = {
   clerkUserId: string;
@@ -180,6 +180,77 @@ export function getProductById(productId: string) {
   return products.find((product) => product.producto_id === productId);
 }
 
+function getFilteredProducts({
+  search = "",
+  categoria,
+  talle
+}: {
+  search?: string;
+  categoria?: string | null;
+  talle?: string | null;
+}) {
+  const normalizedSearch = search.trim().toLowerCase();
+
+  return products.filter((product) => {
+    const seller = sellers.find((item) => item.clerk_user_id_vendedor === product.clerk_user_id_vendedor);
+    const categoryName = categories.find((item) => item.categoria_producto_id === product.categoria_id)?.nombre;
+    const matchesSearch = normalizedSearch
+      ? [product.titulo, product.descripcion, product.marca, seller?.nombre_vendedor, categoryName]
+          .filter(Boolean)
+          .some((value) => value!.toLowerCase().includes(normalizedSearch))
+      : true;
+    const matchesCategory = categoria ? product.categoria_id === categoria : true;
+    const matchesSize = talle ? product.talle === talle : true;
+
+    return product.estado_publicacion === "activa" && matchesSearch && matchesCategory && matchesSize;
+  });
+}
+
+export function hasBuyerPreferences(preferences?: BuyerPreferences | null): preferences is BuyerPreferences {
+  return Boolean(
+    preferences &&
+      [
+        preferences.talles_preferidos,
+        preferences.categorias_preferidas,
+        preferences.vendedores_preferidos
+      ].some((values) => values.length > 0)
+  );
+}
+
+function preferenceScore(product: Product, preferences: BuyerPreferences) {
+  let score = 0;
+
+  if (preferences.talles_preferidos.includes(product.talle)) {
+    score += 1;
+  }
+
+  if (preferences.categorias_preferidas.includes(product.categoria_id)) {
+    score += 1;
+  }
+
+  if (preferences.vendedores_preferidos.includes(product.clerk_user_id_vendedor)) {
+    score += 1;
+  }
+
+  return score;
+}
+
+export function matchesAnyPreference(product: Product, preferences?: BuyerPreferences | null) {
+  return preferences ? preferenceScore(product, preferences) > 0 : false;
+}
+
+function sortByPreferenceRelevance(items: Product[], preferences: BuyerPreferences) {
+  return [...items].sort((a, b) => {
+    const scoreDifference = preferenceScore(b, preferences) - preferenceScore(a, preferences);
+
+    if (scoreDifference !== 0) {
+      return scoreDifference;
+    }
+
+    return new Date(b.fecha_creacion).getTime() - new Date(a.fecha_creacion).getTime();
+  });
+}
+
 export function getCatalogProducts({
   search = "",
   categoria,
@@ -196,24 +267,52 @@ export function getCatalogProducts({
   const normalizedSearch = search.trim().toLowerCase();
   const normalizedPage = Math.max(page, 1);
   const normalizedPageSize = Math.min(Math.max(pageSize, 1), 20);
-
-  const filtered = products.filter((product) => {
-    const seller = sellers.find((item) => item.clerk_user_id_vendedor === product.clerk_user_id_vendedor);
-    const categoryName = categories.find((item) => item.categoria_producto_id === product.categoria_id)?.nombre;
-    const matchesSearch = normalizedSearch
-      ? [product.titulo, product.descripcion, product.marca, seller?.nombre_vendedor, categoryName]
-          .filter(Boolean)
-          .some((value) => value!.toLowerCase().includes(normalizedSearch))
-      : true;
-    const matchesCategory = categoria ? product.categoria_id === categoria : true;
-    const matchesSize = talle ? product.talle === talle : true;
-
-    return product.estado_publicacion === "activa" && matchesSearch && matchesCategory && matchesSize;
-  });
+  const filtered = getFilteredProducts({ search: normalizedSearch, categoria, talle });
 
   return {
     items: filtered.slice((normalizedPage - 1) * normalizedPageSize, normalizedPage * normalizedPageSize),
     total: filtered.length,
+    page: normalizedPage,
+    pageSize: normalizedPageSize,
+    categorias: categories,
+    vendedores: sellers
+  };
+}
+
+export function getPersonalizedCatalogProducts({
+  preferences,
+  search = "",
+  categoria,
+  talle,
+  page = 1,
+  pageSize = 6,
+  recommendedLimit = 6
+}: {
+  preferences: BuyerPreferences;
+  search?: string;
+  categoria?: string | null;
+  talle?: string | null;
+  page?: number;
+  pageSize?: number;
+  recommendedLimit?: number;
+}) {
+  const normalizedPage = Math.max(page, 1);
+  const normalizedPageSize = Math.min(Math.max(pageSize, 1), 20);
+  const filtered = getFilteredProducts({ search, categoria, talle });
+  const personalizedItems = sortByPreferenceRelevance(
+    filtered.filter((product) => matchesAnyPreference(product, preferences)),
+    preferences
+  ).slice(0, Math.max(recommendedLimit, 0));
+  const personalizedIds = new Set(personalizedItems.map((product) => product.producto_id));
+  const remainingItems = filtered.filter((product) => !personalizedIds.has(product.producto_id));
+
+  return {
+    personalizedItems,
+    items: remainingItems.slice(
+      (normalizedPage - 1) * normalizedPageSize,
+      normalizedPage * normalizedPageSize
+    ),
+    total: remainingItems.length,
     page: normalizedPage,
     pageSize: normalizedPageSize,
     categorias: categories,
@@ -230,7 +329,7 @@ export function createOrder(input: CreateOrderInput) {
   const sequence = orders.length + 1;
   const order: SalesOrder = {
     orden_id: `ord_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
-    nro_orden: `LAMA-${String(sequence).padStart(4, "0")}`,
+    nro_orden: `#ORD-${String(sequence).padStart(4, "0")}`,
     clerk_user_id_comprador: input.clerkUserId,
     producto_id: input.productIds[0],
     producto_ids: input.productIds,

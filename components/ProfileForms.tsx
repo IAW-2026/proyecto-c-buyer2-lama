@@ -7,12 +7,60 @@ import { SubmitButton } from "@/components/ui";
 import type { BuyerWithPreferences } from "@/lib/types";
 
 const initialState: FormState = { ok: false, message: "" };
+const sizes = ["XS", "S", "M", "L", "XL"];
+
+type Option = {
+  id: string;
+  label: string;
+};
 
 function fieldClass() {
   return "mt-1 w-full rounded-md border border-lama-line bg-lama-cream px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-lama-detail";
 }
 
-export function ProfileForms({ buyer }: { buyer: BuyerWithPreferences }) {
+function CheckboxGroup({
+  title,
+  name,
+  options,
+  selectedValues
+}: {
+  title: string;
+  name: string;
+  options: Option[];
+  selectedValues: string[];
+}) {
+  const selected = new Set(selectedValues);
+
+  return (
+    <fieldset>
+      <legend className="text-sm font-bold">{title}</legend>
+      <div className="mt-2 grid gap-2 rounded-md border border-lama-line bg-lama-cream p-3 sm:grid-cols-2">
+        {options.map((option) => (
+          <label key={option.id} className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              name={name}
+              value={option.id}
+              defaultChecked={selected.has(option.id)}
+              className="h-4 w-4 rounded border-lama-line text-lama-detail focus:ring-lama-detail"
+            />
+            <span>{option.label}</span>
+          </label>
+        ))}
+      </div>
+    </fieldset>
+  );
+}
+
+export function ProfileForms({
+  buyer,
+  categoryOptions,
+  sellerOptions
+}: {
+  buyer: BuyerWithPreferences;
+  categoryOptions: Option[];
+  sellerOptions: Option[];
+}) {
   const [profileState, profileAction] = useActionState(saveProfile, initialState);
   const [preferencesState, preferencesAction] = useActionState(savePreferences, initialState);
 
@@ -72,33 +120,26 @@ export function ProfileForms({ buyer }: { buyer: BuyerWithPreferences }) {
       <form action={preferencesAction} className="rounded-lg border border-lama-line bg-lama-card p-5 shadow-soft">
         <input type="hidden" name="clerk_user_id_comprador" value={buyer.clerk_user_id_comprador} />
         <h2 className="text-xl font-bold">Preferencias</h2>
-        <p className="mt-1 text-sm text-lama-ink/70">Separar valores con coma.</p>
 
         <div className="mt-5 grid gap-4">
-          <label className="text-sm font-bold">
-            Talles preferidos
-            <input
-              className={fieldClass()}
-              name="talles_preferidos"
-              defaultValue={buyer.preferencias?.talles_preferidos.join(", ") ?? ""}
-            />
-          </label>
-          <label className="text-sm font-bold">
-            Categorias preferidas
-            <input
-              className={fieldClass()}
-              name="categorias_preferidas"
-              defaultValue={buyer.preferencias?.categorias_preferidas.join(", ") ?? ""}
-            />
-          </label>
-          <label className="text-sm font-bold">
-            Vendedores preferidos
-            <input
-              className={fieldClass()}
-              name="vendedores_preferidos"
-              defaultValue={buyer.preferencias?.vendedores_preferidos.join(", ") ?? ""}
-            />
-          </label>
+          <CheckboxGroup
+            title="Talles preferidos"
+            name="talles_preferidos"
+            options={sizes.map((size) => ({ id: size, label: size }))}
+            selectedValues={buyer.preferencias?.talles_preferidos ?? []}
+          />
+          <CheckboxGroup
+            title="Categorias preferidas"
+            name="categorias_preferidas"
+            options={categoryOptions}
+            selectedValues={buyer.preferencias?.categorias_preferidas ?? []}
+          />
+          <CheckboxGroup
+            title="Vendedores preferidos"
+            name="vendedores_preferidos"
+            options={sellerOptions}
+            selectedValues={buyer.preferencias?.vendedores_preferidos ?? []}
+          />
         </div>
 
         <div className="mt-5">

@@ -50,7 +50,7 @@ export function BillingDetailsModal({
       >
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h2 className="text-xl font-bold">Datos de facturacion</h2>
+            <h2 className="text-xl font-bold">Datos del comprador</h2>
             <p className="mt-1 text-sm text-lama-ink/70">Revisalos antes de confirmar la compra.</p>
           </div>
           <button

@@ -3,12 +3,19 @@
 import { revalidatePath } from "next/cache";
 import { canAccessAdmin, canAccessBuyerApp, getAuthContext } from "@/lib/auth";
 import { upsertBuyer, upsertPreferences } from "@/lib/buyer-store";
-import { buyerSchema, preferencesSchema, splitFormList } from "@/lib/validation";
+import { buyerSchema, preferencesSchema } from "@/lib/validation";
 
 export type FormState = {
   ok: boolean;
   message: string;
 };
+
+function formList(formData: FormData, name: string) {
+  return formData
+    .getAll(name)
+    .map((value) => String(value).trim())
+    .filter(Boolean);
+}
 
 export async function saveProfile(_state: FormState, formData: FormData): Promise<FormState> {
   const authContext = await getAuthContext();
@@ -55,9 +62,9 @@ export async function savePreferences(_state: FormState, formData: FormData): Pr
 
   const parsed = preferencesSchema.safeParse({
     clerk_user_id_comprador: clerkUserId,
-    talles_preferidos: splitFormList(formData.get("talles_preferidos")),
-    categorias_preferidas: splitFormList(formData.get("categorias_preferidas")),
-    vendedores_preferidos: splitFormList(formData.get("vendedores_preferidos"))
+    talles_preferidos: formList(formData, "talles_preferidos"),
+    categorias_preferidas: formList(formData, "categorias_preferidas"),
+    vendedores_preferidos: formList(formData, "vendedores_preferidos")
   });
 
   if (!parsed.success) {

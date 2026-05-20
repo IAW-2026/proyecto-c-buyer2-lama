@@ -1,7 +1,7 @@
 "use client";
 /*
 el Header estaba decidiendo esos links desde el servidor con auth(). 
-En ese instante posterior al registro, Clerk del cliente ya estaba logueado, por eso veías el avatar “L”, 
+En ese instante posterior al registro, Clerk del cliente ya estaba logueado, por eso se veia el avatar “L”, 
 pero el render server del header todavía no veía la sesión actualizada hasta que hacías refresh manual. 
 Era un desfasaje cliente/servidor.
 */

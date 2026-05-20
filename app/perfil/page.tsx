@@ -3,6 +3,7 @@ import { ProfileForms } from "@/components/ProfileForms";
 import { Card, PageShell, StatusBadge } from "@/components/ui";
 import { canAccessBuyerApp, getAuthContext } from "@/lib/auth";
 import { ensureBuyerRegistration, getBuyer } from "@/lib/buyer-store";
+import { categories, sellers } from "@/lib/mock-external";
 import type { BuyerWithPreferences } from "@/lib/types";
 
 function emptyBuyer(userId: string, email: string | null, name: string | null): BuyerWithPreferences {
@@ -58,7 +59,17 @@ export default async function ProfilePage() {
 
   return (
     <PageShell title="Mi Perfil" eyebrow="Información personal y preferencias">
-      <ProfileForms buyer={buyer} />
+      <ProfileForms
+        buyer={buyer}
+        categoryOptions={categories.map((category) => ({
+          id: category.categoria_producto_id,
+          label: category.nombre
+        }))}
+        sellerOptions={sellers.map((seller) => ({
+          id: seller.clerk_user_id_vendedor,
+          label: seller.nombre_vendedor
+        }))}
+      />
     </PageShell>
   );
 }
