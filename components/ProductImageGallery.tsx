@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { MouseEvent, WheelEvent } from "react";
-import { Maximize2, X, ZoomIn, ZoomOut } from "lucide-react";
+import type { MouseEvent } from "react";
+import { ChevronLeft, ChevronRight, Maximize2, RotateCcw, X, ZoomIn, ZoomOut } from "lucide-react";
 import { clsx } from "clsx";
 
 const MAX_PRODUCT_IMAGES = 10;
@@ -25,7 +25,9 @@ export function ProductImageGallery({
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [isZoomOpen, setIsZoomOpen] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(MIN_ZOOM);
+  const [zoomOrigin, setZoomOrigin] = useState({ x: 50, y: 50 });
   const selectedImage = galleryImages[selectedIndex];
+  const hasMultipleImages = galleryImages.length > 1;
 
   useEffect(() => {
     if (!isZoomOpen) {
@@ -44,6 +46,7 @@ export function ProductImageGallery({
 
   function openZoom() {
     setZoomLevel(MIN_ZOOM);
+    setZoomOrigin({ x: 50, y: 50 });
     setIsZoomOpen(true);
   }
 
@@ -51,15 +54,42 @@ export function ProductImageGallery({
     setZoomLevel((current) => clampZoom(Number((current + delta).toFixed(2))));
   }
 
-  function handleZoomWheel(event: WheelEvent<HTMLDivElement>) {
-    event.stopPropagation();
-    event.preventDefault();
-    updateZoom(event.deltaY < 0 ? ZOOM_STEP : -ZOOM_STEP);
-  }
-
   function changeZoomFromButton(event: MouseEvent<HTMLButtonElement>, delta: number) {
     event.stopPropagation();
     updateZoom(delta);
+  }
+
+  function resetZoom(event: MouseEvent<HTMLButtonElement>) {
+    event.stopPropagation();
+    setZoomLevel(MIN_ZOOM);
+    setZoomOrigin({ x: 50, y: 50 });
+  }
+
+  function selectImage(index: number) {
+    setSelectedIndex(index);
+    setZoomLevel(MIN_ZOOM);
+    setZoomOrigin({ x: 50, y: 50 });
+  }
+
+  function showPreviousImage(event?: MouseEvent<HTMLButtonElement>) {
+    event?.stopPropagation();
+    selectImage((selectedIndex - 1 + galleryImages.length) % galleryImages.length);
+  }
+
+  function showNextImage(event?: MouseEvent<HTMLButtonElement>) {
+    event?.stopPropagation();
+    selectImage((selectedIndex + 1) % galleryImages.length);
+  }
+
+  function updateZoomOrigin(event: MouseEvent<HTMLDivElement>) {
+    const rect = event.currentTarget.getBoundingClientRect();
+    const x = ((event.clientX - rect.left) / rect.width) * 100;
+    const y = ((event.clientY - rect.top) / rect.height) * 100;
+
+    setZoomOrigin({
+      x: Math.min(Math.max(x, 0), 100),
+      y: Math.min(Math.max(y, 0), 100)
+    });
   }
 
   if (!selectedImage) {
@@ -72,25 +102,48 @@ export function ProductImageGallery({
 
   return (
     <section aria-label={`Imagenes de ${title}`} className="w-full max-w-2xl">
-      <button
-        type="button"
-        onClick={openZoom}
-        className="group relative block aspect-[4/3] w-full overflow-hidden rounded-lg border border-lama-line bg-lama-card shadow-soft focus:outline-none focus:ring-2 focus:ring-lama-detail focus:ring-offset-2"
-        aria-label={`Ampliar imagen ${selectedIndex + 1} de ${title}`}
-      >
-        <img src={selectedImage} alt={title} className="h-full w-full object-cover" />
-        <span className="absolute right-3 top-3 inline-flex h-10 w-10 items-center justify-center rounded-md bg-lama-card/90 text-lama-ink shadow-soft transition group-hover:bg-white">
-          <Maximize2 className="h-5 w-5" aria-hidden="true" />
-        </span>
-      </button>
+      <div className="relative">
+        <button
+          type="button"
+          onClick={openZoom}
+          className="group relative block aspect-[4/3] w-full overflow-hidden rounded-lg border border-lama-line bg-lama-card shadow-soft focus:outline-none focus:ring-2 focus:ring-lama-detail focus:ring-offset-2"
+          aria-label={`Ampliar imagen ${selectedIndex + 1} de ${title}`}
+        >
+          <img src={selectedImage} alt={title} className="h-full w-full object-cover" />
+          <span className="absolute right-3 top-3 inline-flex h-10 w-10 items-center justify-center rounded-md bg-lama-card/90 text-lama-ink shadow-soft transition group-hover:bg-white">
+            <Maximize2 className="h-5 w-5" aria-hidden="true" />
+          </span>
+        </button>
 
-      {galleryImages.length > 1 ? (
+        {hasMultipleImages ? (
+          <>
+            <button
+              type="button"
+              onClick={showPreviousImage}
+              className="absolute left-3 top-1/2 inline-flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-md bg-lama-card/90 text-lama-ink shadow-soft hover:bg-white focus:outline-none focus:ring-2 focus:ring-lama-detail"
+              aria-label="Ver imagen anterior"
+            >
+              <ChevronLeft className="h-5 w-5" aria-hidden="true" />
+            </button>
+            <button
+              type="button"
+              onClick={showNextImage}
+              className="absolute right-3 top-1/2 inline-flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-md bg-lama-card/90 text-lama-ink shadow-soft hover:bg-white focus:outline-none focus:ring-2 focus:ring-lama-detail"
+              aria-label="Ver imagen siguiente"
+            >
+              <ChevronRight className="h-5 w-5" aria-hidden="true" />
+            </button>
+          </>
+        ) : null}
+      </div>
+
+      {hasMultipleImages ? (
         <div className="mt-3 flex gap-3 overflow-x-auto pb-1" aria-label="Miniaturas del producto">
           {galleryImages.map((image, index) => (
             <button
               key={`${image}-${index}`}
               type="button"
-              onClick={() => setSelectedIndex(index)}
+              onClick={() => selectImage(index)}
               className={clsx(
                 "relative h-16 w-16 shrink-0 overflow-hidden rounded-md border bg-lama-card focus:outline-none focus:ring-2 focus:ring-lama-detail focus:ring-offset-2 sm:h-20 sm:w-20",
                 selectedIndex === index ? "border-lama-detail ring-2 ring-lama-detail" : "border-lama-line"
@@ -131,6 +184,15 @@ export function ProductImageGallery({
               </button>
               <button
                 type="button"
+                onClick={resetZoom}
+                disabled={zoomLevel === MIN_ZOOM}
+                className="inline-flex h-10 w-10 items-center justify-center rounded-md bg-lama-card text-lama-ink shadow-soft hover:bg-white focus:outline-none focus:ring-2 focus:ring-lama-detail disabled:cursor-not-allowed disabled:opacity-50"
+                aria-label="Restablecer zoom"
+              >
+                <RotateCcw className="h-5 w-5" aria-hidden="true" />
+              </button>
+              <button
+                type="button"
                 onClick={(event) => changeZoomFromButton(event, ZOOM_STEP)}
                 disabled={zoomLevel >= MAX_ZOOM}
                 className="inline-flex h-10 w-10 items-center justify-center rounded-md bg-lama-card text-lama-ink shadow-soft hover:bg-white focus:outline-none focus:ring-2 focus:ring-lama-detail disabled:cursor-not-allowed disabled:opacity-50"
@@ -150,21 +212,41 @@ export function ProductImageGallery({
                 <X className="h-5 w-5" aria-hidden="true" />
               </button>
             </div>
+
+            {hasMultipleImages ? (
+              <>
+                <button
+                  type="button"
+                  onClick={showPreviousImage}
+                  className="absolute left-3 top-1/2 z-10 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-md bg-lama-card/90 text-lama-ink shadow-soft hover:bg-white focus:outline-none focus:ring-2 focus:ring-lama-detail"
+                  aria-label="Ver imagen anterior"
+                >
+                  <ChevronLeft className="h-6 w-6" aria-hidden="true" />
+                </button>
+                <button
+                  type="button"
+                  onClick={showNextImage}
+                  className="absolute right-3 top-1/2 z-10 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-md bg-lama-card/90 text-lama-ink shadow-soft hover:bg-white focus:outline-none focus:ring-2 focus:ring-lama-detail"
+                  aria-label="Ver imagen siguiente"
+                >
+                  <ChevronRight className="h-6 w-6" aria-hidden="true" />
+                </button>
+              </>
+            ) : null}
+
             <div
-              onWheelCapture={handleZoomWheel}
-              className="h-[88vh] max-h-[88vh] overflow-auto rounded-lg border border-lama-line bg-lama-card shadow-soft"
+              onMouseMove={updateZoomOrigin}
+              className="h-[88vh] max-h-[88vh] cursor-crosshair overflow-hidden rounded-lg border border-lama-line bg-lama-card shadow-soft"
             >
-              <div
-                className="flex items-center justify-center p-4"
-                style={{
-                  minHeight: `${zoomLevel * 100}%`,
-                  minWidth: `${zoomLevel * 100}%`
-                }}
-              >
+              <div className="flex h-full w-full items-center justify-center p-4">
                 <img
                   src={selectedImage}
                   alt={title}
-                  className="max-h-full max-w-full object-contain"
+                  className="max-h-full max-w-full object-contain transition-transform duration-150"
+                  style={{
+                    transform: `scale(${zoomLevel})`,
+                    transformOrigin: `${zoomOrigin.x}% ${zoomOrigin.y}%`
+                  }}
                 />
               </div>
             </div>
