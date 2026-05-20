@@ -100,7 +100,6 @@ export default async function ProductPage({
           <Card>
             <div className="flex flex-wrap gap-2">
               <StatusBadge>{product.estado_prenda}</StatusBadge>
-              <StatusBadge>{product.estado_publicacion}</StatusBadge>
               <StatusBadge>{category?.nombre ?? product.categoria_id}</StatusBadge>
             </div>
             <p className="mt-5 text-base leading-7">{product.descripcion}</p>
@@ -114,9 +113,9 @@ export default async function ProductPage({
             </Card>
           ) : (
             <Card>
-              <p className="font-bold">Necesitas iniciar sesion para comprar o agregar al carrito.</p>
+              <p className="font-bold">Necesitas iniciar sesión o registrarte para comprar o agregar al carrito.</p>
               <div className="mt-4 flex flex-wrap gap-2">
-                <ButtonLink href="/sign-in">Iniciar sesion</ButtonLink>
+                <ButtonLink href="/sign-in">Iniciar Sesión</ButtonLink>
                 <ButtonLink href="/sign-up" className="bg-lama-cream text-lama-ink hover:bg-white">
                   Registrarme
                 </ButtonLink>

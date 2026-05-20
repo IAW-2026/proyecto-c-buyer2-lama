@@ -109,7 +109,7 @@ export function CheckoutForm({
 
   return (
     <div className="rounded-lg border border-lama-line bg-lama-card p-5 shadow-soft">
-      <h2 className="text-xl font-bold">Checkout</h2>
+      <h2 className="text-xl font-bold">Realizar Compra</h2>
       <dl className="mt-4 space-y-2 text-sm">
         <div className="flex justify-between">
           <dt>Producto</dt>
@@ -126,7 +126,7 @@ export function CheckoutForm({
       </dl>
 
       <label className="mt-5 block text-sm font-bold" htmlFor="metodo_pago">
-        Metodo de pago
+        Método de pago
       </label>
       <select
         id="metodo_pago"

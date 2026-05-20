@@ -154,7 +154,7 @@ export const products: Product[] = [
     producto_id: "prod_007",
     clerk_user_id_vendedor: "user_seller_lama_003",
     categoria_id: "cat_camperas",
-    imagenes: ["/products/blazer-negro.svg", "/products/blazer-negro-back.svg", "/products/blazer-negro-side.svg"],
+    imagenes: ["/products/blazer-negro.svg", "/products/blazer-negro.svg", "/products/blazer-negro.svg"],
     titulo: "Blazer negro sastrero",
     descripcion: "Blazer forrado, corte recto, excelente estado.",
     precio: 45100,
