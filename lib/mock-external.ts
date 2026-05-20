@@ -119,7 +119,7 @@ export const products: Product[] = [
     estado_prenda: "usado",
     talle: "M",
     marca: "Uniqlo",
-    estado_publicacion: "activa",
+    estado_publicacion: "vendida",
     fecha_creacion: "2026-05-01T10:45:00.000Z"
   },
   {
@@ -149,6 +149,20 @@ export const products: Product[] = [
     marca: "Complot",
     estado_publicacion: "activa",
     fecha_creacion: "2026-05-06T18:00:00.000Z"
+  },
+  {
+    producto_id: "prod_007",
+    clerk_user_id_vendedor: "user_seller_lama_003",
+    categoria_id: "cat_camperas",
+    imagenes: ["/products/blazer-negro.svg"],
+    titulo: "Blazer negro sastrero",
+    descripcion: "Blazer forrado, corte recto, excelente estado.",
+    precio: 45100,
+    estado_prenda: "usado como nuevo",
+    talle: "S",
+    marca: "Zara",
+    estado_publicacion: "activa",
+    fecha_creacion: "2026-05-04T13:20:00.000Z"
   }
 ];
 

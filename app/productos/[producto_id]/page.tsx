@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, Calendar, Ruler, Store } from "lucide-react";
 import { AddToCartButton } from "@/components/AddToCartButton";
 import { CheckoutForm } from "@/components/CheckoutForm";
+import { ProductImageGallery } from "@/components/ProductImageGallery";
 import { ButtonLink, Card, PageShell, StatusBadge } from "@/components/ui";
 import { canAccessBuyerApp, getAuthContext } from "@/lib/auth";
 import { getBuyer } from "@/lib/buyer-store";
@@ -49,13 +50,7 @@ export default async function ProductPage({
     >
       <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
         <div className="space-y-6">
-          <div className="relative aspect-[4/3] overflow-hidden rounded-lg border border-lama-line bg-lama-card shadow-soft">
-            <img
-              src={product.imagenes[0]}
-              alt={product.titulo}
-              className="h-full w-full object-cover"
-            />
-          </div>
+          <ProductImageGallery images={product.imagenes} title={product.titulo} />
 
           <Card>
             <div className="flex flex-wrap gap-2">

@@ -11,7 +11,7 @@ const currency = new Intl.NumberFormat("es-AR", {
 export function ProductCard({ product }: { product: Product }) {
   return (
     <article className="overflow-hidden rounded-lg border border-lama-line bg-lama-card shadow-soft">
-      <div className="relative aspect-[4/3] bg-lama-cream">
+      <div className="relative aspect-[16/10] bg-lama-cream">
         <img
           src={product.imagenes[0]}
           alt={product.titulo}
