@@ -1,10 +1,17 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Maximize2, X } from "lucide-react";
+import { Maximize2, X, ZoomIn, ZoomOut } from "lucide-react";
 import { clsx } from "clsx";
 
 const MAX_PRODUCT_IMAGES = 10;
+const MIN_ZOOM = 1;
+const MAX_ZOOM = 3;
+const ZOOM_STEP = 0.2;
+
+function clampZoom(value: number) {
+  return Math.min(Math.max(value, MIN_ZOOM), MAX_ZOOM);
+}
 
 export function ProductImageGallery({
   images,
@@ -16,6 +23,7 @@ export function ProductImageGallery({
   const galleryImages = images.slice(0, MAX_PRODUCT_IMAGES);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [isZoomOpen, setIsZoomOpen] = useState(false);
+  const [zoomLevel, setZoomLevel] = useState(MIN_ZOOM);
   const selectedImage = galleryImages[selectedIndex];
 
   useEffect(() => {
@@ -33,6 +41,20 @@ export function ProductImageGallery({
     return () => window.removeEventListener("keydown", closeOnEscape);
   }, [isZoomOpen]);
 
+  function openZoom() {
+    setZoomLevel(MIN_ZOOM);
+    setIsZoomOpen(true);
+  }
+
+  function updateZoom(delta: number) {
+    setZoomLevel((current) => clampZoom(Number((current + delta).toFixed(2))));
+  }
+
+  function handleZoomWheel(event: React.WheelEvent<HTMLDivElement>) {
+    event.preventDefault();
+    updateZoom(event.deltaY < 0 ? ZOOM_STEP : -ZOOM_STEP);
+  }
+
   if (!selectedImage) {
     return (
       <div className="flex aspect-[4/3] w-full max-w-2xl items-center justify-center rounded-lg border border-dashed border-lama-detail/50 bg-lama-card text-sm font-bold text-lama-ink/70 shadow-soft">
@@ -45,7 +67,7 @@ export function ProductImageGallery({
     <section aria-label={`Imagenes de ${title}`} className="w-full max-w-2xl">
       <button
         type="button"
-        onClick={() => setIsZoomOpen(true)}
+        onClick={openZoom}
         className="group relative block aspect-[4/3] w-full overflow-hidden rounded-lg border border-lama-line bg-lama-card shadow-soft focus:outline-none focus:ring-2 focus:ring-lama-detail focus:ring-offset-2"
         aria-label={`Ampliar imagen ${selectedIndex + 1} de ${title}`}
       >
@@ -83,20 +105,48 @@ export function ProductImageGallery({
           aria-label={`Imagen ampliada de ${title}`}
           onClick={() => setIsZoomOpen(false)}
         >
-          <div className="relative max-h-full w-full max-w-5xl" onClick={(event) => event.stopPropagation()}>
-            <button
-              type="button"
-              onClick={() => setIsZoomOpen(false)}
-              className="absolute right-3 top-3 z-10 inline-flex h-10 w-10 items-center justify-center rounded-md bg-lama-card text-lama-ink shadow-soft hover:bg-white focus:outline-none focus:ring-2 focus:ring-lama-detail"
-              aria-label="Cerrar imagen ampliada"
+          <div className="relative flex max-h-full w-full max-w-5xl flex-col" onClick={(event) => event.stopPropagation()}>
+            <div className="absolute right-3 top-3 z-10 flex gap-2">
+              <button
+                type="button"
+                onClick={() => updateZoom(-ZOOM_STEP)}
+                disabled={zoomLevel <= MIN_ZOOM}
+                className="inline-flex h-10 w-10 items-center justify-center rounded-md bg-lama-card text-lama-ink shadow-soft hover:bg-white focus:outline-none focus:ring-2 focus:ring-lama-detail disabled:cursor-not-allowed disabled:opacity-50"
+                aria-label="Reducir zoom"
+              >
+                <ZoomOut className="h-5 w-5" aria-hidden="true" />
+              </button>
+              <button
+                type="button"
+                onClick={() => updateZoom(ZOOM_STEP)}
+                disabled={zoomLevel >= MAX_ZOOM}
+                className="inline-flex h-10 w-10 items-center justify-center rounded-md bg-lama-card text-lama-ink shadow-soft hover:bg-white focus:outline-none focus:ring-2 focus:ring-lama-detail disabled:cursor-not-allowed disabled:opacity-50"
+                aria-label="Aumentar zoom"
+              >
+                <ZoomIn className="h-5 w-5" aria-hidden="true" />
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsZoomOpen(false)}
+                className="inline-flex h-10 w-10 items-center justify-center rounded-md bg-lama-card text-lama-ink shadow-soft hover:bg-white focus:outline-none focus:ring-2 focus:ring-lama-detail"
+                aria-label="Cerrar imagen ampliada"
+              >
+                <X className="h-5 w-5" aria-hidden="true" />
+              </button>
+            </div>
+            <div
+              onWheel={handleZoomWheel}
+              className="max-h-[88vh] overflow-auto rounded-lg border border-lama-line bg-lama-card shadow-soft"
             >
-              <X className="h-5 w-5" aria-hidden="true" />
-            </button>
-            <img
-              src={selectedImage}
-              alt={title}
-              className="max-h-[88vh] w-full rounded-lg border border-lama-line bg-lama-card object-contain shadow-soft"
-            />
+              <div className="flex min-h-[88vh] min-w-full items-center justify-center">
+                <img
+                  src={selectedImage}
+                  alt={title}
+                  className="h-auto max-w-none object-contain"
+                  style={{ width: `${zoomLevel * 100}%` }}
+                />
+              </div>
+            </div>
           </div>
         </div>
       ) : null}

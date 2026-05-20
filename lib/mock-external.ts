@@ -154,7 +154,7 @@ export const products: Product[] = [
     producto_id: "prod_007",
     clerk_user_id_vendedor: "user_seller_lama_003",
     categoria_id: "cat_camperas",
-    imagenes: ["/products/blazer-negro.svg"],
+    imagenes: ["/products/blazer-negro.svg", "/products/blazer-negro-back.svg", "/products/blazer-negro-side.svg"],
     titulo: "Blazer negro sastrero",
     descripcion: "Blazer forrado, corte recto, excelente estado.",
     precio: 45100,
@@ -163,6 +163,20 @@ export const products: Product[] = [
     marca: "Zara",
     estado_publicacion: "activa",
     fecha_creacion: "2026-05-04T13:20:00.000Z"
+  },
+  {
+    producto_id: "prod_008",
+    clerk_user_id_vendedor: "user_seller_lama_002",
+    categoria_id: "cat_pantalones",
+    imagenes: ["/products/jean-recto.svg"],
+    titulo: "Jean recto tiro alto",
+    descripcion: "Jean azul oscuro de calce recto, con desgaste leve propio del uso.",
+    precio: 34200,
+    estado_prenda: "usado en buen estado",
+    talle: "L",
+    marca: "Lee",
+    estado_publicacion: "activa",
+    fecha_creacion: "2026-04-28T09:10:00.000Z"
   }
 ];
 
@@ -172,20 +186,20 @@ globalForMockExternal.lamaOrders = orders;
 export const paymentMethods: PaymentMethod[] = [
   {
     metodo_pago_id: "mp_mercadopago_wallet",
-    metodo_pago: "billetera virtual",
+    metodo_pago: "Billetera Virtual",
     descripcion: "Pago con saldo disponible en billetera virtual.",
     esta_activo: true
   },
   {
     metodo_pago_id: "mp_debito",
-    metodo_pago: "tarjeta de debito",
-    descripcion: "Pago con tarjeta de debito en modo sandbox.",
+    metodo_pago: "Tarjeta de Débito",
+    descripcion: "Pago con tarjeta de débito en modo sandbox.",
     esta_activo: true
   },
   {
     metodo_pago_id: "mp_credito",
-    metodo_pago: "tarjeta de credito",
-    descripcion: "Pago con tarjeta de credito en modo sandbox.",
+    metodo_pago: "Tarjeta de Crédito",
+    descripcion: "Pago con tarjeta de crédito en modo sandbox.",
     esta_activo: true
   }
 ];
@@ -371,7 +385,7 @@ export function getShippingForOrder(orderId: string): ShippingInfo | null {
     envio_id: `env_${order.orden_id}`,
     orden_id: order.orden_id,
     codigo_seguimiento: `LMA-${order.orden_id.toUpperCase()}`,
-    empresa_logistica: "lama Logistica",
+    empresa_logistica: "Lama Logística",
     estado: order.estado_envio,
     historial_estados: [
       {
