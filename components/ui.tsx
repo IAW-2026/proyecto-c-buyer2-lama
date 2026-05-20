@@ -77,9 +77,14 @@ export function SubmitButton({ children }: { children: ReactNode }) {
   );
 }
 
-export function StatusBadge({ children }: { children: ReactNode }) {
+export function StatusBadge({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <span className="inline-flex w-fit items-center rounded-full border border-lama-detail/40 bg-lama-cream px-3 py-1 text-xs font-bold uppercase text-lama-detail">
+    <span
+      className={clsx(
+        "inline-flex w-fit items-center rounded-full border border-lama-detail/40 bg-lama-cream px-3 py-1 text-xs font-bold uppercase text-lama-detail",
+        className
+      )}
+    >
       {children}
     </span>
   );

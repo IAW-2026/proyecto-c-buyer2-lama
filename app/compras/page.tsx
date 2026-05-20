@@ -21,9 +21,9 @@ export default async function PurchasesPage() {
         </Card>
       ) : (
         <Card>
-          <p className="font-bold">Necesitas iniciar sesion para ver tus compras.</p>
+          <p className="font-bold">Necesitas iniciar sesión para ver tus compras.</p>
           <div className="mt-4 flex flex-wrap gap-2">
-            <ButtonLink href="/sign-in">Iniciar sesion</ButtonLink>
+            <ButtonLink href="/sign-in">Iniciar sesión</ButtonLink>
             <ButtonLink href="/sign-up" className="bg-lama-cream text-lama-ink hover:bg-lama-card">
               Registrarme
             </ButtonLink>

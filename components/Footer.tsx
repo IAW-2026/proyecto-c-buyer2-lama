@@ -21,8 +21,8 @@ const footerSections = [
   {
     title: "Acerca de Lama",
     links: [
+      { label: "Quienes somos", href: "/" },
       { label: "Moda circular", href: "/" },
-      { label: "Productos vintage", href: "/" },
       { label: "Marketplace de segunda mano", href: "/" }
     ]
   },

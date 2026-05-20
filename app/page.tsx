@@ -13,7 +13,7 @@ import type { Product } from "@/lib/types";
 
 function ProductGrid({ products }: { products: Product[] }) {
   return (
-    <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="grid grid-cols-2 gap-x-2 gap-y-6 sm:gap-x-4 md:grid-cols-3 lg:grid-cols-4">
       {products.map((product) => (
         <ProductCard key={product.producto_id} product={product} />
       ))}
