@@ -52,7 +52,7 @@ export default async function Home({
   const visibleCatalog = personalizedCatalog ?? catalog;
 
   return (
-    <PageShell title="Comprar ropa usada y vintage" eyebrow="Marketplace lama">
+    <PageShell title="Comprar ropa usada y vintage">
       <div className="mb-6">
         <SearchBar search={params.search} categoria={params.categoria} talle={params.talle} />
       </div>

@@ -17,7 +17,7 @@ export function ProductCard({ product }: { product: Product }) {
       aria-label={`Ver detalle de ${product.titulo}`}
     >
       <article className="h-full overflow-hidden rounded-lg border border-lama-line bg-lama-card shadow-soft transition group-hover:-translate-y-0.5 group-hover:border-lama-detail/60">
-        <div className="relative aspect-square bg-lama-cream">
+        <div className="relative aspect-square bg-lama-card">
           <img
             src={product.imagenes[0]}
             alt={product.titulo}

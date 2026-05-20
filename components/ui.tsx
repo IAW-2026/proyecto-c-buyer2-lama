@@ -21,19 +21,18 @@ export function PageShell({
 }) {
   return (
     <div className={clsx("mx-auto max-w-7xl px-4 py-8 sm:py-10", className)}>
-        <div
-      className={clsx(
-      "mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between",
-      headerClassName
-    )}
-  >
-    <div className="w-full">
-      <h1 className="mt-1 w-full text-center text-3xl font-bold text-lama-ink sm:text-4xl">
-        {title}
-      </h1>
-    </div>
-    {actions}
-  </div>
+      <div className={clsx("relative mb-6 flex flex-col gap-4", headerClassName)}>
+        {actions ? (
+          <div className="flex justify-start sm:absolute sm:left-0 sm:top-1/2 sm:-translate-y-1/2">
+            {actions}
+          </div>
+        ) : null}
+        <div className="w-full">
+          <h1 className="mt-1 w-full text-center text-3xl font-bold text-lama-ink sm:text-4xl">
+            {title}
+          </h1>
+        </div>
+      </div>
       {contentClassName ? <div className={contentClassName}>{children}</div> : children}
     </div>
   );

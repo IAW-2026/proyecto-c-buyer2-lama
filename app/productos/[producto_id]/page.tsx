@@ -48,8 +48,8 @@ export default async function ProductPage({
         </ButtonLink>
       }
     >
-      <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
-        <div className="space-y-6">
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,672px)_380px] lg:justify-center lg:gap-5">
+        <div className="space-y-4">
           <ProductImageGallery images={product.imagenes} title={product.titulo} />
 
           {authContext.userId && authContext.email && hasBuyerRole ? (
@@ -67,7 +67,7 @@ export default async function ProductPage({
           ) : null}
         </div>
 
-        <aside className="space-y-5">
+        <aside className="space-y-4">
           <Card>
             <p className="text-3xl font-bold">{currency.format(product.precio)}</p>
             <dl className="mt-5 space-y-4 text-sm">
@@ -100,7 +100,6 @@ export default async function ProductPage({
           <Card>
             <div className="flex flex-wrap gap-2">
               <StatusBadge>{product.estado_prenda}</StatusBadge>
-              <StatusBadge>{category?.nombre ?? product.categoria_id}</StatusBadge>
             </div>
             <p className="mt-5 text-base leading-7">{product.descripcion}</p>
           </Card>

@@ -284,7 +284,7 @@ export function getCatalogProducts({
   categoria,
   talle,
   page = 1,
-  pageSize = 6
+  pageSize = 8
 }: {
   search?: string;
   categoria?: string | null;
