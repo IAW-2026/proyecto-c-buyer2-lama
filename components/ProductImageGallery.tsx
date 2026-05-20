@@ -110,7 +110,7 @@ export function ProductImageGallery({
           aria-label={`Ampliar imagen ${selectedIndex + 1} de ${title}`}
         >
           <img src={selectedImage} alt={title} className="h-full w-full object-cover" />
-          <span className="absolute right-3 top-3 inline-flex h-10 w-10 items-center justify-center rounded-md bg-lama-card/90 text-lama-ink shadow-soft transition group-hover:bg-white">
+          <span className="absolute right-3 top-3 inline-flex h-10 w-10 items-center justify-center rounded-md bg-lama-card/90 text-lama-ink shadow-soft transition group-hover:bg-lama-cream">
             <Maximize2 className="h-5 w-5" aria-hidden="true" />
           </span>
         </button>
@@ -120,7 +120,7 @@ export function ProductImageGallery({
             <button
               type="button"
               onClick={showPreviousImage}
-              className="absolute left-3 top-1/2 inline-flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-md bg-lama-card/90 text-lama-ink shadow-soft hover:bg-white focus:outline-none focus:ring-2 focus:ring-lama-detail"
+              className="absolute left-3 top-1/2 inline-flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-md bg-lama-card/90 text-lama-ink shadow-soft hover:bg-lama-cream focus:outline-none focus:ring-2 focus:ring-lama-detail"
               aria-label="Ver imagen anterior"
             >
               <ChevronLeft className="h-5 w-5" aria-hidden="true" />
@@ -128,7 +128,7 @@ export function ProductImageGallery({
             <button
               type="button"
               onClick={showNextImage}
-              className="absolute right-3 top-1/2 inline-flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-md bg-lama-card/90 text-lama-ink shadow-soft hover:bg-white focus:outline-none focus:ring-2 focus:ring-lama-detail"
+              className="absolute right-3 top-1/2 inline-flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-md bg-lama-card/90 text-lama-ink shadow-soft hover:bg-lama-cream focus:outline-none focus:ring-2 focus:ring-lama-detail"
               aria-label="Ver imagen siguiente"
             >
               <ChevronRight className="h-5 w-5" aria-hidden="true" />
@@ -177,7 +177,7 @@ export function ProductImageGallery({
                 type="button"
                 onClick={(event) => changeZoomFromButton(event, -ZOOM_STEP)}
                 disabled={zoomLevel <= MIN_ZOOM}
-                className="inline-flex h-10 w-10 items-center justify-center rounded-md bg-lama-card text-lama-ink shadow-soft hover:bg-white focus:outline-none focus:ring-2 focus:ring-lama-detail disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-md bg-lama-card text-lama-ink shadow-soft hover:bg-lama-cream focus:outline-none focus:ring-2 focus:ring-lama-detail disabled:cursor-not-allowed disabled:opacity-50"
                 aria-label="Reducir zoom"
               >
                 <ZoomOut className="h-5 w-5" aria-hidden="true" />
@@ -186,7 +186,7 @@ export function ProductImageGallery({
                 type="button"
                 onClick={resetZoom}
                 disabled={zoomLevel === MIN_ZOOM}
-                className="inline-flex h-10 w-10 items-center justify-center rounded-md bg-lama-card text-lama-ink shadow-soft hover:bg-white focus:outline-none focus:ring-2 focus:ring-lama-detail disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-md bg-lama-card text-lama-ink shadow-soft hover:bg-lama-cream focus:outline-none focus:ring-2 focus:ring-lama-detail disabled:cursor-not-allowed disabled:opacity-50"
                 aria-label="Restablecer zoom"
               >
                 <RotateCcw className="h-5 w-5" aria-hidden="true" />
@@ -195,7 +195,7 @@ export function ProductImageGallery({
                 type="button"
                 onClick={(event) => changeZoomFromButton(event, ZOOM_STEP)}
                 disabled={zoomLevel >= MAX_ZOOM}
-                className="inline-flex h-10 w-10 items-center justify-center rounded-md bg-lama-card text-lama-ink shadow-soft hover:bg-white focus:outline-none focus:ring-2 focus:ring-lama-detail disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-md bg-lama-card text-lama-ink shadow-soft hover:bg-lama-cream focus:outline-none focus:ring-2 focus:ring-lama-detail disabled:cursor-not-allowed disabled:opacity-50"
                 aria-label="Aumentar zoom"
               >
                 <ZoomIn className="h-5 w-5" aria-hidden="true" />
@@ -206,7 +206,7 @@ export function ProductImageGallery({
                   event.stopPropagation();
                   setIsZoomOpen(false);
                 }}
-                className="inline-flex h-10 w-10 items-center justify-center rounded-md bg-lama-card text-lama-ink shadow-soft hover:bg-white focus:outline-none focus:ring-2 focus:ring-lama-detail"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-md bg-lama-card text-lama-ink shadow-soft hover:bg-lama-cream focus:outline-none focus:ring-2 focus:ring-lama-detail"
                 aria-label="Cerrar imagen ampliada"
               >
                 <X className="h-5 w-5" aria-hidden="true" />
@@ -218,7 +218,7 @@ export function ProductImageGallery({
                 <button
                   type="button"
                   onClick={showPreviousImage}
-                  className="absolute left-3 top-1/2 z-10 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-md bg-lama-card/90 text-lama-ink shadow-soft hover:bg-white focus:outline-none focus:ring-2 focus:ring-lama-detail"
+                  className="absolute left-3 top-1/2 z-10 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-md bg-lama-card/90 text-lama-ink shadow-soft hover:bg-lama-cream focus:outline-none focus:ring-2 focus:ring-lama-detail"
                   aria-label="Ver imagen anterior"
                 >
                   <ChevronLeft className="h-6 w-6" aria-hidden="true" />
@@ -226,7 +226,7 @@ export function ProductImageGallery({
                 <button
                   type="button"
                   onClick={showNextImage}
-                  className="absolute right-3 top-1/2 z-10 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-md bg-lama-card/90 text-lama-ink shadow-soft hover:bg-white focus:outline-none focus:ring-2 focus:ring-lama-detail"
+                  className="absolute right-3 top-1/2 z-10 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-md bg-lama-card/90 text-lama-ink shadow-soft hover:bg-lama-cream focus:outline-none focus:ring-2 focus:ring-lama-detail"
                   aria-label="Ver imagen siguiente"
                 >
                   <ChevronRight className="h-6 w-6" aria-hidden="true" />

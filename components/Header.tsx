@@ -3,6 +3,7 @@ import { Shield } from "lucide-react";
 import { canAccessAdmin, getAuthContext, isClerkConfigured } from "@/lib/auth";
 import { AuthButtons } from "@/components/auth/AuthButtons";
 import { AuthNavLinks } from "@/components/auth/AuthNavLinks";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export async function Header() {
   const authContext = await getAuthContext();
@@ -34,6 +35,7 @@ export async function Header() {
               Admin
             </Link>
           ) : null}
+          <ThemeToggle />
           {isClerkConfigured() ? <AuthButtons /> : null}
         </nav>
       </div>

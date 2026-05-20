@@ -10,16 +10,16 @@ const config: Config = {
     extend: {
       colors: {
         lama: {
-          header: "#8fa18d",
-          detail: "#6f7f6d",
-          cream: "#f6f1e7",
-          card: "#ede6d8",
-          ink: "#37413d",
-          line: "#d8cebd"
+          header: "rgb(var(--lama-header) / <alpha-value>)",
+          detail: "rgb(var(--lama-detail) / <alpha-value>)",
+          cream: "rgb(var(--lama-cream) / <alpha-value>)",
+          card: "rgb(var(--lama-card) / <alpha-value>)",
+          ink: "rgb(var(--lama-ink) / <alpha-value>)",
+          line: "rgb(var(--lama-line) / <alpha-value>)"
         }
       },
       boxShadow: {
-        soft: "0 18px 50px rgba(55, 65, 61, 0.12)"
+        soft: "var(--lama-shadow-soft)"
       }
     }
   },
@@ -27,4 +27,3 @@ const config: Config = {
 };
 
 export default config;
-

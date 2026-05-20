@@ -10,7 +10,22 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="es">
+    <html lang="es" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              try {
+                var theme = localStorage.getItem("lama-theme");
+                var prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+                var resolvedTheme = theme || (prefersDark ? "dark" : "light");
+                document.documentElement.classList.toggle("dark", resolvedTheme === "dark");
+                document.documentElement.dataset.theme = resolvedTheme;
+              } catch (_) {}
+            `
+          }}
+        />
+      </head>
       <body>
         <Providers>
           <Header />
@@ -20,4 +35,3 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     </html>
   );
 }
-

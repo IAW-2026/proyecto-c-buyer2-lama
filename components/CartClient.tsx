@@ -268,7 +268,7 @@ export function CartClient({
         <button
           type="button"
           onClick={clearCart}
-          className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-md bg-lama-cream px-4 py-3 text-sm font-bold text-lama-ink hover:bg-white focus:outline-none focus:ring-2 focus:ring-lama-detail focus:ring-offset-2"
+          className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-md bg-lama-cream px-4 py-3 text-sm font-bold text-lama-ink hover:bg-lama-card focus:outline-none focus:ring-2 focus:ring-lama-detail focus:ring-offset-2"
         >
           Vaciar carrito
         </button>

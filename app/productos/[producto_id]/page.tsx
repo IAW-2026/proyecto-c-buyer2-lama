@@ -42,7 +42,7 @@ export default async function ProductPage({
       title={product.titulo}
       eyebrow="Detalle de producto"
       actions={
-        <ButtonLink href="/" className="bg-lama-card text-lama-ink hover:bg-white">
+        <ButtonLink href="/" className="bg-lama-card text-lama-ink hover:bg-lama-cream">
           <ArrowLeft className="h-4 w-4" aria-hidden="true" />
           Volver
         </ButtonLink>
@@ -116,7 +116,7 @@ export default async function ProductPage({
               <p className="font-bold">Necesitas iniciar sesión o registrarte para comprar o agregar al carrito.</p>
               <div className="mt-4 flex flex-wrap gap-2">
                 <ButtonLink href="/sign-in">Iniciar Sesión</ButtonLink>
-                <ButtonLink href="/sign-up" className="bg-lama-cream text-lama-ink hover:bg-white">
+                <ButtonLink href="/sign-up" className="bg-lama-cream text-lama-ink hover:bg-lama-card">
                   Registrarme
                 </ButtonLink>
               </div>

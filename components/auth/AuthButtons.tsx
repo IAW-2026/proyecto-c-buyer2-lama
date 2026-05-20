@@ -10,7 +10,7 @@ export function AuthButtons() {
       <SignedOut>
         <Link
           href="/sign-in"
-          className="inline-flex items-center gap-2 rounded-md bg-lama-cream px-3 py-2 text-sm font-bold hover:bg-white focus:outline-none focus:ring-2 focus:ring-lama-ink"
+          className="inline-flex items-center gap-2 rounded-md bg-lama-cream px-3 py-2 text-sm font-bold hover:bg-lama-card focus:outline-none focus:ring-2 focus:ring-lama-ink"
         >
           <LogIn className="h-4 w-4" aria-hidden="true" />
           Registrate / Inicia Sesión

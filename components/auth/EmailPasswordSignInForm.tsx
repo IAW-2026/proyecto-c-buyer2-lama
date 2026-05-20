@@ -5,6 +5,7 @@ import { Chrome, LogIn } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
+import { useTheme } from "@/components/ThemeProvider";
 
 type ClerkError = {
   errors?: Array<{
@@ -41,6 +42,7 @@ function isMissingAccountError(error: unknown) {
 export function EmailPasswordSignInForm() {
   const { isSignedIn } = useAuth();
   const { isLoaded, signIn, setActive } = useSignIn();
+  const { theme } = useTheme();
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -121,7 +123,7 @@ export function EmailPasswordSignInForm() {
         <label className="block text-sm font-bold">
           Email
           <input
-            className="mt-2 w-full rounded-md border border-lama-line bg-white px-3 py-2 font-normal focus:border-lama-detail focus:outline-none focus:ring-2 focus:ring-lama-detail/30"
+            className="mt-2 w-full rounded-md border border-lama-line bg-lama-cream px-3 py-2 font-normal text-lama-ink focus:border-lama-detail focus:outline-none focus:ring-2 focus:ring-lama-detail/30"
             type="email"
             autoComplete="email"
             value={email}
@@ -132,7 +134,7 @@ export function EmailPasswordSignInForm() {
         <label className="block text-sm font-bold">
           Contrasena
           <input
-            className="mt-2 w-full rounded-md border border-lama-line bg-white px-3 py-2 font-normal focus:border-lama-detail focus:outline-none focus:ring-2 focus:ring-lama-detail/30"
+            className="mt-2 w-full rounded-md border border-lama-line bg-lama-cream px-3 py-2 font-normal text-lama-ink focus:border-lama-detail focus:outline-none focus:ring-2 focus:ring-lama-detail/30"
             type="password"
             autoComplete="current-password"
             value={password}
@@ -145,7 +147,7 @@ export function EmailPasswordSignInForm() {
             {message}
           </p>
         ) : null}
-        <div id="clerk-captcha" data-cl-theme="light" data-cl-language="es-ES" />
+        <div id="clerk-captcha" data-cl-theme={theme} data-cl-language="es-ES" />
         <button
           className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-lama-detail px-4 py-2 text-sm font-bold text-white hover:bg-lama-ink focus:outline-none focus:ring-2 focus:ring-lama-detail focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70"
           type="submit"
@@ -161,7 +163,7 @@ export function EmailPasswordSignInForm() {
         <span className="h-px flex-1 bg-lama-line" />
       </div>
       <button
-        className="inline-flex w-full items-center justify-center gap-2 rounded-md border border-lama-line bg-white px-4 py-2 text-sm font-bold text-lama-ink hover:bg-lama-cream focus:outline-none focus:ring-2 focus:ring-lama-detail focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70"
+        className="inline-flex w-full items-center justify-center gap-2 rounded-md border border-lama-line bg-lama-card px-4 py-2 text-sm font-bold text-lama-ink hover:bg-lama-cream focus:outline-none focus:ring-2 focus:ring-lama-detail focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70"
         type="button"
         onClick={signInWithGoogle}
         disabled={!isLoaded || isGoogleLoading}

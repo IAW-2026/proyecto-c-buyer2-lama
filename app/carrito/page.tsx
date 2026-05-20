@@ -39,7 +39,7 @@ export default async function CartPage() {
           <p className="font-bold">Necesitas iniciar sesion para ver tu carrito.</p>
           <div className="mt-4 flex flex-wrap gap-2">
             <ButtonLink href="/sign-in">Iniciar sesion</ButtonLink>
-            <ButtonLink href="/sign-up" className="bg-lama-cream text-lama-ink hover:bg-white">
+            <ButtonLink href="/sign-up" className="bg-lama-cream text-lama-ink hover:bg-lama-card">
               Registrarme
             </ButtonLink>
           </div>
