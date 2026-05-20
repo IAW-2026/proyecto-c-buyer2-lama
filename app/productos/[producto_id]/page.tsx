@@ -52,14 +52,19 @@ export default async function ProductPage({
         <div className="space-y-6">
           <ProductImageGallery images={product.imagenes} title={product.titulo} />
 
-          <Card>
-            <div className="flex flex-wrap gap-2">
-              <StatusBadge>{product.estado_prenda}</StatusBadge>
-              <StatusBadge>{product.estado_publicacion}</StatusBadge>
-              <StatusBadge>{category?.nombre ?? product.categoria_id}</StatusBadge>
-            </div>
-            <p className="mt-5 text-lg leading-8">{product.descripcion}</p>
-          </Card>
+          {authContext.userId && authContext.email && hasBuyerRole ? (
+            <CheckoutForm
+              product={product}
+              methods={methods}
+              buyer={{
+                clerk_user_id_comprador: authContext.userId,
+                nombre: buyerProfile?.nombre_comprador ?? authContext.name ?? "",
+                email: authContext.email,
+                DNI: buyerProfile?.DNI ?? "",
+                direccion_envio: buyerProfile?.direccion_envio ?? ""
+              }}
+            />
+          ) : null}
         </div>
 
         <aside className="space-y-5">
@@ -92,21 +97,17 @@ export default async function ProductPage({
             </dl>
           </Card>
 
+          <Card>
+            <div className="flex flex-wrap gap-2">
+              <StatusBadge>{product.estado_prenda}</StatusBadge>
+              <StatusBadge>{product.estado_publicacion}</StatusBadge>
+              <StatusBadge>{category?.nombre ?? product.categoria_id}</StatusBadge>
+            </div>
+            <p className="mt-5 text-base leading-7">{product.descripcion}</p>
+          </Card>
+
           {authContext.userId && authContext.email && hasBuyerRole ? (
-            <>
-              <AddToCartButton product={product} />
-              <CheckoutForm
-                product={product}
-                methods={methods}
-                buyer={{
-                  clerk_user_id_comprador: authContext.userId,
-                  nombre: buyerProfile?.nombre_comprador ?? authContext.name ?? "",
-                  email: authContext.email,
-                  DNI: buyerProfile?.DNI ?? "",
-                  direccion_envio: buyerProfile?.direccion_envio ?? ""
-                }}
-              />
-            </>
+            <AddToCartButton product={product} />
           ) : authContext.userId ? (
             <Card>
               <p className="font-bold">Necesitas rol buyer para comprar o agregar al carrito.</p>

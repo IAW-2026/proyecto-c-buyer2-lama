@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import type { MouseEvent, WheelEvent } from "react";
 import { Maximize2, X, ZoomIn, ZoomOut } from "lucide-react";
 import { clsx } from "clsx";
 
@@ -50,9 +51,15 @@ export function ProductImageGallery({
     setZoomLevel((current) => clampZoom(Number((current + delta).toFixed(2))));
   }
 
-  function handleZoomWheel(event: React.WheelEvent<HTMLDivElement>) {
+  function handleZoomWheel(event: WheelEvent<HTMLDivElement>) {
+    event.stopPropagation();
     event.preventDefault();
     updateZoom(event.deltaY < 0 ? ZOOM_STEP : -ZOOM_STEP);
+  }
+
+  function changeZoomFromButton(event: MouseEvent<HTMLButtonElement>, delta: number) {
+    event.stopPropagation();
+    updateZoom(delta);
   }
 
   if (!selectedImage) {
@@ -105,11 +112,17 @@ export function ProductImageGallery({
           aria-label={`Imagen ampliada de ${title}`}
           onClick={() => setIsZoomOpen(false)}
         >
-          <div className="relative flex max-h-full w-full max-w-5xl flex-col" onClick={(event) => event.stopPropagation()}>
-            <div className="absolute right-3 top-3 z-10 flex gap-2">
+          <div
+            className="relative flex max-h-full w-full max-w-5xl flex-col"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="absolute right-3 top-3 z-10 flex items-center gap-2">
+              <span className="rounded-md bg-lama-card px-3 py-2 text-sm font-bold text-lama-ink shadow-soft">
+                {Math.round(zoomLevel * 100)}%
+              </span>
               <button
                 type="button"
-                onClick={() => updateZoom(-ZOOM_STEP)}
+                onClick={(event) => changeZoomFromButton(event, -ZOOM_STEP)}
                 disabled={zoomLevel <= MIN_ZOOM}
                 className="inline-flex h-10 w-10 items-center justify-center rounded-md bg-lama-card text-lama-ink shadow-soft hover:bg-white focus:outline-none focus:ring-2 focus:ring-lama-detail disabled:cursor-not-allowed disabled:opacity-50"
                 aria-label="Reducir zoom"
@@ -118,7 +131,7 @@ export function ProductImageGallery({
               </button>
               <button
                 type="button"
-                onClick={() => updateZoom(ZOOM_STEP)}
+                onClick={(event) => changeZoomFromButton(event, ZOOM_STEP)}
                 disabled={zoomLevel >= MAX_ZOOM}
                 className="inline-flex h-10 w-10 items-center justify-center rounded-md bg-lama-card text-lama-ink shadow-soft hover:bg-white focus:outline-none focus:ring-2 focus:ring-lama-detail disabled:cursor-not-allowed disabled:opacity-50"
                 aria-label="Aumentar zoom"
@@ -127,7 +140,10 @@ export function ProductImageGallery({
               </button>
               <button
                 type="button"
-                onClick={() => setIsZoomOpen(false)}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  setIsZoomOpen(false);
+                }}
                 className="inline-flex h-10 w-10 items-center justify-center rounded-md bg-lama-card text-lama-ink shadow-soft hover:bg-white focus:outline-none focus:ring-2 focus:ring-lama-detail"
                 aria-label="Cerrar imagen ampliada"
               >
@@ -135,15 +151,20 @@ export function ProductImageGallery({
               </button>
             </div>
             <div
-              onWheel={handleZoomWheel}
-              className="max-h-[88vh] overflow-auto rounded-lg border border-lama-line bg-lama-card shadow-soft"
+              onWheelCapture={handleZoomWheel}
+              className="h-[88vh] max-h-[88vh] overflow-auto rounded-lg border border-lama-line bg-lama-card shadow-soft"
             >
-              <div className="flex min-h-[88vh] min-w-full items-center justify-center">
+              <div
+                className="flex items-center justify-center p-4"
+                style={{
+                  minHeight: `${zoomLevel * 100}%`,
+                  minWidth: `${zoomLevel * 100}%`
+                }}
+              >
                 <img
                   src={selectedImage}
                   alt={title}
-                  className="h-auto max-w-none object-contain"
-                  style={{ width: `${zoomLevel * 100}%` }}
+                  className="max-h-full max-w-full object-contain"
                 />
               </div>
             </div>
