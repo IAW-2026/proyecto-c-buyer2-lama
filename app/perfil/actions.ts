@@ -51,6 +51,7 @@ export async function saveProfile(_state: FormState, formData: FormData): Promis
 export async function savePreferences(_state: FormState, formData: FormData): Promise<FormState> {
   const authContext = await getAuthContext();
   const clerkUserId = String(formData.get("clerk_user_id_comprador") ?? authContext.userId ?? "");
+  const shouldClearPreferences = formData.get("intent") === "clear";
 
   if (!authContext.userId || !canAccessBuyerApp(authContext)) {
     return { ok: false, message: "Necesitas iniciar sesion para guardar preferencias." };
@@ -62,9 +63,9 @@ export async function savePreferences(_state: FormState, formData: FormData): Pr
 
   const parsed = preferencesSchema.safeParse({
     clerk_user_id_comprador: clerkUserId,
-    talles_preferidos: formList(formData, "talles_preferidos"),
-    categorias_preferidas: formList(formData, "categorias_preferidas"),
-    vendedores_preferidos: formList(formData, "vendedores_preferidos")
+    talles_preferidos: shouldClearPreferences ? [] : formList(formData, "talles_preferidos"),
+    categorias_preferidas: shouldClearPreferences ? [] : formList(formData, "categorias_preferidas"),
+    vendedores_preferidos: shouldClearPreferences ? [] : formList(formData, "vendedores_preferidos")
   });
 
   if (!parsed.success) {

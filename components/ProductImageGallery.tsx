@@ -94,14 +94,14 @@ export function ProductImageGallery({
 
   if (!selectedImage) {
     return (
-      <div className="flex aspect-[4/3] w-full max-w-2xl items-center justify-center rounded-lg border border-dashed border-lama-detail/50 bg-lama-card text-sm font-bold text-lama-ink/70 shadow-soft">
+      <div className="flex aspect-[4/3] w-full max-w-xl items-center justify-center rounded-lg border border-dashed border-lama-detail/50 bg-lama-card text-sm font-bold text-lama-ink/70 shadow-soft">
         Sin imagen disponible
       </div>
     );
   }
 
   return (
-    <section aria-label={`Imagenes de ${title}`} className="w-full max-w-2xl">
+    <section aria-label={`Imagenes de ${title}`} className="w-full max-w-xl">
       <div className="relative">
         <button
           type="button"
@@ -145,7 +145,7 @@ export function ProductImageGallery({
               type="button"
               onClick={() => selectImage(index)}
               className={clsx(
-                "relative h-16 w-16 shrink-0 overflow-hidden rounded-md border bg-lama-card focus:outline-none focus:ring-2 focus:ring-lama-detail focus:ring-offset-2 sm:h-20 sm:w-20",
+                "relative h-14 w-14 shrink-0 overflow-hidden rounded-md border bg-lama-card focus:outline-none focus:ring-2 focus:ring-lama-detail focus:ring-offset-2 sm:h-16 sm:w-16",
                 selectedIndex === index ? "border-lama-detail ring-2 ring-lama-detail" : "border-lama-line"
               )}
               aria-label={`Seleccionar imagen ${index + 1} de ${galleryImages.length}`}
