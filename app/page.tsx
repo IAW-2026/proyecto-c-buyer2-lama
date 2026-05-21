@@ -59,7 +59,16 @@ export default async function Home({
   return (
     <PageShell title="Comprar ropa usada y vintage">
       <div className="mb-6">
-        <SearchBar search={params.search} categoria={params.categoria} talle={params.talle} sort={sort} />
+        <SearchBar
+          search={params.search}
+          categoria={params.categoria}
+          talle={params.talle}
+          sort={sort}
+          categoryOptions={catalog.categorias.map((category) => ({
+            id: category.categoria_producto_id,
+            label: category.nombre
+          }))}
+        />
       </div>
 
       {personalizedCatalog?.personalizedItems.length ? (
