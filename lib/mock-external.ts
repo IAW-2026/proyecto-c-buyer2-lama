@@ -7,6 +7,8 @@ type CreateOrderInput = {
   direccionEnvio: string;
 };
 
+export type ProductSort = "price_asc" | "price_desc" | "recent";
+
 const globalForMockExternal = globalThis as unknown as {
   lamaOrders?: SalesOrder[];
 };
@@ -164,7 +166,7 @@ export const products: Product[] = [
   },
   {
     producto_id: "prod_007",
-    clerk_user_id_vendedor: "user_seller_lama_003",
+    clerk_user_id_vendedor: "user_seller_lama_001",
     categoria_id: "cat_zapatillas",
     imagenes: ["/products/zapatillas.webp", "/products/zapatillas2.webp"],
     titulo: "Zapatillas negras",
@@ -178,7 +180,7 @@ export const products: Product[] = [
   },
   {
     producto_id: "prod_008",
-    clerk_user_id_vendedor: "user_seller_lama_002",
+    clerk_user_id_vendedor: "user_seller_lama_003",
     categoria_id: "cat_carteras",
     imagenes: ["/products/cartera.jpg", "/products/cartera2.jpg"],
     titulo: "Cartera de cuero",
@@ -189,6 +191,34 @@ export const products: Product[] = [
     marca: "Prune",
     estado_publicacion: "activa",
     fecha_creacion: "2026-04-28T09:10:00.000Z"
+  },
+    {
+    producto_id: "prod_009",
+    clerk_user_id_vendedor: "user_seller_lama_001",
+    categoria_id: "cat_zapatillas",
+    imagenes: ["/products/zapatillas.webp", "/products/zapatillas2.webp"],
+    titulo: "Zapatillas negras",
+    descripcion: "Zapatillas deportivas en buen estado.",
+    precio: 28500,
+    estado_prenda: "nuevo",
+    talle: "38",
+    marca: "Adidas",
+    estado_publicacion: "activa",
+    fecha_creacion: "2026-05-04T13:20:00.000Z"
+  },
+    {
+    producto_id: "prod_010",
+    clerk_user_id_vendedor: "user_seller_lama_002",
+    categoria_id: "cat_pantalones",
+    imagenes: ["/products/pantalon_cargo.jpg","/products/pantalon_cargo_back.jpg", "/products/pantalon_cargo_lado.jpg"],
+    titulo: "Pantalon cargo verde",
+    descripcion: "Pantalon cargo con bolsillos laterales y cintura regulable.",
+    precio: 31900,
+    estado_prenda: "nuevo",
+    talle: "M",
+    marca: "Complot",
+    estado_publicacion: "activa",
+    fecha_creacion: "2026-05-06T18:00:00.000Z"
   }
 ];
 
@@ -246,6 +276,30 @@ function getFilteredProducts({
   });
 }
 
+export function normalizeProductSort(sort?: string | null): ProductSort {
+  if (sort === "price_asc" || sort === "price_desc" || sort === "recent") {
+    return sort;
+  }
+
+  return "recent";
+}
+
+function sortProducts(items: Product[], sort?: string | null) {
+  const normalizedSort = normalizeProductSort(sort);
+
+  return [...items].sort((a, b) => {
+    if (normalizedSort === "price_asc") {
+      return a.precio - b.precio;
+    }
+
+    if (normalizedSort === "price_desc") {
+      return b.precio - a.precio;
+    }
+
+    return new Date(b.fecha_creacion).getTime() - new Date(a.fecha_creacion).getTime();
+  });
+}
+
 export function hasBuyerPreferences(preferences?: BuyerPreferences | null): preferences is BuyerPreferences {
   return Boolean(
     preferences &&
@@ -295,12 +349,14 @@ export function getCatalogProducts({
   search = "",
   categoria,
   talle,
+  sort = "recent",
   page = 1,
   pageSize = 8
 }: {
   search?: string;
   categoria?: string | null;
   talle?: string | null;
+  sort?: ProductSort | string | null;
   page?: number;
   pageSize?: number;
 }) {
@@ -308,10 +364,11 @@ export function getCatalogProducts({
   const normalizedPage = Math.max(page, 1);
   const normalizedPageSize = Math.min(Math.max(pageSize, 1), 20);
   const filtered = getFilteredProducts({ search: normalizedSearch, categoria, talle });
+  const sorted = sortProducts(filtered, sort);
 
   return {
-    items: filtered.slice((normalizedPage - 1) * normalizedPageSize, normalizedPage * normalizedPageSize),
-    total: filtered.length,
+    items: sorted.slice((normalizedPage - 1) * normalizedPageSize, normalizedPage * normalizedPageSize),
+    total: sorted.length,
     page: normalizedPage,
     pageSize: normalizedPageSize,
     categorias: categories,

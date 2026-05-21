@@ -7,7 +7,8 @@ import { getBuyer } from "@/lib/buyer-store";
 import {
   getCatalogProducts,
   getPersonalizedCatalogProducts,
-  hasBuyerPreferences
+  hasBuyerPreferences,
+  normalizeProductSort
 } from "@/lib/mock-external";
 import type { Product } from "@/lib/types";
 
@@ -33,12 +34,16 @@ export default async function Home({
   const buyer =
     authContext.userId && canAccessBuyerApp(authContext) ? await getBuyer(authContext.userId) : null;
   const preferences = buyer?.preferencias;
-  const hasActiveCatalogFilters = Boolean(params.search?.trim() || params.categoria || params.talle);
+  const sort = normalizeProductSort(params.sort);
+  const hasActiveCatalogFilters = Boolean(
+    params.search?.trim() || params.categoria || params.talle || sort !== "recent"
+  );
   const shouldPersonalize = !hasActiveCatalogFilters && hasBuyerPreferences(preferences);
   const catalog = getCatalogProducts({
     search: params.search,
     categoria: params.categoria,
     talle: params.talle,
+    sort,
     page,
     pageSize: 8
   });
@@ -54,7 +59,7 @@ export default async function Home({
   return (
     <PageShell title="Comprar ropa usada y vintage">
       <div className="mb-6">
-        <SearchBar search={params.search} categoria={params.categoria} talle={params.talle} />
+        <SearchBar search={params.search} categoria={params.categoria} talle={params.talle} sort={sort} />
       </div>
 
       {personalizedCatalog?.personalizedItems.length ? (
