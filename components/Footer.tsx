@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Instagram, Mail, MapPin, Youtube } from "lucide-react";
+import { Instagram, Mail, MapPin} from "lucide-react";
 
 const footerSections = [
   {
@@ -83,7 +83,6 @@ export function Footer() {
             className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-stone-700 text-neutral-950 hover:bg-white focus:outline-none focus:ring-2 focus:ring-white"
             aria-label="YouTube de Lama"
           >
-            <Youtube className="h-5 w-5" aria-hidden="true" />
           </a>
         </section>
       </div>

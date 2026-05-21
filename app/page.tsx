@@ -40,7 +40,7 @@ export default async function Home({
     categoria: params.categoria,
     talle: params.talle,
     page,
-    pageSize: 6
+    pageSize: 8
   });
   const personalizedCatalog = shouldPersonalize
     ? getPersonalizedCatalogProducts({

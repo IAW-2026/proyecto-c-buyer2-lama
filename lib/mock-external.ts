@@ -70,7 +70,7 @@ export const products: Product[] = [
     producto_id: "prod_001",
     clerk_user_id_vendedor: "user_seller_lama_001",
     categoria_id: "cat_camperas",
-    imagenes: ["/products/campera-denim.svg"],
+    imagenes: ["/products/campera_denim.webp"],
     titulo: "Campera denim vintage",
     descripcion: "Campera de jean celeste con corte clasico, sin roturas y con botones originales.",
     precio: 38500,
