@@ -11,11 +11,22 @@ export function ThemeToggle() {
     <button
       type="button"
       onClick={toggleTheme}
-      className="inline-flex h-10 w-10 items-center justify-center rounded-md hover:bg-lama-cream/65 focus:outline-none focus:ring-2 focus:ring-lama-ink"
+      className="relative inline-flex h-9 w-9 items-center justify-center overflow-hidden rounded-lg text-white/70 transition hover:bg-white/10 hover:text-white focus:outline-none focus:ring-1 focus:ring-white/30"
       aria-label={isDark ? "Usar tema claro" : "Usar tema oscuro"}
       title={isDark ? "Usar tema claro" : "Usar tema oscuro"}
     >
-      {isDark ? <Sun className="h-4 w-4" aria-hidden="true" /> : <Moon className="h-4 w-4" aria-hidden="true" />}
+      <Sun
+        className={`h-[18px] w-[18px] transition-all duration-300 ${
+          isDark ? "rotate-0 scale-100 opacity-100" : "rotate-90 scale-0 opacity-0"
+        }`}
+        aria-hidden="true"
+      />
+      <Moon
+        className={`absolute h-[18px] w-[18px] transition-all duration-300 ${
+          isDark ? "-rotate-90 scale-0 opacity-0" : "rotate-0 scale-100 opacity-100"
+        }`}
+        aria-hidden="true"
+      />
     </button>
   );
 }

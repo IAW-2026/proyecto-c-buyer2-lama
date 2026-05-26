@@ -6,14 +6,17 @@ import { Providers } from "@/app/providers";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "lama Buyer App",
-  description: "Buyer App aislada para marketplace de ropa usada y vintage."
+  title: "LAMA — Marketplace de Moda Circular",
+  description:
+    "Comprá y vendé moda con historia. LAMA es el marketplace premium de ropa vintage y de segunda mano en Argentina."
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="es" suppressHydrationWarning>
       <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -28,7 +31,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           }}
         />
       </head>
-      <body>
+      <body className="font-sans antialiased">
         <Providers>
           <div className="flex min-h-screen flex-col">
             <Header />

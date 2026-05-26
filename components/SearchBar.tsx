@@ -25,21 +25,21 @@ export function SearchBar({
   const clearFiltersHref = sort && sort !== "recent" ? `/?sort=${sort}` : "/";
 
   return (
-    <div className="flex flex-col gap-3 lg:flex-row lg:items-start">
-      <form className="grid gap-3 rounded-lg border border-lama-line bg-lama-card p-4 shadow-soft md:grid-cols-[minmax(260px,1fr)_150px_120px_auto_auto] md:items-center lg:basis-3/4">
+    <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
+      <form className="grid gap-3 rounded-2xl border border-lama-line bg-lama-card p-4 shadow-soft sm:p-5 md:grid-cols-[minmax(260px,1fr)_150px_120px_auto_auto] md:items-center lg:basis-3/4">
         {sort && sort !== "recent" ? <input type="hidden" name="sort" value={sort} /> : null}
 
         <label className="sr-only" htmlFor="search">
           Buscar producto
         </label>
-        <div className="relative h-10">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-lama-detail" />
+        <div className="relative h-11">
+          <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-lama-detail" />
           <input
             id="search"
             name="search"
             defaultValue={search}
             placeholder="Buscar por prenda, marca o vendedor"
-            className="h-10 w-full rounded-md border border-lama-line bg-lama-cream pl-10 pr-3 text-sm outline-none focus:ring-2 focus:ring-lama-detail"
+            className="h-11 w-full rounded-xl border border-lama-line bg-lama-cream pl-10 pr-4 text-sm outline-none transition-all focus:border-lama-detail/50 focus:ring-2 focus:ring-lama-detail/20"
           />
         </div>
 
@@ -50,7 +50,7 @@ export function SearchBar({
           id="categoria"
           name="categoria"
           defaultValue={categoria ?? ""}
-          className="h-10 rounded-md border border-lama-line bg-lama-cream px-3 text-sm outline-none focus:ring-2 focus:ring-lama-detail"
+          className="h-11 rounded-xl border border-lama-line bg-lama-cream px-3 text-sm outline-none transition-all focus:border-lama-detail/50 focus:ring-2 focus:ring-lama-detail/20"
         >
           <option value="">Todas</option>
           {categoryOptions.map((category) => (
@@ -67,7 +67,7 @@ export function SearchBar({
           id="talle"
           name="talle"
           defaultValue={talle ?? ""}
-          className="h-10 rounded-md border border-lama-line bg-lama-cream px-3 text-sm outline-none focus:ring-2 focus:ring-lama-detail"
+          className="h-11 rounded-xl border border-lama-line bg-lama-cream px-3 text-sm outline-none transition-all focus:border-lama-detail/50 focus:ring-2 focus:ring-lama-detail/20"
         >
           <option value="">Talles</option>
           {["XS", "S", "M", "L", "XL", "36", "37", "38", "39"].map((size) => (
@@ -77,20 +77,20 @@ export function SearchBar({
           ))}
         </select>
 
-        <button className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-lama-detail px-4 text-sm font-bold text-white hover:bg-lama-ink focus:outline-none focus:ring-2 focus:ring-lama-detail focus:ring-offset-2">
+        <button className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-lama-detail px-5 text-sm font-bold text-white transition-all hover:bg-lama-ink hover:shadow-md focus:outline-none focus:ring-2 focus:ring-lama-detail focus:ring-offset-2">
           <Search className="h-4 w-4" aria-hidden="true" />
           Buscar
         </button>
         <Link
           href={clearFiltersHref}
-          className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-lama-cream px-4 text-sm font-bold text-lama-ink hover:bg-lama-line focus:outline-none focus:ring-2 focus:ring-lama-detail focus:ring-offset-2"
+          className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-lama-line bg-lama-cream px-5 text-sm font-bold text-lama-ink transition-all hover:border-lama-detail/40 hover:bg-lama-card focus:outline-none focus:ring-2 focus:ring-lama-detail focus:ring-offset-2"
         >
           <X className="h-4 w-4" aria-hidden="true" />
-          Limpiar filtros
+          Limpiar
         </Link>
       </form>
 
-      <form className="flex flex-col gap-3 rounded-lg border border-lama-line bg-lama-card p-4 shadow-soft lg:flex-1">
+      <form className="flex flex-col gap-3 rounded-2xl border border-lama-line bg-lama-card p-4 shadow-soft sm:p-5 lg:flex-1">
         {search ? <input type="hidden" name="search" value={search} /> : null}
         {categoria ? <input type="hidden" name="categoria" value={categoria} /> : null}
         {talle ? <input type="hidden" name="talle" value={talle} /> : null}
@@ -102,7 +102,7 @@ export function SearchBar({
           name="sort"
           defaultValue={sort ?? "recent"}
           onChange={(event) => event.currentTarget.form?.requestSubmit()}
-          className="h-10 rounded-md border border-lama-line bg-lama-cream px-3 text-sm outline-none focus:ring-2 focus:ring-lama-detail"
+          className="h-11 rounded-xl border border-lama-line bg-lama-cream px-3 text-sm outline-none transition-all focus:border-lama-detail/50 focus:ring-2 focus:ring-lama-detail/20"
         >
           <option value="price_asc">Precio más bajo</option>
           <option value="price_desc">Precio más alto</option>

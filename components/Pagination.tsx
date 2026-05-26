@@ -26,15 +26,15 @@ export function Pagination({
   const totalPages = Math.max(Math.ceil(total / pageSize), 1);
 
   return (
-    <nav className="mt-6 flex items-center justify-between" aria-label="Paginacion">
-      <p className="text-sm text-lama-ink/70">
-        Pagina {page} de {totalPages} · {total} resultados
+    <nav className="mt-8 flex items-center justify-between" aria-label="Paginacion">
+      <p className="text-sm text-lama-ink/60">
+        Página {page} de {totalPages} · {total} resultados
       </p>
       <div className="flex gap-2">
         <Link
           aria-disabled={page <= 1}
           href={buildHref(searchParams, Math.max(page - 1, 1))}
-          className="inline-flex items-center gap-2 rounded-md border border-lama-detail px-3 py-2 text-sm font-bold aria-disabled:pointer-events-none aria-disabled:opacity-40"
+          className="inline-flex items-center gap-2 rounded-xl border border-lama-line px-4 py-2.5 text-sm font-bold transition-all hover:border-lama-detail/50 hover:bg-lama-card aria-disabled:pointer-events-none aria-disabled:opacity-40"
         >
           <ChevronLeft className="h-4 w-4" aria-hidden="true" />
           Anterior
@@ -42,7 +42,7 @@ export function Pagination({
         <Link
           aria-disabled={page >= totalPages}
           href={buildHref(searchParams, Math.min(page + 1, totalPages))}
-          className="inline-flex items-center gap-2 rounded-md border border-lama-detail px-3 py-2 text-sm font-bold aria-disabled:pointer-events-none aria-disabled:opacity-40"
+          className="inline-flex items-center gap-2 rounded-xl border border-lama-line px-4 py-2.5 text-sm font-bold transition-all hover:border-lama-detail/50 hover:bg-lama-card aria-disabled:pointer-events-none aria-disabled:opacity-40"
         >
           Siguiente
           <ChevronRight className="h-4 w-4" aria-hidden="true" />
@@ -51,4 +51,3 @@ export function Pagination({
     </nav>
   );
 }
-
