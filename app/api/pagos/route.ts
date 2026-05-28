@@ -11,7 +11,7 @@ export async function POST(request: Request) {
   }
 
   if (!canAccessBuyerApp(authContext)) {
-    return NextResponse.json({ error: "Necesitas rol buyer para pagar." }, { status: 403 });
+    return NextResponse.json({ error: "Necesitas rol comprador para pagar." }, { status: 403 });
   }
 
   const body = await request.json().catch(() => null);

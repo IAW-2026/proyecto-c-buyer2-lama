@@ -31,7 +31,7 @@ export default async function ProfilePage() {
     return (
       <PageShell title="Mi Perfil" eyebrow="Acceso">
         <Card>
-          <p className="font-bold">Necesitas iniciar sesion con rol buyer.</p>
+          <p className="font-bold">Necesitas iniciar sesion con rol comprador.</p>
         </Card>
       </PageShell>
     );

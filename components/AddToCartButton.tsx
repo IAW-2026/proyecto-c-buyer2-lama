@@ -28,6 +28,11 @@ export function AddToCartButton({ product }: { product: Product }) {
   const [message, setMessage] = useState<string | null>(null);
 
   function addToCart() {
+    if (product.estado_publicacion !== "activa") {
+      setMessage("Este producto ya no se encuentra disponible");
+      return;
+    }
+
     const cart = readCart();
     const productAlreadyExists = cart.some((item) => item.producto_id === product.producto_id);
     const cartSellerId = cart[0]?.clerk_user_id_vendedor;

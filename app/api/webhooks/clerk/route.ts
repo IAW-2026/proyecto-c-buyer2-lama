@@ -2,7 +2,7 @@ import { verifyWebhook } from "@clerk/nextjs/webhooks";
 import type { UserJSON } from "@clerk/nextjs/server";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import { assignBuyerRoleIfUnassigned, getRolesFromMetadata, hasBuyerAccess } from "@/lib/auth";
+import { ensureCompradorRole, getRolesFromMetadata, hasBuyerAccess } from "@/lib/auth";
 import { ensureBuyerRegistration } from "@/lib/buyer-store";
 import { prisma } from "@/lib/prisma";
 
@@ -31,12 +31,12 @@ export async function POST(request: NextRequest) {
       const user = event.data as UserJSON;
       let roles = getRolesFromMetadata(user.public_metadata);
 
-      if (roles.length === 0 && isBuyerAppSignup(user)) {
-        roles = await assignBuyerRoleIfUnassigned(user.id);
+      if (isBuyerAppSignup(user)) {
+        roles = await ensureCompradorRole(user.id);
       }
 
       if (!hasBuyerAccess(roles)) {
-        return NextResponse.json({ ok: true, skipped: "El usuario no tiene rol buyer." });
+        return NextResponse.json({ ok: true, skipped: "El usuario no tiene rol comprador." });
       }
 
       const email = getPrimaryEmail(user);

@@ -10,8 +10,7 @@ import {
   getCatalogProducts,
   getPersonalizedCatalogProducts,
   hasBuyerPreferences,
-  normalizeProductSort,
-  products
+  normalizeProductSort
 } from "@/lib/mock-external";
 import type { Product } from "@/lib/types";
 import {
@@ -66,11 +65,10 @@ export default async function Home({
     : null;
   const visibleCatalog = personalizedCatalog ?? catalog;
   const categoryTiles = catalog.categorias.map((category) => {
-    const categoryProduct = products.find(
-      (product) =>
-        product.categoria_id === category.categoria_producto_id &&
-        product.estado_publicacion === "activa"
-    );
+    const categoryProduct = getCatalogProducts({
+      categoria: category.categoria_producto_id,
+      pageSize: 1
+    }).items[0];
 
     return {
       ...category,

@@ -225,6 +225,28 @@ export const products: Product[] = [
 const orders = globalForMockExternal.lamaOrders ?? [];
 globalForMockExternal.lamaOrders = orders;
 
+function getSoldProductIds() {
+  return new Set(
+    orders
+      .filter((order) => order.estado_general === "pagada")
+      .flatMap((order) => order.producto_ids)
+  );
+}
+
+function withCalculatedPublicationStatus(product: Product) {
+  if (product.estado_publicacion !== "activa") {
+    return product;
+  }
+
+  return getSoldProductIds().has(product.producto_id)
+    ? { ...product, estado_publicacion: "vendida" as const }
+    : product;
+}
+
+function isActiveProduct(product: Product) {
+  return withCalculatedPublicationStatus(product).estado_publicacion === "activa";
+}
+
 export const paymentMethods: PaymentMethod[] = [
   {
     metodo_pago_id: "mp_mercadopago_wallet",
@@ -247,7 +269,8 @@ export const paymentMethods: PaymentMethod[] = [
 ];
 
 export function getProductById(productId: string) {
-  return products.find((product) => product.producto_id === productId);
+  const product = products.find((item) => item.producto_id === productId);
+  return product ? withCalculatedPublicationStatus(product) : undefined;
 }
 
 function getFilteredProducts({
@@ -272,7 +295,7 @@ function getFilteredProducts({
     const matchesCategory = categoria ? product.categoria_id === categoria : true;
     const matchesSize = talle ? product.talle === talle : true;
 
-    return product.estado_publicacion === "activa" && matchesSearch && matchesCategory && matchesSize;
+    return isActiveProduct(product) && matchesSearch && matchesCategory && matchesSize;
   });
 }
 

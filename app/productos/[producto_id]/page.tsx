@@ -36,6 +36,7 @@ export default async function ProductPage({
   const buyerProfile = authContext.userId && hasBuyerRole ? await getBuyer(authContext.userId) : null;
   const seller = sellers.find((item) => item.clerk_user_id_vendedor === product.clerk_user_id_vendedor);
   const category = categories.find((item) => item.categoria_producto_id === product.categoria_id);
+  const isProductAvailable = product.estado_publicacion === "activa";
 
   return (
     <PageShell
@@ -52,7 +53,7 @@ export default async function ProductPage({
         <div className="space-y-4">
           <ProductImageGallery images={product.imagenes} title={product.titulo} />
 
-          {authContext.userId && authContext.email && hasBuyerRole ? (
+          {isProductAvailable && authContext.userId && authContext.email && hasBuyerRole ? (
             <CheckoutForm
               product={product}
               methods={methods}
@@ -99,16 +100,21 @@ export default async function ProductPage({
 
           <Card>
             <div className="flex flex-wrap gap-2">
+              <StatusBadge>{product.estado_publicacion}</StatusBadge>
               <StatusBadge>{product.estado_prenda}</StatusBadge>
             </div>
             <p className="mt-5 text-base leading-7">{product.descripcion}</p>
           </Card>
 
-          {authContext.userId && authContext.email && hasBuyerRole ? (
+          {!isProductAvailable ? (
+            <Card>
+              <p className="font-bold">Este producto ya fue vendido y no se puede comprar.</p>
+            </Card>
+          ) : authContext.userId && authContext.email && hasBuyerRole ? (
             <AddToCartButton product={product} />
           ) : authContext.userId ? (
             <Card>
-              <p className="font-bold">Necesitas rol buyer para comprar o agregar al carrito.</p>
+              <p className="font-bold">Necesitas rol comprador para comprar o agregar al carrito.</p>
             </Card>
           ) : (
             <Card>

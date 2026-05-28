@@ -11,7 +11,7 @@ export async function GET() {
   }
 
   if (!canAccessBuyerApp(authContext)) {
-    return NextResponse.json({ error: "Necesitas rol buyer para ver tus compras." }, { status: 403 });
+    return NextResponse.json({ error: "Necesitas rol comprador para ver tus compras." }, { status: 403 });
   }
 
   const orders = await getSalesOrdersForBuyer(authContext.userId);

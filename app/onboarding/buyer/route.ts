@@ -1,6 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import { assignBuyerRoleIfUnassigned } from "@/lib/auth";
+import { ensureCompradorRole } from "@/lib/auth";
 
 export async function GET() {
   const { userId } = await auth();
@@ -9,6 +9,6 @@ export async function GET() {
     redirect("/sign-in");
   }
 
-  await assignBuyerRoleIfUnassigned(userId);
+  await ensureCompradorRole(userId);
   redirect("/perfil");
 }

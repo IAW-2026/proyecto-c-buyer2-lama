@@ -1,6 +1,6 @@
 import { auth, clerkClient, currentUser } from "@clerk/nextjs/server";
 
-export const BUYER_ROLE = "buyer";
+export const COMPRADOR_ROLE = "comprador";
 export const SUPER_ADMIN_ROLE = "super_admin";
 
 export type AuthContext = {
@@ -42,20 +42,20 @@ export function getRolesFromMetadata(metadata: unknown) {
 }
 
 export function hasBuyerAccess(roles: string[]) {
-  return roles.includes(BUYER_ROLE);
+  return roles.includes(COMPRADOR_ROLE) && !roles.includes(SUPER_ADMIN_ROLE);
 }
 
-export async function assignBuyerRoleIfUnassigned(userId: string) {
+export async function ensureCompradorRole(userId: string) {
   const client = await clerkClient();
   const user = await client.users.getUser(userId);
   const publicMetadata = metadataObject(user.publicMetadata);
   const currentRoles = getRolesFromMetadata(publicMetadata);
 
-  if (currentRoles.length > 0) {
+  if (currentRoles.includes(SUPER_ADMIN_ROLE) || currentRoles.includes(COMPRADOR_ROLE)) {
     return currentRoles;
   }
 
-  const roles = [BUYER_ROLE];
+  const roles = [...currentRoles, COMPRADOR_ROLE];
 
   await client.users.updateUserMetadata(userId, {
     publicMetadata: {
@@ -85,14 +85,15 @@ export async function getAuthContext(): Promise<AuthContext> {
       validEmail(user?.primaryEmailAddress?.emailAddress) ??
       validEmail(user?.emailAddresses[0]?.emailAddress);
     const name = user?.fullName ?? user?.username ?? null;
-    const roles = normalizeRoles(claims?.roles);
+    const sessionRoles = normalizeRoles(claims?.roles);
     const metadataRoles = getRolesFromMetadata(user?.publicMetadata);
+    const roles = normalizeRoles([...sessionRoles, ...metadataRoles]);
 
     return {
       userId: session.userId,
       email,
       name,
-      roles: roles.length > 0 ? roles : metadataRoles
+      roles
     };
   } catch {
     return { userId: null, email: null, name: null, roles: [] };
