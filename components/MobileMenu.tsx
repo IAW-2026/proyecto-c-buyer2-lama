@@ -54,7 +54,7 @@ export function MobileMenu({ categories }: { categories: Category[] }) {
                 <ChevronRight className="h-4 w-4 text-white/40" aria-hidden="true" />
               </Link>
               <Link
-                href="/#catalogo"
+                href="/productos"
                 onClick={() => setOpen(false)}
                 className="flex items-center justify-between rounded-xl px-4 py-3.5 text-lg font-semibold transition hover:bg-white/10"
               >
@@ -88,7 +88,7 @@ export function MobileMenu({ categories }: { categories: Category[] }) {
                 {categories.map((category) => (
                   <Link
                     key={category.categoria_producto_id}
-                    href={`/?categoria=${category.categoria_producto_id}`}
+                    href={`/productos?categoria=${category.categoria_producto_id}`}
                     onClick={() => setOpen(false)}
                     className="flex items-center justify-between rounded-xl px-4 py-3 text-base font-medium text-white/75 transition hover:bg-white/10 hover:text-white"
                   >

@@ -22,11 +22,11 @@ export function SearchBar({
   sort?: ProductSort;
   categoryOptions: Option[];
 }) {
-  const clearFiltersHref = sort && sort !== "recent" ? `/?sort=${sort}` : "/";
+  const clearFiltersHref = sort && sort !== "recent" ? `/productos?sort=${sort}` : "/productos";
 
   return (
     <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
-      <form className="grid gap-3 rounded-2xl border border-lama-line bg-lama-card p-4 shadow-soft sm:p-5 md:grid-cols-[minmax(260px,1fr)_150px_120px_auto_auto] md:items-center lg:basis-3/4">
+      <form action="/productos" className="grid gap-3 rounded-2xl border border-lama-line bg-lama-card p-4 shadow-soft sm:p-5 md:grid-cols-[minmax(260px,1fr)_150px_120px_auto_auto] md:items-center lg:basis-3/4">
         {sort && sort !== "recent" ? <input type="hidden" name="sort" value={sort} /> : null}
 
         <label className="sr-only" htmlFor="search">
@@ -90,7 +90,7 @@ export function SearchBar({
         </Link>
       </form>
 
-      <form className="flex flex-col gap-3 rounded-2xl border border-lama-line bg-lama-card p-4 shadow-soft sm:p-5 lg:flex-1">
+      <form action="/productos" className="flex flex-col gap-3 rounded-2xl border border-lama-line bg-lama-card p-4 shadow-soft sm:p-5 lg:flex-1">
         {search ? <input type="hidden" name="search" value={search} /> : null}
         {categoria ? <input type="hidden" name="categoria" value={categoria} /> : null}
         {talle ? <input type="hidden" name="talle" value={talle} /> : null}

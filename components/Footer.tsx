@@ -5,7 +5,7 @@ const footerSections = [
   {
     title: "Comprar",
     links: [
-      { label: "Buscar productos", href: "/" },
+      { label: "Buscar productos", href: "/productos" },
       { label: "Mi carrito", href: "/carrito" },
       { label: "Mis compras", href: "/compras" }
     ]
@@ -29,9 +29,9 @@ const footerSections = [
   {
     title: "Novedades Lama",
     links: [
-      { label: "Camperas", href: "/?categoria=cat_camperas" },
-      { label: "Vestidos", href: "/?categoria=cat_vestidos" },
-      { label: "Pantalones", href: "/?categoria=cat_pantalones" }
+      { label: "Camperas", href: "/productos?categoria=cat_camperas" },
+      { label: "Vestidos", href: "/productos?categoria=cat_vestidos" },
+      { label: "Pantalones", href: "/productos?categoria=cat_pantalones" }
     ]
   }
 ];

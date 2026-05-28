@@ -1,24 +1,20 @@
 import { ProductCard } from "@/components/ProductCard";
-import { SearchBar } from "@/components/SearchBar";
-import { Pagination } from "@/components/Pagination";
 import { DashboardPreview } from "@/components/DashboardPreview";
-import { EmptyState } from "@/components/ui";
 import Link from "next/link";
 import { canAccessBuyerApp, getAuthContext } from "@/lib/auth";
 import { getBuyer } from "@/lib/buyer-store";
 import {
   getCatalogProducts,
   getPersonalizedCatalogProducts,
-  hasBuyerPreferences,
-  normalizeProductSort
+  hasBuyerPreferences
 } from "@/lib/mock-external";
 import type { Product } from "@/lib/types";
 import {
   ChevronDown,
-  Sparkles,
-  Users,
   Recycle,
-  ShoppingBag
+  ShoppingBag,
+  Sparkles,
+  Users
 } from "lucide-react";
 
 function ProductGrid({ products }: { products: Product[] }) {
@@ -31,39 +27,18 @@ function ProductGrid({ products }: { products: Product[] }) {
   );
 }
 
-export default async function Home({
-  searchParams
-}: {
-  searchParams: Promise<Record<string, string | undefined>>;
-}) {
-  const params = await searchParams;
-  const requestedPage = Number(params.page ?? 1);
-  const page = Number.isFinite(requestedPage) ? requestedPage : 1;
+export default async function Home() {
   const authContext = await getAuthContext();
   const buyer =
     authContext.userId && canAccessBuyerApp(authContext) ? await getBuyer(authContext.userId) : null;
   const preferences = buyer?.preferencias;
-  const sort = normalizeProductSort(params.sort);
-  const hasActiveCatalogFilters = Boolean(
-    params.search?.trim() || params.categoria || params.talle || sort !== "recent"
-  );
-  const shouldPersonalize = !hasActiveCatalogFilters && hasBuyerPreferences(preferences);
-  const catalog = getCatalogProducts({
-    search: params.search,
-    categoria: params.categoria,
-    talle: params.talle,
-    sort,
-    page,
-    pageSize: 8
-  });
-  const personalizedCatalog = shouldPersonalize
+  const catalog = getCatalogProducts({ pageSize: 8 });
+  const personalizedCatalog = hasBuyerPreferences(preferences)
     ? getPersonalizedCatalogProducts({
         preferences,
-        page,
         pageSize: 6
       })
     : null;
-  const visibleCatalog = personalizedCatalog ?? catalog;
   const categoryTiles = catalog.categorias.map((category) => {
     const categoryProduct = getCatalogProducts({
       categoria: category.categoria_producto_id,
@@ -78,24 +53,18 @@ export default async function Home({
 
   return (
     <div>
-      {/* ═══════════════════════════════════════════════════════════════
-          HERO SECTION — Editorial fashion impact
-          ═══════════════════════════════════════════════════════════════ */}
       <section className="relative flex min-h-[85vh] items-end overflow-hidden sm:min-h-[90vh]">
-        {/* Background image */}
         <img
           src="/products/campera_denim.webp"
           alt=""
           className="absolute inset-0 h-full w-full object-cover"
           aria-hidden="true"
         />
-        {/* Overlay gradient */}
         <div
           className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20"
           aria-hidden="true"
         />
 
-        {/* Content */}
         <div className="relative z-10 mx-auto w-full max-w-7xl px-4 pb-16 pt-32 sm:px-6 sm:pb-24 lg:px-8">
           <div className="max-w-2xl">
             <p
@@ -108,7 +77,7 @@ export default async function Home({
               className="font-display text-5xl font-bold leading-[1.05] text-white drop-shadow-lg sm:text-7xl lg:text-8xl"
               style={{ animationDelay: "0.2s", animationFillMode: "both" }}
             >
-              Comprá moda
+              Compra moda
               <br />
               <span className="italic">con historia</span>
             </h1>
@@ -116,31 +85,31 @@ export default async function Home({
               className="mt-5 max-w-lg text-base leading-relaxed text-white/70 sm:mt-6 sm:text-lg"
               style={{ animationDelay: "0.4s", animationFillMode: "both" }}
             >
-              Descubrí prendas únicas de segunda mano, seleccionadas por la comunidad.
+              Descubri prendas unicas de segunda mano, seleccionadas por la comunidad.
               Moda circular, sustentable y con personalidad.
             </p>
 
-            {/* CTAs */}
             <div
               className="mt-8 flex flex-wrap gap-3 sm:mt-10 sm:gap-4"
               style={{ animationDelay: "0.5s", animationFillMode: "both" }}
             >
+              {!authContext.userId ? (
+                <Link
+                  href="/sign-in"
+                  className="group inline-flex items-center gap-2 rounded-full bg-white px-7 py-3.5 text-sm font-bold text-lama-ink transition-all duration-300 hover:bg-lama-cream hover:shadow-lg hover:shadow-white/10 sm:px-8 sm:py-4 sm:text-base"
+                >
+                  Comenzar ahora
+                  <ShoppingBag className="h-4 w-4 transition-transform group-hover:scale-110" aria-hidden="true" />
+                </Link>
+              ) : null}
               <Link
-                href="#catalogo"
-                className="group inline-flex items-center gap-2 rounded-full bg-white px-7 py-3.5 text-sm font-bold text-lama-ink transition-all duration-300 hover:bg-lama-cream hover:shadow-lg hover:shadow-white/10 sm:px-8 sm:py-4 sm:text-base"
-              >
-                Comenzar ahora
-                <ShoppingBag className="h-4 w-4 transition-transform group-hover:scale-110" aria-hidden="true" />
-              </Link>
-              <Link
-                href="#categorias"
+                href="/productos"
                 className="inline-flex items-center gap-2 rounded-full border border-white/30 px-7 py-3.5 text-sm font-bold text-white backdrop-blur-sm transition-all duration-300 hover:border-white/60 hover:bg-white/10 sm:px-8 sm:py-4 sm:text-base"
               >
-                Explorar plataforma
+                Ver Productos
               </Link>
             </div>
 
-            {/* Stats badges */}
             <div
               className="mt-10 flex flex-wrap gap-6 sm:mt-14 sm:gap-8"
               style={{ animationDelay: "0.7s", animationFillMode: "both" }}
@@ -176,15 +145,11 @@ export default async function Home({
           </div>
         </div>
 
-        {/* Scroll indicator */}
         <div className="absolute bottom-6 left-1/2 z-10 -translate-x-1/2 animate-bounce-down">
           <ChevronDown className="h-6 w-6 text-white/40" aria-hidden="true" />
         </div>
       </section>
 
-      {/* ═══════════════════════════════════════════════════════════════
-          CATEGORIES SECTION
-          ═══════════════════════════════════════════════════════════════ */}
       <section
         id="categorias"
         className="mx-auto max-w-7xl px-4 py-16 sm:py-20 lg:px-6"
@@ -193,17 +158,17 @@ export default async function Home({
         <div className="mb-8 flex items-end justify-between gap-4 sm:mb-10">
           <div>
             <p className="mb-2 text-xs font-bold uppercase tracking-[0.25em] text-lama-detail">
-              Categorías
+              Categorias
             </p>
             <h2
               id="home-categories"
               className="font-display text-3xl font-bold text-lama-ink sm:text-4xl"
             >
-              Elegí por tipo de prenda
+              Elegi por tipo de prenda
             </h2>
           </div>
           <Link
-            href="/"
+            href="/productos"
             className="hidden text-sm font-bold text-lama-detail underline underline-offset-4 transition-colors hover:text-lama-ink sm:inline"
           >
             Ver todos
@@ -214,7 +179,7 @@ export default async function Home({
           {categoryTiles.map((category) => (
             <Link
               key={category.categoria_producto_id}
-              href={`/?categoria=${category.categoria_producto_id}`}
+              href={`/productos?categoria=${category.categoria_producto_id}`}
               className="group relative block min-h-60 overflow-hidden rounded-2xl focus:outline-none focus:ring-2 focus:ring-lama-detail focus:ring-offset-2 sm:min-h-64"
             >
               <img
@@ -236,60 +201,6 @@ export default async function Home({
         </div>
       </section>
 
-      {/* ═══════════════════════════════════════════════════════════════
-          PRODUCT CATALOG
-          ═══════════════════════════════════════════════════════════════ */}
-      <section
-        id="catalogo"
-        className="mx-auto max-w-7xl px-4 pb-16 lg:px-6"
-        aria-labelledby="catalog-products"
-      >
-        <div className="mb-8 sm:mb-10">
-          <p className="mb-2 text-xs font-bold uppercase tracking-[0.25em] text-lama-detail">
-            Catálogo
-          </p>
-          <h2
-            id="catalog-products"
-            className="font-display text-3xl font-bold text-lama-ink sm:text-4xl"
-          >
-            Últimas prendas
-          </h2>
-        </div>
-
-        <div className="mb-8">
-          <SearchBar
-            search={params.search}
-            categoria={params.categoria}
-            talle={params.talle}
-            sort={sort}
-            categoryOptions={catalog.categorias.map((category) => ({
-              id: category.categoria_producto_id,
-              label: category.nombre
-            }))}
-          />
-        </div>
-
-        {visibleCatalog.items.length ? (
-          <>
-            <ProductGrid products={visibleCatalog.items} />
-            <Pagination
-              page={visibleCatalog.page}
-              pageSize={visibleCatalog.pageSize}
-              total={visibleCatalog.total}
-              searchParams={params}
-            />
-          </>
-        ) : (
-          <EmptyState
-            title="No se encontraron prendas"
-            text="Probá ajustar la búsqueda, la categoría o el talle para ver más publicaciones activas."
-          />
-        )}
-      </section>
-
-      {/* ═══════════════════════════════════════════════════════════════
-          PERSONALIZED SECTION
-          ═══════════════════════════════════════════════════════════════ */}
       {personalizedCatalog?.personalizedItems.length ? (
         <section className="mx-auto max-w-7xl px-4 pb-16 lg:px-6" aria-labelledby="personalized-products">
           <div className="mb-8">
@@ -307,9 +218,6 @@ export default async function Home({
         </section>
       ) : null}
 
-      {/* ═══════════════════════════════════════════════════════════════
-          DASHBOARD PREVIEW
-          ═══════════════════════════════════════════════════════════════ */}
       <div className="border-t border-lama-line/50">
         <DashboardPreview />
       </div>

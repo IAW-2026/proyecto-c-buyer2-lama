@@ -53,7 +53,7 @@ export async function Header() {
                 Inicio
               </Link>
               <Link
-                href="/#catalogo"
+                href="/productos"
                 className="relative rounded-lg px-3 py-2 text-sm font-medium text-white/80 transition-colors hover:bg-white/10 hover:text-white"
               >
                 Catálogo
@@ -67,7 +67,7 @@ export async function Header() {
                 </summary>
                 <div className="absolute left-0 top-full z-50 mt-2 min-w-52 overflow-hidden rounded-xl border border-white/10 bg-neutral-900/95 py-1.5 shadow-lg backdrop-blur-xl">
                   <Link
-                    href="/"
+                    href="/productos"
                     className="block px-4 py-2.5 text-sm font-medium text-white/80 transition hover:bg-white/10 hover:text-white focus:bg-white/10 focus:outline-none"
                   >
                     Ver todos
@@ -75,7 +75,7 @@ export async function Header() {
                   {categories.map((category) => (
                     <Link
                       key={category.categoria_producto_id}
-                      href={`/?categoria=${category.categoria_producto_id}`}
+                      href={`/productos?categoria=${category.categoria_producto_id}`}
                       className="block px-4 py-2.5 text-sm font-medium text-white/80 transition hover:bg-white/10 hover:text-white focus:bg-white/10 focus:outline-none"
                     >
                       {category.nombre}
@@ -89,7 +89,7 @@ export async function Header() {
           {/* Right side actions */}
           <div className="flex items-center gap-1.5 sm:gap-2">
             {/* Desktop Search */}
-            <form action="/" className="relative hidden lg:block">
+            <form action="/productos" className="relative hidden lg:block">
               <label className="sr-only" htmlFor="header-search-desktop">
                 Buscar producto
               </label>
@@ -131,7 +131,7 @@ export async function Header() {
 
         {/* Mobile search bar */}
         <div className="border-t border-white/5 px-4 pb-3 pt-1 lg:hidden">
-          <form action="/" className="relative">
+          <form action="/productos" className="relative">
             <label className="sr-only" htmlFor="header-search-mobile">
               Buscar producto
             </label>
