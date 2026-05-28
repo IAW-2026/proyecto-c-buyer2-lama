@@ -53,7 +53,7 @@ export default async function Home() {
 
   return (
     <div>
-      <section className="relative flex min-h-[85vh] items-end overflow-hidden sm:min-h-[90vh]">
+      <section className="relative -mt-[112px] flex min-h-[calc(85vh+112px)] items-end overflow-hidden sm:min-h-[calc(90vh+112px)] lg:-mt-[65px] lg:min-h-[calc(90vh+65px)]">
         <img
           src="/products/inicio.png"
           alt=""
