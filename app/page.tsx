@@ -47,7 +47,7 @@ export default async function Home() {
 
     return {
       ...category,
-      image: categoryProduct?.imagenes[0] ?? "/products/campera_denim.webp"
+      image: categoryProduct?.imagenes[0] ?? "/products/inicio.png"
     };
   });
 
@@ -55,7 +55,7 @@ export default async function Home() {
     <div>
       <section className="relative flex min-h-[85vh] items-end overflow-hidden sm:min-h-[90vh]">
         <img
-          src="/products/campera_denim.webp"
+          src="/products/inicio.png"
           alt=""
           className="absolute inset-0 h-full w-full object-cover"
           aria-hidden="true"

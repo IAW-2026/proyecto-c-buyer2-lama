@@ -44,7 +44,7 @@ const legalLinks = [
 
 export function Footer() {
   return (
-    <footer className="mt-16 border-t border-lama-line/30 bg-neutral-950 text-stone-100">
+    <footer className="mt-16 border-t border-white/10 bg-lama-ink/80 text-stone-100 backdrop-blur-xl dark:bg-black/70">
       {/* Gradient accent line */}
       <div className="h-px bg-gradient-to-r from-transparent via-lama-header/50 to-transparent" aria-hidden="true" />
 
