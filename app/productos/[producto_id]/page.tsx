@@ -51,6 +51,7 @@ export default async function ProductPage({
     <PageShell
       title={product.titulo}
       eyebrow="Detalle de producto"
+      titleClassName="font-display"
       actions={
         <ButtonLink href="/productos" className="bg-lama-card text-lama-ink hover:bg-lama-cream">
           <ArrowLeft className="h-4 w-4" aria-hidden="true" />
@@ -129,11 +130,7 @@ export default async function ProductPage({
 
           <Card>
             <div className="flex flex-wrap gap-2">
-              {!isProductAvailable ? (
-                <StatusBadge>No disponible</StatusBadge>
-              ) : (
-                <StatusBadge>{product.estado_publicacion}</StatusBadge>
-              )}
+              {!isProductAvailable ? <StatusBadge>No disponible</StatusBadge> : null}
               <StatusBadge>{product.estado_prenda}</StatusBadge>
             </div>
             <p className="mt-5 text-base leading-7">{product.descripcion}</p>

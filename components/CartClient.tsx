@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { CreditCard, Loader2, ShoppingBag, Trash2 } from "lucide-react";
 import { BillingDetailsModal, type BillingDetails } from "@/components/BillingDetailsModal";
-import { EmptyState } from "@/components/ui";
+import { EmptyState, LoadingState } from "@/components/ui";
 import { savePurchase } from "@/lib/purchases-storage";
 import type { PaymentMethod, Product } from "@/lib/types";
 
@@ -146,11 +146,7 @@ export function CartClient({
   }
 
   if (!isLoaded) {
-    return (
-      <div className="rounded-lg border border-lama-line bg-lama-card p-8 text-center shadow-soft">
-        <p className="font-bold">Cargando carrito...</p>
-      </div>
-    );
+    return <LoadingState text="Cargando carrito..." />;
   }
 
   if (!cart.length) {

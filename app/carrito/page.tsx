@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
 import { CartClient } from "@/components/CartClient";
 import { ButtonLink, Card, PageShell } from "@/components/ui";
 import { canAccessBuyerApp } from "@/lib/auth";
@@ -19,7 +20,17 @@ export default async function CartPage() {
   const buyerProfile = authContext.userId && hasBuyerRole ? await getBuyer(authContext.userId) : null;
 
   return (
-    <PageShell title="Mi carrito" eyebrow="Productos guardados">
+    <PageShell
+      title="Mi carrito"
+      eyebrow="Productos guardados"
+      titleClassName="font-display"
+      actions={
+        <ButtonLink href="/productos" className="bg-lama-card text-lama-ink hover:bg-lama-cream">
+          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+          Volver
+        </ButtonLink>
+      }
+    >
       {authContext.userId && authContext.email && hasBuyerRole ? (
         <CartClient
           methods={methods}

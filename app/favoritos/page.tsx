@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
 import { ProductCard } from "@/components/ProductCard";
 import { SearchBar } from "@/components/SearchBar";
 import { Pagination } from "@/components/Pagination";
@@ -56,7 +57,17 @@ export default async function FavoritesPage({
     : null;
 
   return (
-    <PageShell title="Mis favoritos" eyebrow="Productos guardados">
+    <PageShell
+      title="Mis favoritos"
+      eyebrow="Productos guardados"
+      titleClassName="font-display"
+      actions={
+        <ButtonLink href="/productos" className="bg-lama-card text-lama-ink hover:bg-lama-cream">
+          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+          Volver
+        </ButtonLink>
+      }
+    >
       {!hasBuyerRole ? (
         <Card>
           <p className="font-bold">Este usuario no puede acceder a favoritos de comprador.</p>

@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { PackageCheck, Truck } from "lucide-react";
 import { ProductMini } from "@/components/ProductCard";
-import { Card, EmptyState, StatusBadge } from "@/components/ui";
+import { Card, EmptyState, LoadingState, StatusBadge } from "@/components/ui";
 import { readPurchases, type StoredPurchase } from "@/lib/purchases-storage";
 
 const currency = new Intl.NumberFormat("es-AR", {
@@ -54,11 +54,7 @@ export function PurchasesClient({ buyerId }: { buyerId: string }) {
   );
 
   if (!isLoaded) {
-    return (
-      <div className="rounded-lg border border-lama-line bg-lama-card p-8 text-center shadow-soft">
-        <p className="font-bold">Cargando compras...</p>
-      </div>
-    );
+    return <LoadingState text="Cargando compras..." />;
   }
 
   if (!buyerPurchases.length) {
@@ -76,7 +72,6 @@ export function PurchasesClient({ buyerId }: { buyerId: string }) {
               <div className="flex flex-wrap items-center gap-3">
                 <h2 className="text-xl font-bold">Nro. Orden: {purchase.nro_orden}</h2>
                 <StatusBadge>{purchase.estado_general}</StatusBadge>
-                <StatusBadge>Pago {purchase.estado_pago}</StatusBadge>
               </div>
               <div className="space-y-3">
                 {purchase.products.map((product) => (

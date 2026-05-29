@@ -9,6 +9,7 @@ export function PageShell({
   actions,
   className,
   headerClassName,
+  titleClassName,
   contentClassName
 }: {
   title: string;
@@ -17,6 +18,7 @@ export function PageShell({
   actions?: ReactNode;
   className?: string;
   headerClassName?: string;
+  titleClassName?: string;
   contentClassName?: string;
 }) {
   return (
@@ -28,7 +30,7 @@ export function PageShell({
           </div>
         ) : null}
         <div className="w-full">
-          <h1 className="mt-1 w-full text-center text-3xl font-bold text-lama-ink sm:text-4xl">
+          <h1 className={clsx("mt-1 w-full text-center text-3xl font-bold text-lama-ink sm:text-4xl", titleClassName)}>
             {title}
           </h1>
         </div>
@@ -94,6 +96,14 @@ export function EmptyState({ title, text }: { title: string; text: string }) {
     <div className="rounded-lg border border-dashed border-lama-detail/50 bg-lama-card p-8 text-center">
       <p className="text-lg font-bold">{title}</p>
       <p className="mt-2 text-sm text-lama-ink/75">{text}</p>
+    </div>
+  );
+}
+
+export function LoadingState({ text }: { text: string }) {
+  return (
+    <div className="rounded-lg border border-lama-line bg-lama-card p-8 text-center shadow-soft">
+      <p className="font-bold">{text}</p>
     </div>
   );
 }
