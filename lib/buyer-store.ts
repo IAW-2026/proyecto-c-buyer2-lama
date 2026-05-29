@@ -322,7 +322,24 @@ export async function upsertPreferences(input: unknown) {
 }
 
 export async function getBuyerReport() {
-  const { items } = await listBuyers({ pageSize: 25 });
+  let items: BuyerWithPreferences[];
+
+  if (shouldUseDatabase()) {
+    try {
+      items = await prisma.comprador.findMany({
+        include: { preferencias: true },
+        orderBy: { fecha_creacion: "desc" }
+      });
+    } catch {
+      items = fallbackBuyers;
+    }
+  } else {
+    items = fallbackBuyers;
+  }
+
+  const lastMonthStart = new Date();
+  lastMonthStart.setDate(lastMonthStart.getDate() - 30);
+
   const categoryCounts = new Map<string, number>();
   const sizeCounts = new Map<string, number>();
 
@@ -337,7 +354,8 @@ export async function getBuyerReport() {
 
   return {
     totalBuyers: items.length,
-    topCategories: [...categoryCounts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 4),
-    topSizes: [...sizeCounts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 4)
+    buyersLastMonth: items.filter((buyer) => buyer.fecha_creacion >= lastMonthStart).length,
+    topCategories: [...categoryCounts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 3),
+    topSizes: [...sizeCounts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 3)
   };
 }
