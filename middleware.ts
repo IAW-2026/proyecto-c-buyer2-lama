@@ -26,7 +26,14 @@ export default clerkMiddleware(async (auth, request) => {
   }
 
   if (userId && isAuthRoute(request)) {
-    return NextResponse.redirect(new URL("/post-login", request.url));
+    const postLoginUrl = new URL("/post-login", request.url);
+    const redirectUrl = request.nextUrl.searchParams.get("redirect_url");
+
+    if (redirectUrl) {
+      postLoginUrl.searchParams.set("redirect_url", redirectUrl);
+    }
+
+    return NextResponse.redirect(postLoginUrl);
   }
 
   return NextResponse.next();

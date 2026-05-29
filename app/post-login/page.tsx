@@ -1,11 +1,21 @@
 import { redirect } from "next/navigation";
 import { canAccessAdmin, canAccessBuyerApp, getAuthContext } from "@/lib/auth";
 
-export default async function PostLoginPage() {
+function safeRedirectPath(value?: string) {
+  return value && value.startsWith("/") && !value.startsWith("//") ? value : null;
+}
+
+export default async function PostLoginPage({
+  searchParams
+}: {
+  searchParams: Promise<Record<string, string | undefined>>;
+}) {
   const authContext = await getAuthContext();
+  const params = await searchParams;
+  const redirectPath = safeRedirectPath(params.redirect_url);
 
   if (!authContext.userId) {
-    redirect("/sign-in");
+    redirect(redirectPath ? `/sign-in?redirect_url=${encodeURIComponent(redirectPath)}` : "/sign-in");
   }
 
   if (canAccessAdmin(authContext)) {
@@ -13,7 +23,7 @@ export default async function PostLoginPage() {
   }
 
   if (canAccessBuyerApp(authContext)) {
-    redirect("/");
+    redirect(redirectPath ?? "/");
   }
 
   redirect("/onboarding/buyer");

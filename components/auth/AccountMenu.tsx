@@ -29,7 +29,7 @@ function SignedOutAccountMenu() {
 function ClerkAccountMenu({ isAdmin }: { isAdmin: boolean }) {
   return (
     <UserButton
-      afterSignOutUrl="/sign-in"
+      afterSignOutUrl="/"
       appearance={{
         elements: {
           userButtonAvatarBox: "h-9 w-9",

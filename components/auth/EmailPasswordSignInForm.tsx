@@ -3,7 +3,7 @@
 import { useAuth, useSignIn } from "@clerk/nextjs";
 import { Chrome, LogIn } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
 import { useTheme } from "@/components/ThemeProvider";
 
@@ -39,11 +39,20 @@ function isMissingAccountError(error: unknown) {
   );
 }
 
+function safeRedirectPath(value: string | null) {
+  return value && value.startsWith("/") && !value.startsWith("//") ? value : null;
+}
+
 export function EmailPasswordSignInForm() {
   const { isSignedIn } = useAuth();
   const { isLoaded, signIn, setActive } = useSignIn();
   const { theme } = useTheme();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectPath = safeRedirectPath(searchParams.get("redirect_url"));
+  const postLoginUrl = redirectPath
+    ? `/post-login?redirect_url=${encodeURIComponent(redirectPath)}`
+    : "/post-login";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState<string | null>(null);
@@ -52,9 +61,9 @@ export function EmailPasswordSignInForm() {
 
   useEffect(() => {
     if (isSignedIn) {
-      router.replace("/post-login");
+      router.replace(postLoginUrl);
     }
-  }, [isSignedIn, router]);
+  }, [isSignedIn, postLoginUrl, router]);
 
   async function signInWithGoogle() {
     if (!isLoaded) {
@@ -67,8 +76,10 @@ export function EmailPasswordSignInForm() {
     try {
       await signIn.authenticateWithRedirect({
         strategy: "oauth_google",
-        redirectUrl: "/sso-callback",
-        redirectUrlComplete: "/post-login"
+        redirectUrl: redirectPath
+          ? `/sso-callback?redirect_url=${encodeURIComponent(redirectPath)}`
+          : "/sso-callback",
+        redirectUrlComplete: postLoginUrl
       });
     } catch (error) {
       setIsGoogleLoading(false);
@@ -95,7 +106,7 @@ export function EmailPasswordSignInForm() {
 
       if (result.status === "complete") {
         await setActive({ session: result.createdSessionId });
-        router.push("/post-login");
+        router.push(postLoginUrl);
         router.refresh();
         return;
       }
@@ -107,6 +118,9 @@ export function EmailPasswordSignInForm() {
           missing_account: "1",
           email
         });
+        if (redirectPath) {
+          params.set("redirect_url", redirectPath);
+        }
         router.push(`/sign-up?${params.toString()}`);
         return;
       }

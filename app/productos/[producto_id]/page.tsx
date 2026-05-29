@@ -40,6 +40,8 @@ export default async function ProductPage({
   const seller = sellers.find((item) => item.clerk_user_id_vendedor === product.clerk_user_id_vendedor);
   const category = categories.find((item) => item.categoria_producto_id === product.categoria_id);
   const isProductAvailable = product.estado_publicacion === "activa";
+  const productPath = `/productos/${product.producto_id}`;
+  const signInHref = `/sign-in?redirect_url=${encodeURIComponent(productPath)}`;
   const initialFavorite =
     authContext.userId && hasBuyerRole
       ? await isFavoriteProduct(authContext.userId, product.producto_id)
@@ -86,7 +88,7 @@ export default async function ProductPage({
                 isAuthenticated={Boolean(authContext.userId && hasBuyerRole)}
                 isAvailable={isProductAvailable}
                 variant="wide"
-                redirectTo={`/productos/${product.producto_id}`}
+                redirectTo={productPath}
               />
             </div>
             <dl className="mt-5 space-y-4 text-sm">
@@ -151,7 +153,7 @@ export default async function ProductPage({
             <Card>
               <p className="font-bold">Necesitas iniciar sesion o registrarte para comprar, agregar al carrito o guardar favoritos.</p>
               <div className="mt-4 flex flex-wrap gap-2">
-                <ButtonLink href="/sign-in">Iniciar sesion</ButtonLink>
+                <ButtonLink href={signInHref}>Iniciar sesion</ButtonLink>
                 <ButtonLink href="/sign-up" className="bg-lama-cream text-lama-ink hover:bg-lama-card">
                   Registrarme
                 </ButtonLink>

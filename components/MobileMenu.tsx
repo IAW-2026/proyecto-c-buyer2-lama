@@ -52,14 +52,6 @@ export function MobileMenu({ categories }: { categories: Category[] }) {
                 <ChevronRight className="h-4 w-4 text-white/40" aria-hidden="true" />
               </Link>
               <Link
-                href="/favoritos"
-                onClick={() => setOpen(false)}
-                className="flex items-center justify-between rounded-xl px-4 py-3.5 text-lg font-semibold transition hover:bg-white/10"
-              >
-                Mis favoritos
-                <ChevronRight className="h-4 w-4 text-white/40" aria-hidden="true" />
-              </Link>
-              <Link
                 href="/compras"
                 onClick={() => setOpen(false)}
                 className="flex items-center justify-between rounded-xl px-4 py-3.5 text-lg font-semibold transition hover:bg-white/10"

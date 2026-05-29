@@ -41,12 +41,6 @@ export async function Header() {
                 >
                   Inicio
                 </Link>
-                <Link
-                  href="/favoritos"
-                  className="relative rounded-lg px-3 py-2 text-sm font-medium text-white/80 transition-colors hover:bg-white/10 hover:text-white"
-                >
-                  Favoritos
-                </Link>
                 <CategoryDropdown categories={categories} />
               </div>
             ) : null}

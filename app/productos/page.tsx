@@ -72,6 +72,7 @@ export default async function ProductsPage({
           categoria={params.categoria}
           talle={params.talle}
           sort={sort}
+          basePath="/productos"
           categoryOptions={catalog.categorias.map((category) => ({
             id: category.categoria_producto_id,
             label: category.nombre
