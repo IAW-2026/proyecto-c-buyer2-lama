@@ -9,6 +9,25 @@ export const buyerSchema = z.object({
   direccion_envio: z.string().min(6, "La direccion de envio es obligatoria.")
 });
 
+function nullableText(schema: z.ZodString) {
+  return z.preprocess((value) => {
+    if (typeof value !== "string") {
+      return null;
+    }
+
+    const trimmed = value.trim();
+    return trimmed ? trimmed : null;
+  }, schema.nullable());
+}
+
+export const adminBuyerUpdateSchema = z.object({
+  clerk_user_id_comprador: z.string().min(3, "El ID de Clerk es obligatorio."),
+  nombre_comprador: z.string().trim().min(3, "El nombre debe tener al menos 3 caracteres."),
+  DNI: nullableText(z.string().min(7, "El DNI debe tener al menos 7 caracteres.").max(12)),
+  telefono: nullableText(z.string().max(30, "El telefono es demasiado largo.")),
+  direccion_envio: nullableText(z.string().min(6, "La direccion debe tener al menos 6 caracteres."))
+});
+
 export const preferencesSchema = z.object({
   clerk_user_id_comprador: z.string().min(3),
   talles_preferidos: z.array(z.string().min(1)).default([]),

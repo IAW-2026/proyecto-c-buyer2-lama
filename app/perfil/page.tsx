@@ -15,6 +15,8 @@ function emptyBuyer(userId: string, email: string | null, name: string | null): 
     DNI: "",
     telefono: "",
     direccion_envio: "",
+    esta_activo: true,
+    fecha_desactivacion: null,
     fecha_creacion: new Date(),
     fecha_actualizacion: new Date(),
     preferencias: null
@@ -58,8 +60,21 @@ export default async function ProfilePage() {
         })
       : emptyBuyer(authContext.userId, authContext.email, authContext.name));
 
+  if (!buyer.esta_activo) {
+    return (
+      <PageShell title="Mi Perfil" eyebrow="Informacion personal y preferencias">
+        <Card>
+          <p className="font-bold">Tu cuenta esta desactivada.</p>
+          <p className="mt-2 text-sm text-lama-ink/70">
+            No podes editar el perfil, guardar favoritos ni realizar compras hasta que un administrador la active.
+          </p>
+        </Card>
+      </PageShell>
+    );
+  }
+
   return (
-    <PageShell title="Mi Perfil" eyebrow="Información personal y preferencias">
+    <PageShell title="Mi Perfil" eyebrow="Informacion personal y preferencias">
       <ProfileForms
         buyer={buyer}
         categoryOptions={categories.map((category) => ({

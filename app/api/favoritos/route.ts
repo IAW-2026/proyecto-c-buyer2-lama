@@ -22,11 +22,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Producto invalido." }, { status: 400 });
   }
 
-  await ensureBuyerRegistration({
+  const buyer = await ensureBuyerRegistration({
     clerkUserId: authContext.userId,
     email: authContext.email,
     name: authContext.name
   });
+
+  if (!buyer.esta_activo) {
+    return NextResponse.json({ error: "La cuenta esta desactivada." }, { status: 403 });
+  }
 
   try {
     const favorite = await addFavoriteProduct(authContext.userId, productId);

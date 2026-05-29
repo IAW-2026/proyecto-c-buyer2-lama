@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { canAccessAdmin, getAuthContext } from "@/lib/auth";
-import { listBuyers, upsertBuyer } from "@/lib/buyer-store";
-import { buyerSchema } from "@/lib/validation";
+import { listBuyers } from "@/lib/buyer-store";
 
 export async function GET(request: Request) {
   const authContext = await getAuthContext();
@@ -12,6 +11,7 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const result = await listBuyers({
     search: searchParams.get("search") ?? "",
+    estado: searchParams.get("estado") ?? "todos",
     page: Number(searchParams.get("page") ?? 1),
     pageSize: Number(searchParams.get("pageSize") ?? 8)
   });
@@ -19,23 +19,14 @@ export async function GET(request: Request) {
   return NextResponse.json(result);
 }
 
-export async function POST(request: Request) {
+export async function POST(_request: Request) {
   const authContext = await getAuthContext();
   if (!canAccessAdmin(authContext)) {
     return NextResponse.json({ error: "No autorizado." }, { status: 403 });
   }
 
-  const body = await request.json().catch(() => null);
-  const parsed = buyerSchema.safeParse(body);
-
-  if (!parsed.success) {
-    return NextResponse.json(
-      { error: "Datos de comprador invalidos.", issues: parsed.error.flatten().fieldErrors },
-      { status: 400 }
-    );
-  }
-
-  const buyer = await upsertBuyer(parsed.data);
-  return NextResponse.json(buyer, { status: 201 });
+  return NextResponse.json(
+    { error: "Los compradores se crean desde Clerk/onboarding, no desde el admin." },
+    { status: 405 }
+  );
 }
-

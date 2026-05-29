@@ -13,11 +13,13 @@ const currency = new Intl.NumberFormat("es-AR", {
 export function ProductCard({
   product,
   isFavorite = false,
-  canFavorite = false
+  canFavorite = false,
+  isAccountActive = true
 }: {
   product: Product;
   isFavorite?: boolean;
   canFavorite?: boolean;
+  isAccountActive?: boolean;
 }) {
   const isAvailable = product.estado_publicacion === "activa";
 
@@ -74,6 +76,7 @@ export function ProductCard({
         productTitle={product.titulo}
         initialFavorite={isFavorite}
         isAuthenticated={canFavorite}
+        isAccountActive={isAccountActive}
         isAvailable={isAvailable}
         redirectTo={`/productos/${product.producto_id}`}
         className="absolute right-3 top-3 z-10"

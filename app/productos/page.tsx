@@ -3,6 +3,7 @@ import { SearchBar } from "@/components/SearchBar";
 import { Pagination } from "@/components/Pagination";
 import { EmptyState } from "@/components/ui";
 import { canAccessBuyerApp } from "@/lib/auth";
+import { getBuyer } from "@/lib/buyer-store";
 import { listFavoriteProductIds } from "@/lib/favorites-store";
 import {
   getCatalogProducts,
@@ -14,11 +15,13 @@ import type { Product } from "@/lib/types";
 function ProductGrid({
   products,
   favoriteProductIds,
-  canFavorite
+  canFavorite,
+  isAccountActive
 }: {
   products: Product[];
   favoriteProductIds: Set<string>;
   canFavorite: boolean;
+  isAccountActive: boolean;
 }) {
   return (
     <div className="grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 lg:grid-cols-4">
@@ -28,6 +31,7 @@ function ProductGrid({
           product={product}
           isFavorite={favoriteProductIds.has(product.producto_id)}
           canFavorite={canFavorite}
+          isAccountActive={isAccountActive}
         />
       ))}
     </div>
@@ -41,6 +45,8 @@ export default async function ProductsPage({
 }) {
   const authContext = await getBuyerRouteAuthContext();
   const hasBuyerRole = canAccessBuyerApp(authContext);
+  const buyer = authContext.userId && hasBuyerRole ? await getBuyer(authContext.userId) : null;
+  const isAccountActive = buyer?.esta_activo ?? true;
   const params = await searchParams;
   const requestedPage = Number(params.page ?? 1);
   const page = Number.isFinite(requestedPage) ? requestedPage : 1;
@@ -86,6 +92,7 @@ export default async function ProductsPage({
             products={catalog.items}
             favoriteProductIds={favoriteProductIds}
             canFavorite={Boolean(authContext.userId && hasBuyerRole)}
+            isAccountActive={isAccountActive}
           />
           <Pagination
             page={catalog.page}

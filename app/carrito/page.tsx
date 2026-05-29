@@ -18,6 +18,7 @@ export default async function CartPage() {
 
   const methods = authContext.userId && hasBuyerRole ? await fetchInternalApi<PaymentMethod[]>("/api/metodos-pago") : [];
   const buyerProfile = authContext.userId && hasBuyerRole ? await getBuyer(authContext.userId) : null;
+  const isAccountActive = buyerProfile?.esta_activo ?? true;
 
   return (
     <PageShell
@@ -31,7 +32,7 @@ export default async function CartPage() {
         </ButtonLink>
       }
     >
-      {authContext.userId && authContext.email && hasBuyerRole ? (
+      {authContext.userId && authContext.email && hasBuyerRole && isAccountActive ? (
         <CartClient
           methods={methods}
           buyer={{
@@ -42,6 +43,13 @@ export default async function CartPage() {
             direccion_envio: buyerProfile?.direccion_envio ?? ""
           }}
         />
+      ) : authContext.userId && authContext.email && hasBuyerRole && !isAccountActive ? (
+        <Card>
+          <p className="font-bold">Tu cuenta esta desactivada.</p>
+          <p className="mt-2 text-sm text-lama-ink/70">
+            No podes realizar compras hasta que un administrador la active.
+          </p>
+        </Card>
       ) : authContext.userId ? (
         <Card>
           <p className="font-bold">Este usuario ya tiene otro rol asignado y no puede acceder al carrito de comprador.</p>

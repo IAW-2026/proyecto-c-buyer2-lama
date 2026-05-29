@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { canAccessAdmin, canAccessBuyerApp, getAuthContext } from "@/lib/auth";
-import { getBuyer, upsertBuyer } from "@/lib/buyer-store";
-import { buyerSchema } from "@/lib/validation";
+import { getBuyer, updateBuyerProfile } from "@/lib/buyer-store";
+import { adminBuyerUpdateSchema } from "@/lib/validation";
 
 export async function GET(
   _request: Request,
@@ -40,7 +40,23 @@ export async function PATCH(
   }
 
   const body = await request.json().catch(() => null);
-  const parsed = buyerSchema.safeParse({ ...body, clerk_user_id_comprador });
+  const existingBuyer = await getBuyer(clerk_user_id_comprador);
+
+  if (!existingBuyer) {
+    return NextResponse.json({ error: "Comprador no encontrado." }, { status: 404 });
+  }
+
+  if (!canAccessAdmin(authContext) && !existingBuyer.esta_activo) {
+    return NextResponse.json({ error: "La cuenta esta desactivada." }, { status: 403 });
+  }
+
+  const parsed = adminBuyerUpdateSchema.safeParse({
+    clerk_user_id_comprador,
+    nombre_comprador: String(body?.nombre_comprador ?? ""),
+    DNI: String(body?.DNI ?? ""),
+    telefono: String(body?.telefono ?? ""),
+    direccion_envio: String(body?.direccion_envio ?? "")
+  });
 
   if (!parsed.success) {
     return NextResponse.json(
@@ -49,6 +65,6 @@ export async function PATCH(
     );
   }
 
-  const buyer = await upsertBuyer(parsed.data);
+  const buyer = await updateBuyerProfile(parsed.data);
   return NextResponse.json(buyer);
 }

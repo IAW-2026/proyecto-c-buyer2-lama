@@ -161,7 +161,7 @@ export function ProfileForms({
           </label>
           <label className="text-sm font-bold">
             Email
-            <input className={fieldClass()} type="email" name="email" defaultValue={buyer.email} required />
+            <input className={fieldClass()} type="email" name="email" defaultValue={buyer.email} readOnly required />
           </label>
           <label className="text-sm font-bold">
             DNI

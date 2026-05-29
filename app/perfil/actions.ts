@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { canAccessAdmin, canAccessBuyerApp, getAuthContext } from "@/lib/auth";
-import { upsertBuyer, upsertPreferences } from "@/lib/buyer-store";
+import { getBuyer, upsertBuyer, upsertPreferences } from "@/lib/buyer-store";
 import { buyerSchema, preferencesSchema } from "@/lib/validation";
 
 export type FormState = {
@@ -29,9 +29,14 @@ export async function saveProfile(_state: FormState, formData: FormData): Promis
     return { ok: false, message: "No tenes permisos para editar este perfil." };
   }
 
+  const currentBuyer = await getBuyer(clerkUserId);
+  if (currentBuyer && !currentBuyer.esta_activo) {
+    return { ok: false, message: "La cuenta esta desactivada." };
+  }
+
   const parsed = buyerSchema.safeParse({
     clerk_user_id_comprador: clerkUserId,
-    email: String(formData.get("email") ?? ""),
+    email: authContext.email ?? String(formData.get("email") ?? ""),
     nombre_comprador: String(formData.get("nombre_comprador") ?? ""),
     DNI: String(formData.get("DNI") ?? ""),
     telefono: String(formData.get("telefono") ?? ""),
@@ -59,6 +64,11 @@ export async function savePreferences(_state: FormState, formData: FormData): Pr
 
   if (!canAccessAdmin(authContext) && clerkUserId !== authContext.userId) {
     return { ok: false, message: "No tenes permisos para editar estas preferencias." };
+  }
+
+  const currentBuyer = await getBuyer(clerkUserId);
+  if (currentBuyer && !currentBuyer.esta_activo) {
+    return { ok: false, message: "La cuenta esta desactivada." };
   }
 
   const parsed = preferencesSchema.safeParse({

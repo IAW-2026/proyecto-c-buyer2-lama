@@ -15,6 +15,8 @@ model comprador {
   DNI                     String?
   telefono                String?
   direccion_envio         String?
+  esta_activo             Boolean                 @default(true)
+  fecha_desactivacion     DateTime?
   fecha_creacion          DateTime                @default(now())
   fecha_actualizacion     DateTime                @updatedAt
   preferencias            preferencias_comprador?

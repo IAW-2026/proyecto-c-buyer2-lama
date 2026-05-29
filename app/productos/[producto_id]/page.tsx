@@ -37,6 +37,8 @@ export default async function ProductPage({
   const methods = await fetchInternalApi<PaymentMethod[]>("/api/metodos-pago");
   const hasBuyerRole = canAccessBuyerApp(authContext);
   const buyerProfile = authContext.userId && hasBuyerRole ? await getBuyer(authContext.userId) : null;
+  const isAccountActive = buyerProfile?.esta_activo ?? true;
+  const canUseBuyerActions = Boolean(authContext.userId && authContext.email && hasBuyerRole && isAccountActive);
   const seller = sellers.find((item) => item.clerk_user_id_vendedor === product.clerk_user_id_vendedor);
   const category = categories.find((item) => item.categoria_producto_id === product.categoria_id);
   const isProductAvailable = product.estado_publicacion === "activa";
@@ -63,14 +65,14 @@ export default async function ProductPage({
         <div className="space-y-4">
           <ProductImageGallery images={product.imagenes} title={product.titulo} />
 
-          {isProductAvailable && authContext.userId && authContext.email && hasBuyerRole ? (
+          {isProductAvailable && canUseBuyerActions ? (
             <CheckoutForm
               product={product}
               methods={methods}
               buyer={{
-                clerk_user_id_comprador: authContext.userId,
+                clerk_user_id_comprador: authContext.userId!,
                 nombre: buyerProfile?.nombre_comprador ?? authContext.name ?? "",
-                email: authContext.email,
+                email: authContext.email!,
                 DNI: buyerProfile?.DNI ?? "",
                 direccion_envio: buyerProfile?.direccion_envio ?? ""
               }}
@@ -87,6 +89,7 @@ export default async function ProductPage({
                 productTitle={product.titulo}
                 initialFavorite={initialFavorite}
                 isAuthenticated={Boolean(authContext.userId && hasBuyerRole)}
+                isAccountActive={isAccountActive}
                 isAvailable={isProductAvailable}
                 variant="wide"
                 redirectTo={productPath}
@@ -140,8 +143,15 @@ export default async function ProductPage({
             <Card>
               <p className="font-bold">Este producto no esta disponible para comprar, agregar al carrito o guardar en favoritos.</p>
             </Card>
-          ) : authContext.userId && authContext.email && hasBuyerRole ? (
+          ) : canUseBuyerActions ? (
             <AddToCartButton product={product} />
+          ) : authContext.userId && authContext.email && hasBuyerRole && !isAccountActive ? (
+            <Card>
+              <p className="font-bold">Tu cuenta esta desactivada.</p>
+              <p className="mt-2 text-sm text-lama-ink/70">
+                No podes comprar, agregar al carrito ni guardar favoritos hasta que un administrador la active.
+              </p>
+            </Card>
           ) : authContext.userId ? (
             <Card>
               <p className="font-bold">Necesitas rol comprador para comprar, agregar al carrito o guardar favoritos.</p>

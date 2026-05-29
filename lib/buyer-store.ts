@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import type { BuyerWithPreferences } from "@/lib/types";
-import { buyerSchema, preferencesSchema } from "@/lib/validation";
+import { adminBuyerUpdateSchema, buyerSchema, preferencesSchema } from "@/lib/validation";
 
 type ClerkBuyerRegistration = {
   clerkUserId: string;
@@ -14,6 +14,8 @@ const globalForBuyerStore = globalThis as unknown as {
 
 const fallbackBuyers = globalForBuyerStore.fallbackBuyers ?? [];
 globalForBuyerStore.fallbackBuyers = fallbackBuyers;
+
+export type BuyerStatusFilter = "todos" | "activos" | "inactivos";
 
 function shouldUseDatabase() {
   return Boolean(process.env.DATABASE_URL);
@@ -35,34 +37,43 @@ function pendingBuyerData({ clerkUserId, email, name }: ClerkBuyerRegistration) 
     nombre_comprador: name?.trim() || fallbackName(email),
     DNI: null,
     telefono: null,
-    direccion_envio: null
+    direccion_envio: null,
+    esta_activo: true,
+    fecha_desactivacion: null
   };
 }
 
 export async function listBuyers({
   search = "",
+  estado = "todos",
   page = 1,
   pageSize = 8
 }: {
   search?: string;
+  estado?: BuyerStatusFilter | string;
   page?: number;
   pageSize?: number;
 }) {
   const normalizedPage = Math.max(page, 1);
   const normalizedPageSize = Math.max(Math.min(pageSize, 25), 1);
   const skip = (normalizedPage - 1) * normalizedPageSize;
+  const statusFilter = normalizeBuyerStatusFilter(estado);
 
   if (shouldUseDatabase()) {
     try {
-      const where = search
-        ? {
-            OR: [
-              { nombre_comprador: { contains: search, mode: "insensitive" as const } },
-              { email: { contains: search, mode: "insensitive" as const } },
-              { DNI: { contains: search, mode: "insensitive" as const } }
-            ]
-          }
-        : {};
+      const where = {
+        ...(statusFilter === "activos" ? { esta_activo: true } : {}),
+        ...(statusFilter === "inactivos" ? { esta_activo: false } : {}),
+        ...(search
+          ? {
+              OR: [
+                { nombre_comprador: { contains: search, mode: "insensitive" as const } },
+                { email: { contains: search, mode: "insensitive" as const } },
+                { DNI: { contains: search, mode: "insensitive" as const } }
+              ]
+            }
+          : {})
+      };
 
       const [items, total] = await Promise.all([
         prisma.comprador.findMany({
@@ -77,22 +88,34 @@ export async function listBuyers({
 
       return { items, total, page: normalizedPage, pageSize: normalizedPageSize };
     } catch {
-      return listFallbackBuyers(search, normalizedPage, normalizedPageSize);
+      return listFallbackBuyers(search, statusFilter, normalizedPage, normalizedPageSize);
     }
   }
 
-  return listFallbackBuyers(search, normalizedPage, normalizedPageSize);
+  return listFallbackBuyers(search, statusFilter, normalizedPage, normalizedPageSize);
 }
 
-function listFallbackBuyers(search: string, page: number, pageSize: number) {
+function normalizeBuyerStatusFilter(value?: string): BuyerStatusFilter {
+  if (value === "activos" || value === "inactivos") {
+    return value;
+  }
+
+  return "todos";
+}
+
+function listFallbackBuyers(search: string, estado: BuyerStatusFilter, page: number, pageSize: number) {
   const normalizedSearch = search.trim().toLowerCase();
-  const filtered = normalizedSearch
-    ? fallbackBuyers.filter((buyer) =>
-        [buyer.nombre_comprador, buyer.email, buyer.DNI].some((value) =>
+  const filtered = fallbackBuyers.filter((buyer) => {
+    const matchesStatus =
+      estado === "activos" ? buyer.esta_activo : estado === "inactivos" ? !buyer.esta_activo : true;
+    const matchesSearch = normalizedSearch
+      ? [buyer.nombre_comprador, buyer.email, buyer.DNI].some((value) =>
           value !== null && value.toLowerCase().includes(normalizedSearch)
         )
-      )
-    : fallbackBuyers;
+      : true;
+
+    return matchesStatus && matchesSearch;
+  });
 
   return {
     items: filtered.slice((page - 1) * pageSize, page * pageSize),
@@ -283,12 +306,90 @@ export async function upsertBuyer(input: unknown) {
   const buyer: BuyerWithPreferences = {
     ...data,
     telefono: data.telefono ?? null,
+    esta_activo: true,
+    fecha_desactivacion: null,
     fecha_creacion: new Date(),
     fecha_actualizacion: new Date(),
     preferencias: null
   };
   fallbackBuyers.unshift(buyer);
   return buyer;
+}
+
+export async function updateBuyerProfile(input: unknown) {
+  const data = adminBuyerUpdateSchema.parse(input);
+
+  if (shouldUseDatabase()) {
+    const existing = await prisma.comprador.findUnique({
+      where: { clerk_user_id_comprador: data.clerk_user_id_comprador }
+    });
+
+    if (!existing) {
+      throw new Error("Comprador no encontrado.");
+    }
+
+    return prisma.comprador.update({
+      where: { clerk_user_id_comprador: data.clerk_user_id_comprador },
+      data: {
+        nombre_comprador: data.nombre_comprador,
+        DNI: data.DNI,
+        telefono: data.telefono,
+        direccion_envio: data.direccion_envio
+      },
+      include: { preferencias: true }
+    });
+  }
+
+  const existing = fallbackBuyers.find(
+    (buyer) => buyer.clerk_user_id_comprador === data.clerk_user_id_comprador
+  );
+
+  if (!existing) {
+    throw new Error("Comprador no encontrado.");
+  }
+
+  Object.assign(existing, {
+    nombre_comprador: data.nombre_comprador,
+    DNI: data.DNI,
+    telefono: data.telefono,
+    direccion_envio: data.direccion_envio,
+    fecha_actualizacion: new Date()
+  });
+  return existing;
+}
+
+export async function setBuyerActive(clerkUserId: string, isActive: boolean) {
+  if (shouldUseDatabase()) {
+    const existing = await prisma.comprador.findUnique({
+      where: { clerk_user_id_comprador: clerkUserId }
+    });
+
+    if (!existing) {
+      throw new Error("Comprador no encontrado.");
+    }
+
+    return prisma.comprador.update({
+      where: { clerk_user_id_comprador: clerkUserId },
+      data: {
+        esta_activo: isActive,
+        fecha_desactivacion: isActive ? null : new Date()
+      },
+      include: { preferencias: true }
+    });
+  }
+
+  const existing = fallbackBuyers.find((buyer) => buyer.clerk_user_id_comprador === clerkUserId);
+
+  if (!existing) {
+    throw new Error("Comprador no encontrado.");
+  }
+
+  Object.assign(existing, {
+    esta_activo: isActive,
+    fecha_desactivacion: isActive ? null : new Date(),
+    fecha_actualizacion: new Date()
+  });
+  return existing;
 }
 
 export async function upsertPreferences(input: unknown) {
@@ -342,8 +443,9 @@ export async function getBuyerReport() {
 
   const categoryCounts = new Map<string, number>();
   const sizeCounts = new Map<string, number>();
+  const activeItems = items.filter((buyer) => buyer.esta_activo);
 
-  for (const buyer of items) {
+  for (const buyer of activeItems) {
     for (const category of buyer.preferencias?.categorias_preferidas ?? []) {
       categoryCounts.set(category, (categoryCounts.get(category) ?? 0) + 1);
     }
@@ -354,6 +456,8 @@ export async function getBuyerReport() {
 
   return {
     totalBuyers: items.length,
+    activeBuyers: activeItems.length,
+    inactiveBuyers: items.length - activeItems.length,
     buyersLastMonth: items.filter((buyer) => buyer.fecha_creacion >= lastMonthStart).length,
     topCategories: [...categoryCounts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 3),
     topSizes: [...sizeCounts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 3)

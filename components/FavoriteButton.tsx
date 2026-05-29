@@ -11,6 +11,7 @@ export function FavoriteButton({
   productTitle,
   initialFavorite,
   isAuthenticated,
+  isAccountActive = true,
   isAvailable = true,
   variant = "icon",
   redirectTo,
@@ -20,6 +21,7 @@ export function FavoriteButton({
   productTitle: string;
   initialFavorite: boolean;
   isAuthenticated: boolean;
+  isAccountActive?: boolean;
   isAvailable?: boolean;
   variant?: "icon" | "wide";
   redirectTo?: string;
@@ -60,6 +62,39 @@ export function FavoriteButton({
       >
         <Heart className="h-5 w-5" aria-hidden="true" />
       </Link>
+    );
+  }
+
+  if (!isAccountActive) {
+    if (variant === "wide") {
+      return (
+        <button
+          type="button"
+          disabled
+          className={clsx(
+            "inline-flex w-full cursor-not-allowed items-center justify-center gap-2 rounded-md border border-lama-line bg-lama-cream px-4 py-3 text-sm font-bold text-lama-ink opacity-60",
+            className
+          )}
+        >
+          <Heart className="h-4 w-4" aria-hidden="true" />
+          Cuenta desactivada
+        </button>
+      );
+    }
+
+    return (
+      <button
+        type="button"
+        disabled
+        className={clsx(
+          "inline-flex h-10 w-10 cursor-not-allowed items-center justify-center rounded-full border border-white/70 bg-white/90 text-lama-ink opacity-60 shadow-soft",
+          className
+        )}
+        aria-label={`Cuenta desactivada para guardar ${productTitle}`}
+        title="Cuenta desactivada"
+      >
+        <Heart className="h-5 w-5" aria-hidden="true" />
+      </button>
     );
   }
 

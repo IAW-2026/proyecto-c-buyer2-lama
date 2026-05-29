@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { canAccessBuyerApp, getAuthContext } from "@/lib/auth";
-import { upsertBuyer } from "@/lib/buyer-store";
+import { getBuyer, upsertBuyer } from "@/lib/buyer-store";
 import { buyerSchema } from "@/lib/validation";
 
 export async function POST(request: Request) {
@@ -12,6 +12,11 @@ export async function POST(request: Request) {
 
   if (!canAccessBuyerApp(authContext)) {
     return NextResponse.json({ error: "Necesitas rol comprador para guardar tus datos." }, { status: 403 });
+  }
+
+  const currentBuyer = await getBuyer(authContext.userId);
+  if (currentBuyer && !currentBuyer.esta_activo) {
+    return NextResponse.json({ error: "La cuenta esta desactivada." }, { status: 403 });
   }
 
   const body = await request.json().catch(() => null);

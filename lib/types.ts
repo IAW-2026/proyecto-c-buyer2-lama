@@ -5,6 +5,8 @@ export type Buyer = {
   DNI: string | null;
   telefono: string | null;
   direccion_envio: string | null;
+  esta_activo: boolean;
+  fecha_desactivacion: Date | null;
   fecha_creacion: Date;
   fecha_actualizacion: Date;
 };

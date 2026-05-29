@@ -3,8 +3,7 @@ import type { UserJSON } from "@clerk/nextjs/server";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { ensureCompradorRole, getRolesFromMetadata, hasBuyerAccess } from "@/lib/auth";
-import { ensureBuyerRegistration } from "@/lib/buyer-store";
-import { prisma } from "@/lib/prisma";
+import { ensureBuyerRegistration, setBuyerActive } from "@/lib/buyer-store";
 
 function getPrimaryEmail(user: UserJSON) {
   const primaryEmail = user.email_addresses.find(
@@ -57,9 +56,11 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ ok: false, message: "El evento de Clerk no tiene ID de usuario." }, { status: 202 });
       }
 
-      await prisma.comprador.deleteMany({
-        where: { clerk_user_id_comprador: userId }
-      });
+      try {
+        await setBuyerActive(userId, false);
+      } catch {
+        return NextResponse.json({ ok: true, skipped: "Comprador no encontrado para desactivar." });
+      }
     }
 
     return NextResponse.json({ ok: true });

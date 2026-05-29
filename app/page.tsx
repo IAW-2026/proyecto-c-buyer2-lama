@@ -22,11 +22,13 @@ import {
 function ProductGrid({
   products,
   favoriteProductIds,
-  canFavorite
+  canFavorite,
+  isAccountActive
 }: {
   products: Product[];
   favoriteProductIds: Set<string>;
   canFavorite: boolean;
+  isAccountActive: boolean;
 }) {
   return (
     <div className="grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 lg:grid-cols-4">
@@ -36,6 +38,7 @@ function ProductGrid({
           product={product}
           isFavorite={favoriteProductIds.has(product.producto_id)}
           canFavorite={canFavorite}
+          isAccountActive={isAccountActive}
         />
       ))}
     </div>
@@ -46,6 +49,7 @@ export default async function Home() {
   const authContext = await getBuyerRouteAuthContext();
   const hasBuyerRole = canAccessBuyerApp(authContext);
   const buyer = authContext.userId && hasBuyerRole ? await getBuyer(authContext.userId) : null;
+  const isAccountActive = buyer?.esta_activo ?? true;
   const favoriteProductIds =
     authContext.userId && hasBuyerRole
       ? new Set(await listFavoriteProductIds(authContext.userId))
@@ -237,6 +241,7 @@ export default async function Home() {
             products={personalizedCatalog.personalizedItems}
             favoriteProductIds={favoriteProductIds}
             canFavorite={Boolean(authContext.userId && hasBuyerRole)}
+            isAccountActive={isAccountActive}
           />
         </section>
       ) : null}
