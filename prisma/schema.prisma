@@ -18,6 +18,7 @@ model comprador {
   fecha_creacion          DateTime                @default(now())
   fecha_actualizacion     DateTime                @updatedAt
   preferencias            preferencias_comprador?
+  favoritos               favorito_producto[]
 
   @@map("comprador")
 }
@@ -31,4 +32,16 @@ model preferencias_comprador {
   comprador                comprador @relation(fields: [clerk_user_id_comprador], references: [clerk_user_id_comprador], onDelete: Cascade)
 
   @@map("preferencias_comprador")
+}
+
+model favorito_producto {
+  favorito_id              String    @id @default(cuid())
+  producto_id              String
+  clerk_user_id_comprador  String
+  fecha_agregado           DateTime  @default(now())
+  comprador                comprador @relation(fields: [clerk_user_id_comprador], references: [clerk_user_id_comprador], onDelete: Cascade)
+
+  @@unique([producto_id, clerk_user_id_comprador])
+  @@index([clerk_user_id_comprador, fecha_agregado])
+  @@map("favorito_producto")
 }

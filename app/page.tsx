@@ -3,6 +3,7 @@ import { DashboardPreview } from "@/components/DashboardPreview";
 import Link from "next/link";
 import { canAccessBuyerApp } from "@/lib/auth";
 import { getBuyer } from "@/lib/buyer-store";
+import { listFavoriteProductIds } from "@/lib/favorites-store";
 import { getBuyerRouteAuthContext } from "@/lib/role-guards";
 import {
   getCatalogProducts,
@@ -18,11 +19,24 @@ import {
   Users
 } from "lucide-react";
 
-function ProductGrid({ products }: { products: Product[] }) {
+function ProductGrid({
+  products,
+  favoriteProductIds,
+  canFavorite
+}: {
+  products: Product[];
+  favoriteProductIds: Set<string>;
+  canFavorite: boolean;
+}) {
   return (
     <div className="grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 lg:grid-cols-4">
       {products.map((product) => (
-        <ProductCard key={product.producto_id} product={product} />
+        <ProductCard
+          key={product.producto_id}
+          product={product}
+          isFavorite={favoriteProductIds.has(product.producto_id)}
+          canFavorite={canFavorite}
+        />
       ))}
     </div>
   );
@@ -30,8 +44,12 @@ function ProductGrid({ products }: { products: Product[] }) {
 
 export default async function Home() {
   const authContext = await getBuyerRouteAuthContext();
-  const buyer =
-    authContext.userId && canAccessBuyerApp(authContext) ? await getBuyer(authContext.userId) : null;
+  const hasBuyerRole = canAccessBuyerApp(authContext);
+  const buyer = authContext.userId && hasBuyerRole ? await getBuyer(authContext.userId) : null;
+  const favoriteProductIds =
+    authContext.userId && hasBuyerRole
+      ? new Set(await listFavoriteProductIds(authContext.userId))
+      : new Set<string>();
   const preferences = buyer?.preferencias;
   const catalog = getCatalogProducts({ pageSize: 8 });
   const personalizedCatalog = hasBuyerPreferences(preferences)
@@ -215,7 +233,11 @@ export default async function Home() {
               Basado en tus preferencias
             </h2>
           </div>
-          <ProductGrid products={personalizedCatalog.personalizedItems} />
+          <ProductGrid
+            products={personalizedCatalog.personalizedItems}
+            favoriteProductIds={favoriteProductIds}
+            canFavorite={Boolean(authContext.userId && hasBuyerRole)}
+          />
         </section>
       ) : null}
 

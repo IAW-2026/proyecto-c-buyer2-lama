@@ -2,11 +2,13 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, Calendar, Ruler, Store } from "lucide-react";
 import { AddToCartButton } from "@/components/AddToCartButton";
 import { CheckoutForm } from "@/components/CheckoutForm";
+import { FavoriteButton } from "@/components/FavoriteButton";
 import { ProductImageGallery } from "@/components/ProductImageGallery";
 import { ButtonLink, Card, PageShell, StatusBadge } from "@/components/ui";
 import { canAccessBuyerApp } from "@/lib/auth";
 import { getBuyer } from "@/lib/buyer-store";
 import { fetchInternalApi } from "@/lib/external-client";
+import { isFavoriteProduct } from "@/lib/favorites-store";
 import { getBuyerRouteAuthContext } from "@/lib/role-guards";
 import { categories, sellers } from "@/lib/mock-external";
 import type { PaymentMethod, Product } from "@/lib/types";
@@ -38,13 +40,17 @@ export default async function ProductPage({
   const seller = sellers.find((item) => item.clerk_user_id_vendedor === product.clerk_user_id_vendedor);
   const category = categories.find((item) => item.categoria_producto_id === product.categoria_id);
   const isProductAvailable = product.estado_publicacion === "activa";
+  const initialFavorite =
+    authContext.userId && hasBuyerRole
+      ? await isFavoriteProduct(authContext.userId, product.producto_id)
+      : false;
 
   return (
     <PageShell
       title={product.titulo}
       eyebrow="Detalle de producto"
       actions={
-        <ButtonLink href="/" className="bg-lama-card text-lama-ink hover:bg-lama-cream">
+        <ButtonLink href="/productos" className="bg-lama-card text-lama-ink hover:bg-lama-cream">
           <ArrowLeft className="h-4 w-4" aria-hidden="true" />
           Volver
         </ButtonLink>
@@ -72,6 +78,17 @@ export default async function ProductPage({
         <aside className="space-y-4">
           <Card>
             <p className="text-3xl font-bold">{currency.format(product.precio)}</p>
+            <div className="mt-5">
+              <FavoriteButton
+                productId={product.producto_id}
+                productTitle={product.titulo}
+                initialFavorite={initialFavorite}
+                isAuthenticated={Boolean(authContext.userId && hasBuyerRole)}
+                isAvailable={isProductAvailable}
+                variant="wide"
+                redirectTo={`/productos/${product.producto_id}`}
+              />
+            </div>
             <dl className="mt-5 space-y-4 text-sm">
               <div className="flex items-center gap-3">
                 <Store className="h-5 w-5 text-lama-detail" aria-hidden="true" />
@@ -85,7 +102,7 @@ export default async function ProductPage({
                 <div>
                   <dt className="font-bold">Talle y marca</dt>
                   <dd>
-                    {product.talle} · {product.marca}
+                    {product.talle} - {product.marca}
                   </dd>
                 </div>
               </div>
@@ -96,12 +113,25 @@ export default async function ProductPage({
                   <dd>{new Date(product.fecha_creacion).toLocaleDateString("es-AR")}</dd>
                 </div>
               </div>
+              {category ? (
+                <div className="flex items-center gap-3">
+                  <Store className="h-5 w-5 text-lama-detail" aria-hidden="true" />
+                  <div>
+                    <dt className="font-bold">Categoria</dt>
+                    <dd>{category.nombre}</dd>
+                  </div>
+                </div>
+              ) : null}
             </dl>
           </Card>
 
           <Card>
             <div className="flex flex-wrap gap-2">
-              <StatusBadge>{product.estado_publicacion}</StatusBadge>
+              {!isProductAvailable ? (
+                <StatusBadge>No disponible</StatusBadge>
+              ) : (
+                <StatusBadge>{product.estado_publicacion}</StatusBadge>
+              )}
               <StatusBadge>{product.estado_prenda}</StatusBadge>
             </div>
             <p className="mt-5 text-base leading-7">{product.descripcion}</p>
@@ -109,19 +139,19 @@ export default async function ProductPage({
 
           {!isProductAvailable ? (
             <Card>
-              <p className="font-bold">Este producto ya fue vendido y no se puede comprar.</p>
+              <p className="font-bold">Este producto no esta disponible para comprar, agregar al carrito o guardar en favoritos.</p>
             </Card>
           ) : authContext.userId && authContext.email && hasBuyerRole ? (
             <AddToCartButton product={product} />
           ) : authContext.userId ? (
             <Card>
-              <p className="font-bold">Necesitas rol comprador para comprar o agregar al carrito.</p>
+              <p className="font-bold">Necesitas rol comprador para comprar, agregar al carrito o guardar favoritos.</p>
             </Card>
           ) : (
             <Card>
-              <p className="font-bold">Necesitas iniciar sesión o registrarte para comprar o agregar al carrito.</p>
+              <p className="font-bold">Necesitas iniciar sesion o registrarte para comprar, agregar al carrito o guardar favoritos.</p>
               <div className="mt-4 flex flex-wrap gap-2">
-                <ButtonLink href="/sign-in">Iniciar Sesión</ButtonLink>
+                <ButtonLink href="/sign-in">Iniciar sesion</ButtonLink>
                 <ButtonLink href="/sign-up" className="bg-lama-cream text-lama-ink hover:bg-lama-card">
                   Registrarme
                 </ButtonLink>

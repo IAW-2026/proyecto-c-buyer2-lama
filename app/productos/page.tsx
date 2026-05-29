@@ -2,6 +2,8 @@ import { ProductCard } from "@/components/ProductCard";
 import { SearchBar } from "@/components/SearchBar";
 import { Pagination } from "@/components/Pagination";
 import { EmptyState } from "@/components/ui";
+import { canAccessBuyerApp } from "@/lib/auth";
+import { listFavoriteProductIds } from "@/lib/favorites-store";
 import {
   getCatalogProducts,
   normalizeProductSort
@@ -9,11 +11,24 @@ import {
 import { getBuyerRouteAuthContext } from "@/lib/role-guards";
 import type { Product } from "@/lib/types";
 
-function ProductGrid({ products }: { products: Product[] }) {
+function ProductGrid({
+  products,
+  favoriteProductIds,
+  canFavorite
+}: {
+  products: Product[];
+  favoriteProductIds: Set<string>;
+  canFavorite: boolean;
+}) {
   return (
     <div className="grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 lg:grid-cols-4">
       {products.map((product) => (
-        <ProductCard key={product.producto_id} product={product} />
+        <ProductCard
+          key={product.producto_id}
+          product={product}
+          isFavorite={favoriteProductIds.has(product.producto_id)}
+          canFavorite={canFavorite}
+        />
       ))}
     </div>
   );
@@ -24,11 +39,16 @@ export default async function ProductsPage({
 }: {
   searchParams: Promise<Record<string, string | undefined>>;
 }) {
-  await getBuyerRouteAuthContext();
+  const authContext = await getBuyerRouteAuthContext();
+  const hasBuyerRole = canAccessBuyerApp(authContext);
   const params = await searchParams;
   const requestedPage = Number(params.page ?? 1);
   const page = Number.isFinite(requestedPage) ? requestedPage : 1;
   const sort = normalizeProductSort(params.sort);
+  const favoriteProductIds =
+    authContext.userId && hasBuyerRole
+      ? new Set(await listFavoriteProductIds(authContext.userId))
+      : new Set<string>();
   const catalog = getCatalogProducts({
     search: params.search,
     categoria: params.categoria,
@@ -61,7 +81,11 @@ export default async function ProductsPage({
 
       {catalog.items.length ? (
         <>
-          <ProductGrid products={catalog.items} />
+          <ProductGrid
+            products={catalog.items}
+            favoriteProductIds={favoriteProductIds}
+            canFavorite={Boolean(authContext.userId && hasBuyerRole)}
+          />
           <Pagination
             page={catalog.page}
             pageSize={catalog.pageSize}

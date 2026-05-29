@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Eye } from "lucide-react";
 import type { Product } from "@/lib/types";
+import { FavoriteButton } from "@/components/FavoriteButton";
 import { StatusBadge } from "@/components/ui";
 
 const currency = new Intl.NumberFormat("es-AR", {
@@ -9,15 +10,24 @@ const currency = new Intl.NumberFormat("es-AR", {
   maximumFractionDigits: 0
 });
 
-export function ProductCard({ product }: { product: Product }) {
+export function ProductCard({
+  product,
+  isFavorite = false,
+  canFavorite = false
+}: {
+  product: Product;
+  isFavorite?: boolean;
+  canFavorite?: boolean;
+}) {
+  const isAvailable = product.estado_publicacion === "activa";
+
   return (
-    <Link
-      href={`/productos/${product.producto_id}`}
-      className="group block rounded-2xl focus:outline-none focus:ring-2 focus:ring-lama-detail focus:ring-offset-2"
-      aria-label={`Ver detalle de ${product.titulo}`}
-    >
-      <article className="h-full overflow-hidden rounded-2xl border border-lama-line bg-lama-card shadow-soft transition-all duration-300 group-hover:-translate-y-1 group-hover:border-lama-detail/40 group-hover:shadow-lg">
-        {/* Image */}
+    <article className="group relative h-full overflow-hidden rounded-2xl border border-lama-line bg-lama-card shadow-soft transition-all duration-300 hover:-translate-y-1 hover:border-lama-detail/40 hover:shadow-lg">
+      <Link
+        href={`/productos/${product.producto_id}`}
+        className="block h-full rounded-2xl focus:outline-none focus:ring-2 focus:ring-lama-detail focus:ring-offset-2"
+        aria-label={`Ver detalle de ${product.titulo}`}
+      >
         <div className="relative aspect-[3/4] overflow-hidden bg-lama-cream">
           <img
             src={product.imagenes[0]}
@@ -33,9 +43,13 @@ export function ProductCard({ product }: { product: Product }) {
           </div>
         </div>
 
-        {/* Content */}
         <div className="space-y-2 p-3 sm:p-4">
           <div className="flex flex-wrap gap-1.5">
+            {!isAvailable ? (
+              <StatusBadge className="px-2 py-0.5 text-[10px] leading-4 sm:text-xs">
+                No disponible
+              </StatusBadge>
+            ) : null}
             <StatusBadge className="px-2 py-0.5 text-[10px] leading-4 sm:text-xs">
               {product.estado_prenda}
             </StatusBadge>
@@ -53,8 +67,18 @@ export function ProductCard({ product }: { product: Product }) {
             <p className="mt-1 text-xs text-lama-ink/55 sm:text-sm">{product.marca}</p>
           </div>
         </div>
-      </article>
-    </Link>
+      </Link>
+
+      <FavoriteButton
+        productId={product.producto_id}
+        productTitle={product.titulo}
+        initialFavorite={isFavorite}
+        isAuthenticated={canFavorite}
+        isAvailable={isAvailable}
+        redirectTo={`/productos/${product.producto_id}`}
+        className="absolute right-3 top-3 z-10"
+      />
+    </article>
   );
 }
 

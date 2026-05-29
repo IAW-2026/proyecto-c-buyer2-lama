@@ -1,7 +1,7 @@
 "use client";
 
 import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
-import { LogIn, ShoppingBag, ShoppingCart, UserRound } from "lucide-react";
+import { Heart, LogIn, ShoppingBag, ShoppingCart, UserRound } from "lucide-react";
 import Link from "next/link";
 
 function SignedOutAccountMenu() {
@@ -49,6 +49,11 @@ function ClerkAccountMenu({ isAdmin }: { isAdmin: boolean }) {
             href="/compras"
             label="Mis compras"
             labelIcon={<ShoppingBag className="h-4 w-4" aria-hidden="true" />}
+          />
+          <UserButton.Link
+            href="/favoritos"
+            label="Mis favoritos"
+            labelIcon={<Heart className="h-4 w-4" aria-hidden="true" />}
           />
           <UserButton.Link
             href="/carrito"

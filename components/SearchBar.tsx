@@ -9,24 +9,42 @@ type Option = {
   label: string;
 };
 
+type SortOption = {
+  value: ProductSort;
+  label: string;
+};
+
+const defaultSortOptions: SortOption[] = [
+  { value: "price_asc", label: "Precio mas bajo" },
+  { value: "price_desc", label: "Precio mas alto" },
+  { value: "recent", label: "Agregados recientemente" }
+];
+
 export function SearchBar({
   search,
   categoria,
   talle,
   sort,
-  categoryOptions
+  categoryOptions,
+  basePath = "/",
+  sortOptions = defaultSortOptions
 }: {
   search?: string;
   categoria?: string;
   talle?: string;
   sort?: ProductSort;
   categoryOptions: Option[];
+  basePath?: string;
+  sortOptions?: SortOption[];
 }) {
-  const clearFiltersHref = sort && sort !== "recent" ? `/productos?sort=${sort}` : "/productos";
+  const clearFiltersHref = sort && sort !== "recent" ? `${basePath}?sort=${sort}` : basePath;
 
   return (
     <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
-      <form action="/productos" className="grid gap-3 rounded-2xl border border-lama-line bg-lama-card p-4 shadow-soft sm:p-5 md:grid-cols-[minmax(260px,1fr)_150px_120px_auto_auto] md:items-center lg:basis-3/4">
+      <form
+        action={basePath}
+        className="grid gap-3 rounded-2xl border border-lama-line bg-lama-card p-4 shadow-soft sm:p-5 md:grid-cols-[minmax(260px,1fr)_150px_120px_auto_auto] md:items-center lg:basis-3/4"
+      >
         {sort && sort !== "recent" ? <input type="hidden" name="sort" value={sort} /> : null}
 
         <label className="sr-only" htmlFor="search">
@@ -44,7 +62,7 @@ export function SearchBar({
         </div>
 
         <label className="sr-only" htmlFor="categoria">
-          Categoría
+          Categoria
         </label>
         <select
           id="categoria"
@@ -90,7 +108,10 @@ export function SearchBar({
         </Link>
       </form>
 
-      <form action="/productos" className="flex flex-col gap-3 rounded-2xl border border-lama-line bg-lama-card p-4 shadow-soft sm:p-5 lg:flex-1">
+      <form
+        action={basePath}
+        className="flex flex-col gap-3 rounded-2xl border border-lama-line bg-lama-card p-4 shadow-soft sm:p-5 lg:flex-1"
+      >
         {search ? <input type="hidden" name="search" value={search} /> : null}
         {categoria ? <input type="hidden" name="categoria" value={categoria} /> : null}
         {talle ? <input type="hidden" name="talle" value={talle} /> : null}
@@ -104,9 +125,11 @@ export function SearchBar({
           onChange={(event) => event.currentTarget.form?.requestSubmit()}
           className="h-11 rounded-xl border border-lama-line bg-lama-cream px-3 text-sm outline-none transition-all focus:border-lama-detail/50 focus:ring-2 focus:ring-lama-detail/20"
         >
-          <option value="price_asc">Precio más bajo</option>
-          <option value="price_desc">Precio más alto</option>
-          <option value="recent">Agregados recientemente</option>
+          {sortOptions.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
         </select>
       </form>
     </div>
