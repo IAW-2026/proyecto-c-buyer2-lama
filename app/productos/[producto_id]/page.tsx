@@ -4,9 +4,10 @@ import { AddToCartButton } from "@/components/AddToCartButton";
 import { CheckoutForm } from "@/components/CheckoutForm";
 import { ProductImageGallery } from "@/components/ProductImageGallery";
 import { ButtonLink, Card, PageShell, StatusBadge } from "@/components/ui";
-import { canAccessBuyerApp, getAuthContext } from "@/lib/auth";
+import { canAccessBuyerApp } from "@/lib/auth";
 import { getBuyer } from "@/lib/buyer-store";
 import { fetchInternalApi } from "@/lib/external-client";
+import { getBuyerRouteAuthContext } from "@/lib/role-guards";
 import { categories, sellers } from "@/lib/mock-external";
 import type { PaymentMethod, Product } from "@/lib/types";
 
@@ -22,6 +23,7 @@ export default async function ProductPage({
   params: Promise<{ producto_id: string }>;
 }) {
   const { producto_id } = await params;
+  const authContext = await getBuyerRouteAuthContext();
   let product: Product;
 
   try {
@@ -31,7 +33,6 @@ export default async function ProductPage({
   }
 
   const methods = await fetchInternalApi<PaymentMethod[]>("/api/metodos-pago");
-  const authContext = await getAuthContext();
   const hasBuyerRole = canAccessBuyerApp(authContext);
   const buyerProfile = authContext.userId && hasBuyerRole ? await getBuyer(authContext.userId) : null;
   const seller = sellers.find((item) => item.clerk_user_id_vendedor === product.clerk_user_id_vendedor);

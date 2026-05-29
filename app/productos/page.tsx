@@ -6,6 +6,7 @@ import {
   getCatalogProducts,
   normalizeProductSort
 } from "@/lib/mock-external";
+import { getBuyerRouteAuthContext } from "@/lib/role-guards";
 import type { Product } from "@/lib/types";
 
 function ProductGrid({ products }: { products: Product[] }) {
@@ -23,6 +24,7 @@ export default async function ProductsPage({
 }: {
   searchParams: Promise<Record<string, string | undefined>>;
 }) {
+  await getBuyerRouteAuthContext();
   const params = await searchParams;
   const requestedPage = Number(params.page ?? 1);
   const page = Number.isFinite(requestedPage) ? requestedPage : 1;

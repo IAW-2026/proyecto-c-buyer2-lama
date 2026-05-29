@@ -26,7 +26,7 @@ function SignedOutAccountMenu() {
   );
 }
 
-function ClerkAccountMenu() {
+function ClerkAccountMenu({ isAdmin }: { isAdmin: boolean }) {
   return (
     <UserButton
       afterSignOutUrl="/sign-in"
@@ -38,23 +38,25 @@ function ClerkAccountMenu() {
         }
       }}
     >
-      <UserButton.MenuItems>
-        <UserButton.Link
-          href="/perfil"
-          label="Perfil"
-          labelIcon={<UserRound className="h-4 w-4" aria-hidden="true" />}
-        />
-        <UserButton.Link
-          href="/compras"
-          label="Mis compras"
-          labelIcon={<ShoppingBag className="h-4 w-4" aria-hidden="true" />}
-        />
-        <UserButton.Link
-          href="/carrito"
-          label="Mi Carrito"
-          labelIcon={<ShoppingCart className="h-4 w-4" aria-hidden="true" />}
-        />
-      </UserButton.MenuItems>
+      {!isAdmin ? (
+        <UserButton.MenuItems>
+          <UserButton.Link
+            href="/perfil"
+            label="Perfil"
+            labelIcon={<UserRound className="h-4 w-4" aria-hidden="true" />}
+          />
+          <UserButton.Link
+            href="/compras"
+            label="Mis compras"
+            labelIcon={<ShoppingBag className="h-4 w-4" aria-hidden="true" />}
+          />
+          <UserButton.Link
+            href="/carrito"
+            label="Mi Carrito"
+            labelIcon={<ShoppingCart className="h-4 w-4" aria-hidden="true" />}
+          />
+        </UserButton.MenuItems>
+      ) : null}
     </UserButton>
   );
 }
@@ -71,7 +73,13 @@ function StaticAccountMenu() {
   );
 }
 
-export function AccountMenu({ clerkConfigured }: { clerkConfigured: boolean }) {
+export function AccountMenu({
+  clerkConfigured,
+  isAdmin = false
+}: {
+  clerkConfigured: boolean;
+  isAdmin?: boolean;
+}) {
   if (!clerkConfigured) {
     return <StaticAccountMenu />;
   }
@@ -79,7 +87,7 @@ export function AccountMenu({ clerkConfigured }: { clerkConfigured: boolean }) {
   return (
     <>
       <SignedIn>
-        <ClerkAccountMenu />
+        <ClerkAccountMenu isAdmin={isAdmin} />
       </SignedIn>
       <SignedOut>
         <SignedOutAccountMenu />

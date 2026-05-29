@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Instagram, Mail, MapPin, Heart } from "lucide-react";
+import { canAccessAdmin, getAuthContext } from "@/lib/auth";
 
 const footerSections = [
   {
@@ -42,7 +43,13 @@ const legalLinks = [
   { label: "Defensa de las y los consumidores", href: "/" }
 ];
 
-export function Footer() {
+export async function Footer() {
+  const authContext = await getAuthContext();
+
+  if (canAccessAdmin(authContext)) {
+    return null;
+  }
+
   return (
     <footer className="mt-16 border-t border-white/10 bg-lama-ink/80 text-stone-100 backdrop-blur-xl dark:bg-black/70">
       {/* Gradient accent line */}

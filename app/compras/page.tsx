@@ -1,10 +1,11 @@
 import { redirect } from "next/navigation";
 import { PurchasesClient } from "@/components/PurchasesClient";
 import { ButtonLink, Card, PageShell } from "@/components/ui";
-import { canAccessBuyerApp, getAuthContext } from "@/lib/auth";
+import { canAccessBuyerApp } from "@/lib/auth";
+import { getBuyerRouteAuthContext } from "@/lib/role-guards";
 
 export default async function PurchasesPage() {
-  const authContext = await getAuthContext();
+  const authContext = await getBuyerRouteAuthContext();
   const hasBuyerRole = canAccessBuyerApp(authContext);
 
   if (authContext.userId && authContext.roles.length === 0) {

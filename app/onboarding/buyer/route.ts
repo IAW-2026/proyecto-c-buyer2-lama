@@ -1,6 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import { ensureCompradorRole } from "@/lib/auth";
+import { ensureCompradorRole, SUPER_ADMIN_ROLE } from "@/lib/auth";
 
 export async function GET() {
   const { userId } = await auth();
@@ -9,6 +9,11 @@ export async function GET() {
     redirect("/sign-in");
   }
 
-  await ensureCompradorRole(userId);
+  const roles = await ensureCompradorRole(userId);
+
+  if (roles.includes(SUPER_ADMIN_ROLE)) {
+    redirect("/admin");
+  }
+
   redirect("/perfil");
 }

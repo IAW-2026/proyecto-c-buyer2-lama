@@ -1,9 +1,10 @@
 import { redirect } from "next/navigation";
 import { ProfileForms } from "@/components/ProfileForms";
-import { Card, PageShell, StatusBadge } from "@/components/ui";
-import { canAccessBuyerApp, getAuthContext } from "@/lib/auth";
+import { Card, PageShell } from "@/components/ui";
+import { canAccessBuyerApp } from "@/lib/auth";
 import { ensureBuyerRegistration, getBuyer } from "@/lib/buyer-store";
 import { categories, sellers } from "@/lib/mock-external";
+import { getBuyerRouteAuthContext } from "@/lib/role-guards";
 import type { BuyerWithPreferences } from "@/lib/types";
 
 function emptyBuyer(userId: string, email: string | null, name: string | null): BuyerWithPreferences {
@@ -21,7 +22,7 @@ function emptyBuyer(userId: string, email: string | null, name: string | null): 
 }
 
 export default async function ProfilePage() {
-  const authContext = await getAuthContext();
+  const authContext = await getBuyerRouteAuthContext();
 
   if (authContext.userId && authContext.roles.length === 0) {
     redirect("/onboarding/buyer");

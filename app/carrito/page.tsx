@@ -1,13 +1,14 @@
 import { redirect } from "next/navigation";
 import { CartClient } from "@/components/CartClient";
 import { ButtonLink, Card, PageShell } from "@/components/ui";
-import { canAccessBuyerApp, getAuthContext } from "@/lib/auth";
+import { canAccessBuyerApp } from "@/lib/auth";
 import { getBuyer } from "@/lib/buyer-store";
 import { fetchInternalApi } from "@/lib/external-client";
+import { getBuyerRouteAuthContext } from "@/lib/role-guards";
 import type { PaymentMethod } from "@/lib/types";
 
 export default async function CartPage() {
-  const authContext = await getAuthContext();
+  const authContext = await getBuyerRouteAuthContext();
   const hasBuyerRole = canAccessBuyerApp(authContext);
 
   if (authContext.userId && authContext.roles.length === 0) {

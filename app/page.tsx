@@ -1,8 +1,9 @@
 import { ProductCard } from "@/components/ProductCard";
 import { DashboardPreview } from "@/components/DashboardPreview";
 import Link from "next/link";
-import { canAccessBuyerApp, getAuthContext } from "@/lib/auth";
+import { canAccessBuyerApp } from "@/lib/auth";
 import { getBuyer } from "@/lib/buyer-store";
+import { getBuyerRouteAuthContext } from "@/lib/role-guards";
 import {
   getCatalogProducts,
   getPersonalizedCatalogProducts,
@@ -28,7 +29,7 @@ function ProductGrid({ products }: { products: Product[] }) {
 }
 
 export default async function Home() {
-  const authContext = await getAuthContext();
+  const authContext = await getBuyerRouteAuthContext();
   const buyer =
     authContext.userId && canAccessBuyerApp(authContext) ? await getBuyer(authContext.userId) : null;
   const preferences = buyer?.preferencias;

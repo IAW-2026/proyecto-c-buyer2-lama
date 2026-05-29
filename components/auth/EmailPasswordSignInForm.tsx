@@ -52,7 +52,7 @@ export function EmailPasswordSignInForm() {
 
   useEffect(() => {
     if (isSignedIn) {
-      router.replace("/");
+      router.replace("/post-login");
     }
   }, [isSignedIn, router]);
 
@@ -68,7 +68,7 @@ export function EmailPasswordSignInForm() {
       await signIn.authenticateWithRedirect({
         strategy: "oauth_google",
         redirectUrl: "/sso-callback",
-        redirectUrlComplete: "/onboarding/buyer"
+        redirectUrlComplete: "/post-login"
       });
     } catch (error) {
       setIsGoogleLoading(false);
@@ -95,7 +95,7 @@ export function EmailPasswordSignInForm() {
 
       if (result.status === "complete") {
         await setActive({ session: result.createdSessionId });
-        router.push("/");
+        router.push("/post-login");
         router.refresh();
         return;
       }
