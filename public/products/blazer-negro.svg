@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 675" role="img" aria-labelledby="title desc">
+  <title id="title">Blazer negro sastrero</title>
+  <desc id="desc">Ilustracion de blazer negro sastrero.</desc>
+  <rect width="900" height="675" fill="#f6f1e7"/>
+  <rect x="75" y="70" width="750" height="535" rx="28" fill="#ede6d8"/>
+  <path d="M338 126h224l78 96 60 323-128 28-48-204v193H376V369l-48 204-128-28 60-323z" fill="#2f3633"/>
+  <path d="M390 126l60 206 60-206" fill="#f6f1e7"/>
+  <path d="M390 126l60 206 60-206M450 332v176M392 270h116" stroke="#8fa18d" stroke-width="9" stroke-linecap="round"/>
+  <circle cx="450" cy="390" r="9" fill="#ede6d8"/>
+  <circle cx="450" cy="442" r="9" fill="#ede6d8"/>
+</svg>
+
