@@ -6,11 +6,12 @@ import { CategoryDropdown } from "@/components/CategoryDropdown";
 import { HeaderScrollSurface } from "@/components/HeaderScrollSurface";
 import { MobileMenu } from "@/components/MobileMenu";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { categories } from "@/lib/mock-external";
+import { getCategories } from "@/lib/seller-service";
 
 export async function Header() {
   const authContext = await getAuthContext();
   const showAdmin = canAccessAdmin(authContext);
+  const categories = showAdmin ? [] : await getCategories().catch(() => []);
 
   return (
     <header className="sticky top-0 z-50">

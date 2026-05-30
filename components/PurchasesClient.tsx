@@ -5,12 +5,23 @@ import { PackageCheck, Truck } from "lucide-react";
 import { ProductMini } from "@/components/ProductCard";
 import { Card, EmptyState, LoadingState, StatusBadge } from "@/components/ui";
 import { readPurchases, type StoredPurchase } from "@/lib/purchases-storage";
+import type { OrderStatus, ShippingInfo } from "@/lib/types";
 
 const currency = new Intl.NumberFormat("es-AR", {
   style: "currency",
   currency: "ARS",
   maximumFractionDigits: 0
 });
+
+type PurchasesResponse =
+  | StoredPurchase[]
+  | {
+      items?: StoredPurchase[];
+    };
+
+function normalizePurchasesResponse(response: PurchasesResponse) {
+  return Array.isArray(response) ? response : response.items ?? [];
+}
 
 export function PurchasesClient({ buyerId }: { buyerId: string }) {
   const [purchases, setPurchases] = useState<StoredPurchase[]>([]);
@@ -21,6 +32,30 @@ export function PurchasesClient({ buyerId }: { buyerId: string }) {
       return [...new Map(items.map((purchase) => [purchase.orden_id, purchase])).values()];
     }
 
+    async function enrichPurchase(purchase: StoredPurchase): Promise<StoredPurchase> {
+      const [status, shipping] = await Promise.all([
+        fetch(`/api/ordenes-ventas/${purchase.orden_id}/estado`, { cache: "no-store" })
+          .then(async (response) => (response.ok ? ((await response.json()) as OrderStatus) : null))
+          .catch(() => null),
+        fetch(`/api/envios/orden/${purchase.orden_id}`, { cache: "no-store" })
+          .then(async (response) => (response.ok ? ((await response.json()) as ShippingInfo) : null))
+          .catch(() => null)
+      ]);
+
+      return {
+        ...purchase,
+        ...(status
+          ? {
+              estado_general: status.estado_general,
+              estado_pago: status.estado_pago,
+              estado_envio: status.estado_envio,
+              fecha_actualizacion: status.fecha_actualizacion ?? purchase.fecha_actualizacion
+            }
+          : {}),
+        shipping
+      };
+    }
+
     async function refreshPurchases() {
       const localPurchases = readPurchases();
       let apiPurchases: StoredPurchase[] = [];
@@ -28,13 +63,14 @@ export function PurchasesClient({ buyerId }: { buyerId: string }) {
       try {
         const response = await fetch("/api/ordenes-ventas", { cache: "no-store" });
         if (response.ok) {
-          apiPurchases = await response.json();
+          apiPurchases = normalizePurchasesResponse(await response.json());
         }
       } catch {
         apiPurchases = [];
       }
 
-      setPurchases(mergePurchases([...localPurchases, ...apiPurchases]));
+      const mergedPurchases = mergePurchases([...apiPurchases, ...localPurchases]);
+      setPurchases(await Promise.all(mergedPurchases.map(enrichPurchase)));
       setIsLoaded(true);
     }
 
@@ -49,7 +85,10 @@ export function PurchasesClient({ buyerId }: { buyerId: string }) {
   }, []);
 
   const buyerPurchases = useMemo(
-    () => purchases.filter((purchase) => purchase.clerk_user_id_comprador === buyerId),
+    () =>
+      purchases.filter(
+        (purchase) => (purchase.comprador_id ?? purchase.clerk_user_id_comprador) === buyerId
+      ),
     [buyerId, purchases]
   );
 
@@ -70,7 +109,7 @@ export function PurchasesClient({ buyerId }: { buyerId: string }) {
           <div className="grid gap-5 lg:grid-cols-[1fr_300px]">
             <div className="space-y-4">
               <div className="flex flex-wrap items-center gap-3">
-                <h2 className="text-xl font-bold">Nro. Orden: {purchase.nro_orden}</h2>
+                <h2 className="text-xl font-bold">Orden: {purchase.orden_id}</h2>
                 <StatusBadge>{purchase.estado_general}</StatusBadge>
               </div>
               <div className="space-y-3">
@@ -99,16 +138,27 @@ export function PurchasesClient({ buyerId }: { buyerId: string }) {
                 <Truck className="h-5 w-5 text-lama-detail" aria-hidden="true" />
                 Envio
               </div>
-              <p className="mt-2 text-sm font-bold">Empresa a cargo del envio: lama Logistica</p>
-              <p className="text-sm font-semibold">Codigo de Seguimiento: LMA-{purchase.orden_id.toUpperCase()}</p>
+              <p className="mt-2 text-sm font-bold">
+                Empresa a cargo del envio: {purchase.shipping?.empresa_logistica ?? "Pendiente"}
+              </p>
+              {purchase.shipping?.codigo_seguimiento ? (
+                <p className="text-sm font-semibold">
+                  Codigo de Seguimiento: {purchase.shipping.codigo_seguimiento}
+                </p>
+              ) : null}
               <ol className="mt-4 space-y-3">
-                <li className="text-sm">
-                  <div className="flex items-center gap-2 font-bold">
-                    <PackageCheck className="h-4 w-4 text-lama-detail" aria-hidden="true" />
-                    {purchase.estado_envio}
-                  </div>
-                  <p className="ml-6 text-lama-ink/75">Envio generado al confirmar la compra.</p>
-                </li>
+                {(purchase.shipping?.historial_estados?.length
+                  ? purchase.shipping.historial_estados
+                  : [{ estado: purchase.estado_envio, descripcion: "Envio pendiente de preparacion." }]
+                ).map((item, index) => (
+                  <li key={`${item.estado}-${index}`} className="text-sm">
+                    <div className="flex items-center gap-2 font-bold">
+                      <PackageCheck className="h-4 w-4 text-lama-detail" aria-hidden="true" />
+                      {item.estado}
+                    </div>
+                    <p className="ml-6 text-lama-ink/75">{item.descripcion}</p>
+                  </li>
+                ))}
               </ol>
             </div>
           </div>

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Search, X } from "lucide-react";
-import type { ProductSort } from "@/lib/mock-external";
+import type { ProductSort } from "@/lib/types";
 
 type Option = {
   id: string;

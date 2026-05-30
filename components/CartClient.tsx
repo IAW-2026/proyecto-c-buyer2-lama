@@ -7,7 +7,7 @@ import { CreditCard, Loader2, ShoppingBag, Trash2 } from "lucide-react";
 import { BillingDetailsModal, type BillingDetails } from "@/components/BillingDetailsModal";
 import { EmptyState, LoadingState } from "@/components/ui";
 import { savePurchase } from "@/lib/purchases-storage";
-import type { PaymentMethod, Product } from "@/lib/types";
+import type { Product } from "@/lib/types";
 
 const CART_STORAGE_KEY = "lama-cart";
 
@@ -36,16 +36,13 @@ function saveCart(cart: Product[]) {
 }
 
 export function CartClient({
-  buyer,
-  methods
+  buyer
 }: {
   buyer: CartBuyer;
-  methods: PaymentMethod[];
 }) {
   const router = useRouter();
   const [cart, setCart] = useState<Product[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
-  const [methodId, setMethodId] = useState(methods[0]?.metodo_pago_id ?? "");
   const [isBillingOpen, setIsBillingOpen] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -109,8 +106,7 @@ export function CartClient({
           },
           monto_producto: productsTotal,
           monto_envio: shippingAmount,
-          monto_total: total,
-          metodo_pago_id: methodId
+          monto_total: total
         })
       });
 
@@ -124,16 +120,16 @@ export function CartClient({
       const now = new Date().toISOString();
       savePurchase({
         orden_id: data.orden_id,
-        nro_orden: data.nro_orden,
+        comprador_id: buyer.clerk_user_id_comprador,
         clerk_user_id_comprador: buyer.clerk_user_id_comprador,
         producto_ids: cart.map((product) => product.producto_id),
         total,
         direccion_envio: details.direccion_envio,
-        estado_general: "pagada",
-        estado_pago: "aprobado",
-        estado_envio: "pendiente",
+        estado_general: data.estado_general ?? "pendiente de pago",
+        estado_pago: data.estado_pago ?? "pendiente",
+        estado_envio: data.estado_envio ?? "pendiente",
         fecha_creacion: data.fecha_creacion ?? now,
-        fecha_actualizacion: data.fecha_creacion ?? now,
+        fecha_actualizacion: data.fecha_actualizacion ?? data.fecha_creacion ?? now,
         products: cart
       });
 
@@ -222,26 +218,10 @@ export function CartClient({
           </div>
         </dl>
 
-        <label className="mt-5 block text-sm font-bold" htmlFor="metodo_pago_carrito">
-          Metodo de pago
-        </label>
-        <select
-          id="metodo_pago_carrito"
-          value={methodId}
-          onChange={(event) => setMethodId(event.target.value)}
-          className="mt-2 w-full rounded-md border border-lama-line bg-lama-cream px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-lama-detail"
-        >
-          {methods.map((method) => (
-            <option key={method.metodo_pago_id} value={method.metodo_pago_id}>
-              {method.metodo_pago}
-            </option>
-          ))}
-        </select>
-
         <button
           type="button"
           onClick={openBillingDetails}
-          disabled={isPending || !methodId}
+          disabled={isPending}
           className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-md bg-lama-detail px-4 py-3 text-sm font-bold text-white hover:bg-lama-ink focus:outline-none focus:ring-2 focus:ring-lama-detail focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isPending ? (

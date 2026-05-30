@@ -7,8 +7,8 @@ import { ProductMini } from "@/components/ProductCard";
 import { ButtonLink, Card, PageShell, StatusBadge } from "@/components/ui";
 import { canAccessAdmin, getAuthContext } from "@/lib/auth";
 import { getBuyer } from "@/lib/buyer-store";
-import { categories, getProductById, sellers } from "@/lib/mock-external";
 import { getSalesOrdersForBuyer } from "@/lib/order-service";
+import { getCategories, getProductsByIds, getSellers } from "@/lib/seller-service";
 
 const currency = new Intl.NumberFormat("es-AR", {
   style: "currency",
@@ -48,9 +48,16 @@ export default async function AdminBuyerDetailPage({
     notFound();
   }
 
-  const orders = (await getSalesOrdersForBuyer(buyer.clerk_user_id_comprador)).map((order) => ({
+  const [ordersFromSeller, categories, sellers] = await Promise.all([
+    getSalesOrdersForBuyer(buyer.clerk_user_id_comprador),
+    getCategories().catch(() => []),
+    getSellers().catch(() => [])
+  ]);
+  const products = await getProductsByIds(ordersFromSeller.flatMap((order) => order.producto_ids)).catch(() => []);
+  const productsById = new Map(products.map((product) => [product.producto_id, product]));
+  const orders = ordersFromSeller.map((order) => ({
     ...order,
-    products: order.producto_ids.map((productId) => getProductById(productId)).filter(Boolean)
+    products: order.producto_ids.map((productId) => productsById.get(productId)).filter(Boolean)
   }));
 
   return (
@@ -172,7 +179,7 @@ export default async function AdminBuyerDetailPage({
                   <article key={order.orden_id} className="rounded-lg border border-lama-line bg-lama-cream p-4">
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div>
-                        <h3 className="font-bold">Nro. Orden: {order.nro_orden}</h3>
+                        <h3 className="font-bold">Orden: {order.orden_id}</h3>
                         <p className="mt-1 text-sm text-lama-ink/65">{formatDate(order.fecha_creacion)}</p>
                       </div>
                       <div className="flex flex-wrap gap-2">

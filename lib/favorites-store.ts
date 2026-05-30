@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { getProductById, products } from "@/lib/mock-external";
+import { getProductById, getProductsByIds } from "@/lib/seller-service";
 import type { Product } from "@/lib/types";
 
 export type FavoriteProduct = Product & {
@@ -34,19 +34,6 @@ function normalizeFavoriteSort(sort?: string | null): FavoriteSort {
   return sort === "recent" ? sort : "recent";
 }
 
-function favoriteProductFromRecord(record: FavoriteRecord): FavoriteProduct | null {
-  const product = getProductById(record.producto_id);
-
-  if (!product) {
-    return null;
-  }
-
-  return {
-    ...product,
-    fecha_agregado: record.fecha_agregado.toISOString()
-  };
-}
-
 async function getFavoriteRecords(clerkUserId: string): Promise<FavoriteRecord[]> {
   if (shouldUseDatabase()) {
     try {
@@ -73,7 +60,7 @@ export async function isFavoriteProduct(clerkUserId: string, productId: string) 
 }
 
 export async function addFavoriteProduct(clerkUserId: string, productId: string) {
-  const product = getProductById(productId);
+  const product = await getProductById(productId);
 
   if (!product || !productIsAvailable(product)) {
     throw new Error("Producto no disponible para guardar en favoritos.");
@@ -174,8 +161,22 @@ export async function listFavoriteProducts({
   const normalizedPage = Math.max(page, 1);
   const normalizedPageSize = Math.min(Math.max(pageSize, 1), 20);
   const normalizedSort = normalizeFavoriteSort(sort);
-  const favoriteProducts = (await getFavoriteRecords(clerkUserId))
-    .map(favoriteProductFromRecord)
+  const favoriteRecords = await getFavoriteRecords(clerkUserId);
+  const products = await getProductsByIds(favoriteRecords.map((record) => record.producto_id)).catch(() => []);
+  const productsById = new Map(products.map((product) => [product.producto_id, product]));
+  const favoriteProducts = favoriteRecords
+    .map((record) => {
+      const product = productsById.get(record.producto_id);
+
+      if (!product) {
+        return null;
+      }
+
+      return {
+        ...product,
+        fecha_agregado: record.fecha_agregado.toISOString()
+      };
+    })
     .filter((product): product is FavoriteProduct => Boolean(product));
   const filtered = favoriteProducts.filter((product) => {
     const matchesSearch = normalizedSearch
@@ -199,6 +200,6 @@ export async function listFavoriteProducts({
     total: sorted.length,
     page: normalizedPage,
     pageSize: normalizedPageSize,
-    categorias: [...new Set(products.map((product) => product.categoria_id))]
+    categorias: [...new Set(favoriteProducts.map((product) => product.categoria_id))]
   };
 }

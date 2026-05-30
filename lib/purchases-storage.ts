@@ -1,20 +1,21 @@
-import type { Product } from "@/lib/types";
+import type { OrderStatus, Product, ShippingInfo } from "@/lib/types";
 
 export const PURCHASES_STORAGE_KEY = "lama-purchases";
 
 export type StoredPurchase = {
   orden_id: string;
-  nro_orden: string;
+  comprador_id?: string;
   clerk_user_id_comprador: string;
   producto_ids: string[];
   total: number;
   direccion_envio: string;
-  estado_general: "pagada";
-  estado_pago: "aprobado";
-  estado_envio: "pendiente";
+  estado_general: OrderStatus["estado_general"];
+  estado_pago: OrderStatus["estado_pago"];
+  estado_envio: OrderStatus["estado_envio"];
   fecha_creacion: string;
   fecha_actualizacion: string;
   products: Product[];
+  shipping?: ShippingInfo | null;
 };
 
 export function readPurchases() {

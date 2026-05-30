@@ -7,8 +7,8 @@ import { ButtonLink, Card, EmptyState, PageShell } from "@/components/ui";
 import { canAccessBuyerApp } from "@/lib/auth";
 import { getBuyer } from "@/lib/buyer-store";
 import { listFavoriteProducts } from "@/lib/favorites-store";
-import { categories } from "@/lib/mock-external";
 import { getBuyerRouteAuthContext } from "@/lib/role-guards";
+import { getCategories } from "@/lib/seller-service";
 import type { FavoriteProduct } from "@/lib/favorites-store";
 
 function ProductGrid({ products, isAccountActive }: { products: FavoriteProduct[]; isAccountActive: boolean }) {
@@ -59,6 +59,7 @@ export default async function FavoritesPage({
         pageSize: 8
       })
     : null;
+  const categories = hasBuyerRole ? await getCategories().catch(() => []) : [];
 
   return (
     <PageShell

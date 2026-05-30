@@ -10,8 +10,8 @@ import { getBuyer } from "@/lib/buyer-store";
 import { fetchInternalApi } from "@/lib/external-client";
 import { isFavoriteProduct } from "@/lib/favorites-store";
 import { getBuyerRouteAuthContext } from "@/lib/role-guards";
-import { categories, sellers } from "@/lib/mock-external";
-import type { PaymentMethod, Product } from "@/lib/types";
+import { getCategories, getSellers } from "@/lib/seller-service";
+import type { Product } from "@/lib/types";
 
 const currency = new Intl.NumberFormat("es-AR", {
   style: "currency",
@@ -34,7 +34,10 @@ export default async function ProductPage({
     notFound();
   }
 
-  const methods = await fetchInternalApi<PaymentMethod[]>("/api/metodos-pago");
+  const [categories, sellers] = await Promise.all([
+    getCategories().catch(() => []),
+    getSellers().catch(() => [])
+  ]);
   const hasBuyerRole = canAccessBuyerApp(authContext);
   const buyerProfile = authContext.userId && hasBuyerRole ? await getBuyer(authContext.userId) : null;
   const isAccountActive = buyerProfile?.esta_activo ?? true;
@@ -68,7 +71,6 @@ export default async function ProductPage({
           {isProductAvailable && canUseBuyerActions ? (
             <CheckoutForm
               product={product}
-              methods={methods}
               buyer={{
                 clerk_user_id_comprador: authContext.userId!,
                 nombre: buyerProfile?.nombre_comprador ?? authContext.name ?? "",
@@ -106,9 +108,9 @@ export default async function ProductPage({
               <div className="flex items-center gap-3">
                 <Ruler className="h-5 w-5 text-lama-detail" aria-hidden="true" />
                 <div>
-                  <dt className="font-bold">Talle y marca</dt>
+                  <dt className="font-bold">Talle, marca y genero</dt>
                   <dd>
-                    {product.talle} - {product.marca}
+                    {product.talle} - {product.marca} - {product.genero}
                   </dd>
                 </div>
               </div>

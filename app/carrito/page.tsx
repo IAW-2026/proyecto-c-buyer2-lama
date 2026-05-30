@@ -4,9 +4,7 @@ import { CartClient } from "@/components/CartClient";
 import { ButtonLink, Card, PageShell } from "@/components/ui";
 import { canAccessBuyerApp } from "@/lib/auth";
 import { getBuyer } from "@/lib/buyer-store";
-import { fetchInternalApi } from "@/lib/external-client";
 import { getBuyerRouteAuthContext } from "@/lib/role-guards";
-import type { PaymentMethod } from "@/lib/types";
 
 export default async function CartPage() {
   const authContext = await getBuyerRouteAuthContext();
@@ -16,7 +14,6 @@ export default async function CartPage() {
     redirect("/onboarding/buyer");
   }
 
-  const methods = authContext.userId && hasBuyerRole ? await fetchInternalApi<PaymentMethod[]>("/api/metodos-pago") : [];
   const buyerProfile = authContext.userId && hasBuyerRole ? await getBuyer(authContext.userId) : null;
   const isAccountActive = buyerProfile?.esta_activo ?? true;
 
@@ -34,7 +31,6 @@ export default async function CartPage() {
     >
       {authContext.userId && authContext.email && hasBuyerRole && isAccountActive ? (
         <CartClient
-          methods={methods}
           buyer={{
             clerk_user_id_comprador: authContext.userId,
             nombre: buyerProfile?.nombre_comprador ?? authContext.name ?? "",

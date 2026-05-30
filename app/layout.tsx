@@ -5,6 +5,8 @@ import { ScrollToTopButton } from "@/components/ScrollToTopButton";
 import { Providers } from "@/app/providers";
 import "./globals.css";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "LAMA — Marketplace de Moda Circular",
   description:

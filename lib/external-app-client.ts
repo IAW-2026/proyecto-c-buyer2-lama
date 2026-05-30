@@ -1,0 +1,79 @@
+type ExternalAppName = "seller" | "shipping" | "payments";
+
+const baseUrlEnvByApp: Record<ExternalAppName, string> = {
+  seller: "SELLER_APP_BASE_URL",
+  shipping: "SHIPPING_APP_BASE_URL",
+  payments: "PAYMENTS_APP_BASE_URL"
+};
+
+export class ExternalApiError extends Error {
+  constructor(
+    message: string,
+    readonly status: number,
+    readonly body: string
+  ) {
+    super(message);
+  }
+}
+
+function getExternalAppBaseUrl(app: ExternalAppName) {
+  const envName = baseUrlEnvByApp[app];
+  const baseUrl = process.env[envName]?.trim().replace(/\/$/, "");
+
+  if (!baseUrl) {
+    throw new Error(`Falta configurar ${envName}.`);
+  }
+
+  return baseUrl;
+}
+
+function buildExternalUrl(app: ExternalAppName, path: string) {
+  return new URL(path.replace(/^\//, ""), `${getExternalAppBaseUrl(app)}/`).toString();
+}
+
+async function readResponseBody(response: Response) {
+  return response.text().catch(() => "");
+}
+
+export async function fetchExternalJson<T>(
+  app: ExternalAppName,
+  path: string,
+  init?: RequestInit
+): Promise<T> {
+  const response = await fetch(buildExternalUrl(app, path), {
+    ...init,
+    cache: "no-store",
+    headers: {
+      ...(init?.body ? { "content-type": "application/json" } : {}),
+      ...init?.headers
+    }
+  });
+
+  if (!response.ok) {
+    const body = await readResponseBody(response);
+    throw new ExternalApiError(`Error al consumir ${app}:${path}`, response.status, body);
+  }
+
+  const body = await readResponseBody(response);
+  return (body ? JSON.parse(body) : null) as T;
+}
+
+export async function fetchExternalNoContent(
+  app: ExternalAppName,
+  path: string,
+  init?: RequestInit
+) {
+  const response = await fetch(buildExternalUrl(app, path), {
+    ...init,
+    cache: "no-store",
+    headers: {
+      ...(init?.body ? { "content-type": "application/json" } : {}),
+      ...init?.headers
+    }
+  });
+
+  if (!response.ok) {
+    const body = await readResponseBody(response);
+    throw new ExternalApiError(`Error al consumir ${app}:${path}`, response.status, body);
+  }
+}

@@ -8,7 +8,7 @@ import { listFavoriteProductIds } from "@/lib/favorites-store";
 import {
   getCatalogProducts,
   normalizeProductSort
-} from "@/lib/mock-external";
+} from "@/lib/seller-service";
 import { getBuyerRouteAuthContext } from "@/lib/role-guards";
 import type { Product } from "@/lib/types";
 
@@ -55,7 +55,7 @@ export default async function ProductsPage({
     authContext.userId && hasBuyerRole
       ? new Set(await listFavoriteProductIds(authContext.userId))
       : new Set<string>();
-  const catalog = getCatalogProducts({
+  const catalog = await getCatalogProducts({
     search: params.search,
     categoria: params.categoria,
     talle: params.talle,

@@ -58,6 +58,11 @@ export function ProductCard({
             <StatusBadge className="px-2 py-0.5 text-[10px] leading-4 sm:text-xs">
               Talle {product.talle}
             </StatusBadge>
+            {product.genero ? (
+              <StatusBadge className="px-2 py-0.5 text-[10px] leading-4 sm:text-xs">
+                {product.genero}
+              </StatusBadge>
+            ) : null}
           </div>
           <p className="text-lg font-bold text-lama-detail sm:text-xl">
             {currency.format(product.precio)}
@@ -94,7 +99,8 @@ export function ProductMini({ product }: { product: Product }) {
       <div>
         <p className="font-bold">{product.titulo}</p>
         <p className="text-sm text-lama-ink/70">
-          {product.marca} · Talle {product.talle}
+          {product.marca} - Talle {product.talle}
+          {product.genero ? ` - ${product.genero}` : ""}
         </p>
       </div>
     </div>

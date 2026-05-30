@@ -9,7 +9,7 @@ import {
   getCatalogProducts,
   getPersonalizedCatalogProducts,
   hasBuyerPreferences
-} from "@/lib/mock-external";
+} from "@/lib/seller-service";
 import type { Product } from "@/lib/types";
 import {
   ChevronDown,
@@ -55,24 +55,27 @@ export default async function Home() {
       ? new Set(await listFavoriteProductIds(authContext.userId))
       : new Set<string>();
   const preferences = buyer?.preferencias;
-  const catalog = getCatalogProducts({ pageSize: 8 });
+  const catalog = await getCatalogProducts({ pageSize: 8 });
   const personalizedCatalog = hasBuyerPreferences(preferences)
-    ? getPersonalizedCatalogProducts({
+    ? await getPersonalizedCatalogProducts({
         preferences,
         pageSize: 6
       })
     : null;
-  const categoryTiles = catalog.categorias.map((category) => {
-    const categoryProduct = getCatalogProducts({
-      categoria: category.categoria_producto_id,
-      pageSize: 1
-    }).items[0];
+  const categoryTiles = await Promise.all(
+    catalog.categorias.map(async (category) => {
+      const categoryProduct = (await getCatalogProducts({
+        categoria: category.categoria_producto_id,
+        pageSize: 1,
+        includeOptions: false
+      })).items[0];
 
-    return {
-      ...category,
-      image: categoryProduct?.imagenes[0] ?? "/products/inicio.png"
-    };
-  });
+      return {
+        ...category,
+        image: categoryProduct?.imagenes[0] ?? "/products/inicio.png"
+      };
+    })
+  );
 
   return (
     <div>

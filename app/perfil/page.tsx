@@ -3,8 +3,8 @@ import { ProfileForms } from "@/components/ProfileForms";
 import { Card, PageShell } from "@/components/ui";
 import { canAccessBuyerApp } from "@/lib/auth";
 import { ensureBuyerRegistration, getBuyer } from "@/lib/buyer-store";
-import { categories, sellers } from "@/lib/mock-external";
 import { getBuyerRouteAuthContext } from "@/lib/role-guards";
+import { getCategories, getSellers } from "@/lib/seller-service";
 import type { BuyerWithPreferences } from "@/lib/types";
 
 function emptyBuyer(userId: string, email: string | null, name: string | null): BuyerWithPreferences {
@@ -72,6 +72,11 @@ export default async function ProfilePage() {
       </PageShell>
     );
   }
+
+  const [categories, sellers] = await Promise.all([
+    getCategories().catch(() => []),
+    getSellers().catch(() => [])
+  ]);
 
   return (
     <PageShell title="Mi Perfil" eyebrow="Informacion personal y preferencias">
