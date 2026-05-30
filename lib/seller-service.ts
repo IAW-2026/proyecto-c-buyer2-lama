@@ -1,4 +1,6 @@
 import { ExternalApiError, fetchExternalJson } from "@/lib/external-app-client";
+import { getAIRecommendations } from "@/lib/ai/recommendations";
+import { parseSearchIntent, looksLikeNaturalLanguage } from "@/lib/ai/search-intent";
 import type {
   BuyerPreferences,
   CatalogResponse,
@@ -20,6 +22,7 @@ type CatalogQuery = {
   page?: number;
   pageSize?: number;
   includeOptions?: boolean;
+  semanticSearch?: boolean;
 };
 
 type SellerCatalogResponse = {
@@ -92,6 +95,31 @@ export function normalizeProductSort(sort?: string | null): ProductSort {
   }
 
   return "recent";
+}
+
+const allowedSizes = new Set(["XS", "S", "M", "L", "XL", "36", "37", "38", "39"]);
+
+function normalizeSizeFilter(value?: string | null) {
+  const normalized = value?.trim().toUpperCase();
+  return normalized && allowedSizes.has(normalized) ? normalized : null;
+}
+
+function normalizeGenderFilter(value?: string | null) {
+  const normalized = value?.trim().toLowerCase();
+
+  if (normalized === "hombre") {
+    return "Hombre";
+  }
+
+  if (normalized === "mujer") {
+    return "Mujer";
+  }
+
+  if (normalized === "unisex") {
+    return "Unisex";
+  }
+
+  return null;
 }
 
 function normalizePage(value?: number) {
@@ -224,6 +252,55 @@ export async function getSellers(options: Parameters<typeof getSellersList>[0] =
   return (await getSellersList(options)).items;
 }
 
+async function resolveSemanticCatalogQuery(query: CatalogQuery): Promise<{
+  query: CatalogQuery;
+  categoriesForOptions?: Category[];
+  aiSearch?: CatalogResponse["aiSearch"];
+}> {
+  const originalSearch = query.search?.trim() ?? "";
+
+  if (
+    !query.semanticSearch ||
+    !looksLikeNaturalLanguage(originalSearch) ||
+    query.categoria ||
+    query.talle ||
+    query.genero
+  ) {
+    return { query };
+  }
+
+  const categories = await getCategories().catch(() => []);
+  const intent = await parseSearchIntent(originalSearch, categories);
+
+  if (!intent) {
+    return { query, categoriesForOptions: categories };
+  }
+
+  const categoryIds = new Set(categories.map((category) => category.categoria_producto_id));
+  const inferredCategory =
+    intent.categoria && categoryIds.has(intent.categoria) ? intent.categoria : query.categoria;
+  const inferredSize = normalizeSizeFilter(intent.talle) ?? query.talle;
+  const inferredGender = normalizeGenderFilter(intent.genero) ?? query.genero;
+  const interpretedSearch = intent.search.trim() || originalSearch;
+
+  return {
+    query: {
+      ...query,
+      search: interpretedSearch,
+      categoria: inferredCategory,
+      talle: inferredSize,
+      genero: inferredGender
+    },
+    categoriesForOptions: categories,
+    aiSearch: {
+      used: true,
+      originalSearch,
+      interpretedSearch,
+      intentDescription: intent.intent_description || undefined
+    }
+  };
+}
+
 export function hasBuyerPreferences(preferences?: BuyerPreferences | null): preferences is BuyerPreferences {
   return Boolean(
     preferences &&
@@ -270,14 +347,21 @@ function sortByPreferenceRelevance(items: Product[], preferences: BuyerPreferenc
 }
 
 export async function getCatalogProducts(query: CatalogQuery = {}): Promise<CatalogResponse> {
-  const normalizedPage = normalizePage(query.page);
-  const normalizedPageSize = normalizePageSize(query.pageSize);
+  const semanticQuery = await resolveSemanticCatalogQuery(query);
+  const effectiveQuery = semanticQuery.query;
+  const normalizedPage = normalizePage(effectiveQuery.page);
+  const normalizedPageSize = normalizePageSize(effectiveQuery.pageSize);
   const catalog = await fetchExternalJson<SellerCatalogResponse>(
     "seller",
-    `/api/productos?${buildProductQuery(query)}`
+    `/api/productos?${buildProductQuery(effectiveQuery)}`
   );
   const [categorias, vendedores]: [Category[], Seller[]] =
-    query.includeOptions === false ? [[], []] : await Promise.all([getCategories(), getSellers()]);
+    effectiveQuery.includeOptions === false
+      ? [[], []]
+      : await Promise.all([
+          semanticQuery.categoriesForOptions ? Promise.resolve(semanticQuery.categoriesForOptions) : getCategories(),
+          getSellers()
+        ]);
 
   return {
     items: catalog.items.map(normalizeProduct),
@@ -285,12 +369,14 @@ export async function getCatalogProducts(query: CatalogQuery = {}): Promise<Cata
     page: catalog.page ?? normalizedPage,
     pageSize: catalog.pageSize ?? catalog.page_size ?? normalizedPageSize,
     categorias,
-    vendedores
+    vendedores,
+    aiSearch: semanticQuery.aiSearch
   };
 }
 
 export async function getPersonalizedCatalogProducts({
   preferences,
+  favoriteProductIds = [],
   search = "",
   categoria,
   talle,
@@ -299,6 +385,7 @@ export async function getPersonalizedCatalogProducts({
   recommendedLimit = 6
 }: {
   preferences: BuyerPreferences;
+  favoriteProductIds?: string[];
   search?: string;
   categoria?: string | null;
   talle?: string | null;
@@ -319,11 +406,38 @@ export async function getPersonalizedCatalogProducts({
     catalog.items.filter((product) => matchesAnyPreference(product, preferences)),
     preferences
   ).slice(0, Math.max(recommendedLimit, 0));
-  const personalizedIds = new Set(personalizedItems.map((product) => product.producto_id));
+  const recommendationReasons: Record<string, string> = {};
+  const aiRecommendations = await getAIRecommendations({
+    candidateProducts: catalog.items,
+    preferences,
+    favoriteProductIds,
+    limit: Math.max(recommendedLimit, 0)
+  });
+  const productsById = new Map(catalog.items.map((product) => [product.producto_id, product]));
+  const aiPersonalizedItems = aiRecommendations
+    .map((recommendation) => {
+      const product = productsById.get(recommendation.producto_id);
+
+      if (product && recommendation.reason) {
+        recommendationReasons[recommendation.producto_id] = recommendation.reason;
+      }
+
+      return product;
+    })
+    .filter((product): product is Product => Boolean(product));
+  const mergedPersonalizedItems = [
+    ...aiPersonalizedItems,
+    ...personalizedItems.filter(
+      (product) => !aiPersonalizedItems.some((aiProduct) => aiProduct.producto_id === product.producto_id)
+    )
+  ].slice(0, Math.max(recommendedLimit, 0));
+  const finalPersonalizedItems = mergedPersonalizedItems.length ? mergedPersonalizedItems : personalizedItems;
+  const personalizedIds = new Set(finalPersonalizedItems.map((product) => product.producto_id));
   const remainingItems = catalog.items.filter((product) => !personalizedIds.has(product.producto_id));
 
   return {
-    personalizedItems,
+    personalizedItems: finalPersonalizedItems,
+    recommendationReasons,
     items: remainingItems.slice(
       (normalizedPage - 1) * normalizedPageSize,
       normalizedPage * normalizedPageSize
@@ -416,7 +530,6 @@ export async function createSalesOrder(input: CreateSalesOrderInput) {
     method: "POST",
     body: JSON.stringify({
       orden_id: input.ordenId,
-      comprador_id: input.clerkUserId,
       clerk_user_id_comprador: input.clerkUserId,
       items: input.items,
       precio_total: input.precioTotal,

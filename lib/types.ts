@@ -62,6 +62,12 @@ export type CatalogResponse = {
   pageSize: number;
   categorias: Category[];
   vendedores: Seller[];
+  aiSearch?: {
+    used: boolean;
+    originalSearch: string;
+    interpretedSearch: string;
+    intentDescription?: string;
+  };
 };
 
 export type OrderStatus = {

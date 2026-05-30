@@ -13,7 +13,17 @@ export async function GET(request: Request) {
   const sort = normalizeProductSort(searchParams.get("sort"));
 
   try {
-    const catalog = await getCatalogProducts({ search, categoria, vendedor, talle, genero, sort, page, pageSize });
+    const catalog = await getCatalogProducts({
+      search,
+      categoria,
+      vendedor,
+      talle,
+      genero,
+      sort,
+      page,
+      pageSize,
+      semanticSearch: true
+    });
     return NextResponse.json(catalog);
   } catch {
     return NextResponse.json({ error: "No se pudo obtener el catalogo." }, { status: 502 });

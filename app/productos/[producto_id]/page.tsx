@@ -4,6 +4,7 @@ import { AddToCartButton } from "@/components/AddToCartButton";
 import { CheckoutForm } from "@/components/CheckoutForm";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { ProductImageGallery } from "@/components/ProductImageGallery";
+import { AIStyleTipsCard } from "@/components/AIStyleTips";
 import { ButtonLink, Card, PageShell, StatusBadge } from "@/components/ui";
 import { canAccessBuyerApp } from "@/lib/auth";
 import { getBuyer } from "@/lib/buyer-store";
@@ -11,6 +12,7 @@ import { fetchInternalApi } from "@/lib/external-client";
 import { isFavoriteProduct } from "@/lib/favorites-store";
 import { getBuyerRouteAuthContext } from "@/lib/role-guards";
 import { getCategories, getSellers } from "@/lib/seller-service";
+import { getProductStyleTips } from "@/lib/ai/product-description";
 import type { Product } from "@/lib/types";
 
 const currency = new Intl.NumberFormat("es-AR", {
@@ -47,6 +49,9 @@ export default async function ProductPage({
   const isProductAvailable = product.estado_publicacion === "activa";
   const productPath = `/productos/${product.producto_id}`;
   const signInHref = `/sign-in?redirect_url=${encodeURIComponent(productPath)}`;
+  const styleTips = isProductAvailable
+    ? await getProductStyleTips(product, category?.nombre)
+    : null;
   const initialFavorite =
     authContext.userId && hasBuyerRole
       ? await isFavoriteProduct(authContext.userId, product.producto_id)
@@ -140,6 +145,8 @@ export default async function ProductPage({
             </div>
             <p className="mt-5 text-base leading-7">{product.descripcion}</p>
           </Card>
+
+          {styleTips ? <AIStyleTipsCard tips={styleTips} /> : null}
 
           {!isProductAvailable ? (
             <Card>

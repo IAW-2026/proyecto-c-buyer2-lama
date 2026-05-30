@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Eye } from "lucide-react";
+import { Eye, Sparkles } from "lucide-react";
 import type { Product } from "@/lib/types";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { StatusBadge } from "@/components/ui";
@@ -14,12 +14,14 @@ export function ProductCard({
   product,
   isFavorite = false,
   canFavorite = false,
-  isAccountActive = true
+  isAccountActive = true,
+  aiReason
 }: {
   product: Product;
   isFavorite?: boolean;
   canFavorite?: boolean;
   isAccountActive?: boolean;
+  aiReason?: string;
 }) {
   const isAvailable = product.estado_publicacion === "activa";
 
@@ -72,6 +74,12 @@ export function ProductCard({
               {product.titulo}
             </h2>
             <p className="mt-1 text-xs text-lama-ink/55 sm:text-sm">{product.marca}</p>
+            {aiReason ? (
+              <p className="ai-reason-badge mt-2 line-clamp-2">
+                <Sparkles className="h-3 w-3 shrink-0" aria-hidden="true" />
+                {aiReason}
+              </p>
+            ) : null}
           </div>
         </div>
       </Link>

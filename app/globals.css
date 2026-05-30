@@ -172,3 +172,146 @@ textarea {
 .font-display {
   font-family: 'Playfair Display', Georgia, 'Times New Roman', serif;
 }
+
+/* ─── Chat widget ─── */
+.chat-widget-toggle {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 50;
+  display: flex;
+  height: 56px;
+  width: 56px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  border: none;
+  background: rgb(var(--lama-detail));
+  color: white;
+  cursor: pointer;
+  box-shadow: var(--lama-shadow-lg);
+  transition: all 200ms ease;
+}
+
+.chat-widget-toggle:hover {
+  transform: scale(1.08);
+  box-shadow: 0 8px 32px rgba(111, 127, 109, 0.4);
+}
+
+.chat-widget-panel {
+  position: fixed;
+  bottom: 96px;
+  right: 24px;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  width: 380px;
+  max-height: 520px;
+  overflow: hidden;
+  border-radius: 20px;
+  border: 1px solid rgb(var(--lama-line));
+  background: rgb(var(--lama-cream));
+  box-shadow: var(--lama-shadow-lg);
+  animation: scaleIn 200ms ease;
+}
+
+@media (max-width: 480px) {
+  .chat-widget-panel {
+    bottom: 0;
+    right: 0;
+    left: 0;
+    width: 100%;
+    max-height: 100dvh;
+    border-radius: 0;
+  }
+
+  .chat-widget-toggle {
+    bottom: 16px;
+    right: 16px;
+  }
+}
+
+.chat-widget-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  background: rgb(var(--lama-detail));
+  color: white;
+}
+
+.chat-widget-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 280px;
+}
+
+.chat-message {
+  display: flex;
+  gap: 8px;
+  max-width: 90%;
+}
+
+.chat-message-user {
+  align-self: flex-end;
+  flex-direction: row-reverse;
+}
+
+.chat-message-assistant {
+  align-self: flex-start;
+}
+
+.chat-widget-input {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  border-top: 1px solid rgb(var(--lama-line));
+  background: rgb(var(--lama-card));
+}
+
+/* ─── AI card subtle glow ─── */
+.ai-card {
+  position: relative;
+}
+
+.ai-card::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 17px;
+  background: linear-gradient(135deg, rgb(var(--lama-detail) / 0.2), transparent 50%, rgb(var(--lama-detail) / 0.1));
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* ─── AI search badge ─── */
+.ai-search-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: 9999px;
+  background: rgb(var(--lama-detail) / 0.1);
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  color: rgb(var(--lama-detail));
+  letter-spacing: 0.03em;
+}
+
+/* ─── AI recommendation reason ─── */
+.ai-reason-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  border-radius: 9999px;
+  background: rgb(var(--lama-detail) / 0.08);
+  padding: 2px 8px;
+  font-size: 10px;
+  font-weight: 600;
+  color: rgb(var(--lama-detail));
+}

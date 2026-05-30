@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
 import { ScrollToTopButton } from "@/components/ScrollToTopButton";
+import { ChatWidget } from "@/components/ChatWidget";
 import { Providers } from "@/app/providers";
 import "./globals.css";
 
@@ -41,6 +42,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <Footer />
           </div>
           <ScrollToTopButton />
+          <ChatWidget />
         </Providers>
       </body>
     </html>

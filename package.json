@@ -12,8 +12,10 @@
     "prisma:seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
+    "@ai-sdk/google": "^3.0.80",
     "@clerk/nextjs": "^6.12.0",
     "@prisma/client": "^6.4.1",
+    "ai": "^6.0.193",
     "clsx": "^2.1.1",
     "lucide-react": "^0.475.0",
     "next": "^15.1.7",
@@ -38,4 +40,3 @@
     "seed": "tsx prisma/seed.ts"
   }
 }
-
