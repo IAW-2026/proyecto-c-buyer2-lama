@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { isProductAvailable } from "@/lib/product-availability";
 import { getProductById, getProductsByIds } from "@/lib/seller-service";
 import type { Product } from "@/lib/types";
 
@@ -24,10 +25,6 @@ globalForFavoritesStore.fallbackFavorites = fallbackFavorites;
 
 function shouldUseDatabase() {
   return Boolean(process.env.DATABASE_URL);
-}
-
-function productIsAvailable(product: Product) {
-  return product.estado_publicacion === "activa";
 }
 
 function normalizeFavoriteSort(sort?: string | null): FavoriteSort {
@@ -62,7 +59,7 @@ export async function isFavoriteProduct(clerkUserId: string, productId: string) 
 export async function addFavoriteProduct(clerkUserId: string, productId: string) {
   const product = await getProductById(productId);
 
-  if (!product || !productIsAvailable(product)) {
+  if (!product || !isProductAvailable(product)) {
     throw new Error("Producto no disponible para guardar en favoritos.");
   }
 
@@ -177,7 +174,10 @@ export async function listFavoriteProducts({
         fecha_agregado: record.fecha_agregado.toISOString()
       };
     })
-    .filter((product): product is FavoriteProduct => Boolean(product));
+    .filter(
+      (product): product is FavoriteProduct =>
+        product !== null && isProductAvailable(product)
+    );
   const filtered = favoriteProducts.filter((product) => {
     const matchesSearch = normalizedSearch
       ? [product.titulo, product.descripcion, product.marca]

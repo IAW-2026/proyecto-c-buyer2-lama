@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { CheckCircle2, ShoppingCart } from "lucide-react";
+import { isProductAvailable } from "@/lib/product-availability";
 import type { Product } from "@/lib/types";
 
 const CART_STORAGE_KEY = "lama-cart";
@@ -28,7 +29,7 @@ export function AddToCartButton({ product }: { product: Product }) {
   const [message, setMessage] = useState<string | null>(null);
 
   function addToCart() {
-    if (product.estado_publicacion !== "activa") {
+    if (!isProductAvailable(product)) {
       setMessage("Este producto ya no se encuentra disponible");
       return;
     }

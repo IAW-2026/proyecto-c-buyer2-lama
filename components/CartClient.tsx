@@ -6,6 +6,7 @@ import { CreditCard, Loader2, ShoppingBag, Trash2 } from "lucide-react";
 import { BillingDetailsModal, type BillingDetails } from "@/components/BillingDetailsModal";
 import { EmptyState, LoadingState } from "@/components/ui";
 import { CHECKOUT_SHIPPING_AMOUNT } from "@/lib/checkout";
+import { isProductAvailable } from "@/lib/product-availability";
 import type { Product } from "@/lib/types";
 
 const CART_STORAGE_KEY = "lama-cart";
@@ -34,6 +35,12 @@ function saveCart(cart: Product[]) {
   window.dispatchEvent(new Event("lama-cart-updated"));
 }
 
+function unavailableProductsMessage(count: number) {
+  return count === 1
+    ? "Quitamos del carrito un producto que ya no esta disponible."
+    : `Quitamos del carrito ${count} productos que ya no estan disponibles.`;
+}
+
 export function CartClient({
   buyer
 }: {
@@ -46,8 +53,67 @@ export function CartClient({
   const [isPending, startTransition] = useTransition();
 
   useEffect(() => {
-    setCart(readCart());
-    setIsLoaded(true);
+    let isMounted = true;
+
+    async function refreshCart() {
+      const storedCart = readCart();
+      const productIds = storedCart.map((product) => product.producto_id).filter(Boolean);
+
+      if (!productIds.length) {
+        setCart([]);
+        setIsLoaded(true);
+        return;
+      }
+
+      try {
+        const params = new URLSearchParams({ ids: productIds.join(",") });
+        const response = await fetch(`/api/productos/bulk?${params.toString()}`, { cache: "no-store" });
+
+        if (!response.ok) {
+          throw new Error("No se pudo validar el carrito.");
+        }
+
+        const data = (await response.json()) as { items?: Product[] };
+        const availableProductsById = new Map(
+          (data.items ?? [])
+            .filter(isProductAvailable)
+            .map((product) => [product.producto_id, product])
+        );
+        const nextCart = productIds
+          .map((productId) => availableProductsById.get(productId))
+          .filter((product): product is Product => Boolean(product));
+
+        if (!isMounted) {
+          return;
+        }
+
+        setCart(nextCart);
+        saveCart(nextCart);
+
+        const removedProductsCount = storedCart.length - nextCart.length;
+
+        if (removedProductsCount > 0) {
+          setMessage(unavailableProductsMessage(removedProductsCount));
+        }
+      } catch {
+        if (!isMounted) {
+          return;
+        }
+
+        setCart(storedCart);
+        setMessage("No pudimos validar si el carrito esta actualizado. Intentalo de nuevo antes de pagar.");
+      } finally {
+        if (isMounted) {
+          setIsLoaded(true);
+        }
+      }
+    }
+
+    refreshCart();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const productsTotal = useMemo(() => cart.reduce((sum, product) => sum + product.precio, 0), [cart]);
@@ -136,7 +202,7 @@ export function CartClient({
     return (
       <EmptyState
         title="Tu carrito esta vacio"
-        text="Cuando agregues una prenda desde el detalle del producto, va a aparecer aca."
+        text={message ?? "Cuando agregues una prenda desde el detalle del producto, va a aparecer aca."}
       />
     );
   }
