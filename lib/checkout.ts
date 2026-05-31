@@ -1,6 +1,6 @@
 import type { SalesOrder } from "@/lib/types";
 
-export const CHECKOUT_SHIPPING_AMOUNT = 4500;
+export const CHECKOUT_SHIPPING_AMOUNT = 5;
 
 export function getSalesOrderSellerId(
   order: Pick<SalesOrder, "clerk_user_id_vendedor" | "vendedor_id" | "items">
