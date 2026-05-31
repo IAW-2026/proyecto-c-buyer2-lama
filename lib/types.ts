@@ -81,11 +81,15 @@ export type OrderStatus = {
 export type SalesOrderItem = {
   producto_id: string;
   precio_unitario: number;
+  vendedor_id?: string;
+  clerk_user_id_vendedor?: string;
 };
 
 export type SalesOrder = OrderStatus & {
   comprador_id: string;
   clerk_user_id_comprador: string;
+  vendedor_id?: string;
+  clerk_user_id_vendedor?: string;
   items: SalesOrderItem[];
   producto_ids: string[];
   total: number;

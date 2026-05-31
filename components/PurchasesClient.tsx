@@ -4,8 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { PackageCheck, Truck } from "lucide-react";
 import { ProductMini } from "@/components/ProductCard";
 import { Card, EmptyState, LoadingState, StatusBadge } from "@/components/ui";
-import { readPurchases, type StoredPurchase } from "@/lib/purchases-storage";
-import type { OrderStatus, ShippingInfo } from "@/lib/types";
+import type { OrderStatus, Product, ShippingInfo } from "@/lib/types";
 
 const currency = new Intl.NumberFormat("es-AR", {
   style: "currency",
@@ -14,25 +13,35 @@ const currency = new Intl.NumberFormat("es-AR", {
 });
 
 type PurchasesResponse =
-  | StoredPurchase[]
+  | Purchase[]
   | {
-      items?: StoredPurchase[];
+      items?: Purchase[];
     };
+
+type Purchase = {
+  orden_id: string;
+  comprador_id?: string;
+  clerk_user_id_comprador: string;
+  total: number;
+  direccion_envio: string;
+  estado_general: OrderStatus["estado_general"];
+  estado_pago: OrderStatus["estado_pago"];
+  estado_envio: OrderStatus["estado_envio"];
+  fecha_actualizacion: string;
+  products: Product[];
+  shipping?: ShippingInfo | null;
+};
 
 function normalizePurchasesResponse(response: PurchasesResponse) {
   return Array.isArray(response) ? response : response.items ?? [];
 }
 
 export function PurchasesClient({ buyerId }: { buyerId: string }) {
-  const [purchases, setPurchases] = useState<StoredPurchase[]>([]);
+  const [purchases, setPurchases] = useState<Purchase[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    function mergePurchases(items: StoredPurchase[]) {
-      return [...new Map(items.map((purchase) => [purchase.orden_id, purchase])).values()];
-    }
-
-    async function enrichPurchase(purchase: StoredPurchase): Promise<StoredPurchase> {
+    async function enrichPurchase(purchase: Purchase): Promise<Purchase> {
       const [status, shipping] = await Promise.all([
         fetch(`/api/ordenes-ventas/${purchase.orden_id}/estado`, { cache: "no-store" })
           .then(async (response) => (response.ok ? ((await response.json()) as OrderStatus) : null))
@@ -57,8 +66,7 @@ export function PurchasesClient({ buyerId }: { buyerId: string }) {
     }
 
     async function refreshPurchases() {
-      const localPurchases = readPurchases();
-      let apiPurchases: StoredPurchase[] = [];
+      let apiPurchases: Purchase[] = [];
 
       try {
         const response = await fetch("/api/ordenes-ventas", { cache: "no-store" });
@@ -69,20 +77,12 @@ export function PurchasesClient({ buyerId }: { buyerId: string }) {
         apiPurchases = [];
       }
 
-      const mergedPurchases = mergePurchases([...apiPurchases, ...localPurchases]);
-      setPurchases(await Promise.all(mergedPurchases.map(enrichPurchase)));
+      setPurchases(await Promise.all(apiPurchases.map(enrichPurchase)));
       setIsLoaded(true);
     }
 
     refreshPurchases();
-    window.addEventListener("storage", refreshPurchases);
-    window.addEventListener("lama-purchases-updated", refreshPurchases);
-
-    return () => {
-      window.removeEventListener("storage", refreshPurchases);
-      window.removeEventListener("lama-purchases-updated", refreshPurchases);
-    };
-  }, []);
+  }, [buyerId]);
 
   const buyerPurchases = useMemo(
     () =>

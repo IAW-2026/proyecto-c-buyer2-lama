@@ -63,12 +63,16 @@ type SellerProductResponse = Omit<Product, "vendedor_id" | "clerk_user_id_vended
 type SellerOrderItem = {
   producto_id: string;
   precio_unitario: number;
+  vendedor_id?: string;
+  clerk_user_id_vendedor?: string;
 };
 
 type SellerOrderResponse = {
   orden_id: string;
   comprador_id?: string;
   clerk_user_id_comprador?: string;
+  vendedor_id?: string;
+  clerk_user_id_vendedor?: string;
   items?: SellerOrderItem[];
   producto_ids?: string[];
   precio_total?: number;
@@ -501,18 +505,26 @@ function normalizeOrder(
     order.items?.map((item) => item.producto_id) ??
     fallback?.productIds ??
     [];
-  const items =
+  const items: SellerOrderItem[] =
     order.items ??
     productIds.map((productId) => ({
       producto_id: productId,
       precio_unitario: 0
     }));
   const buyerId = order.clerk_user_id_comprador ?? order.comprador_id ?? fallback?.clerkUserId ?? "";
+  const itemWithSeller = items.find((item) => item.clerk_user_id_vendedor || item.vendedor_id);
+  const sellerId =
+    order.clerk_user_id_vendedor ??
+    order.vendedor_id ??
+    itemWithSeller?.clerk_user_id_vendedor ??
+    itemWithSeller?.vendedor_id;
 
   return {
     orden_id: order.orden_id,
     comprador_id: order.comprador_id ?? buyerId,
     clerk_user_id_comprador: buyerId,
+    vendedor_id: order.vendedor_id ?? sellerId,
+    clerk_user_id_vendedor: sellerId,
     items,
     producto_ids: productIds,
     total: order.total ?? order.precio_total ?? fallback?.total ?? 0,

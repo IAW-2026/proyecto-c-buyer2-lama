@@ -55,6 +55,18 @@ export const checkoutOrderParamsSchema = z.object({
   orden_id: z.string().min(3)
 });
 
+export const checkoutSellerMockConfigSchema = z.object({
+  ALLOW_CHECKOUT_SELLER_MOCK: z.enum(["true", "false"]).optional(),
+  CHECKOUT_MOCK_SELLER_ID: z.preprocess((value) => {
+    if (typeof value !== "string") {
+      return undefined;
+    }
+
+    const trimmed = value.trim();
+    return trimmed || undefined;
+  }, z.string().min(3).optional())
+});
+
 export const checkoutOrderResponseSchema = z.object({
   orden_id: z.string().min(3),
   comprador: z.object({
