@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getBuyer } from "@/lib/buyer-store";
-import { CHECKOUT_SHIPPING_AMOUNT, getSalesOrderSellerId } from "@/lib/checkout";
+import { CHECKOUT_SHIPPING_AMOUNT, resolveSalesOrderSellerId } from "@/lib/checkout";
 import { ExternalApiError } from "@/lib/external-app-client";
 import { getSalesOrderById } from "@/lib/order-service";
 import { checkoutOrderParamsSchema, checkoutOrderResponseSchema } from "@/lib/validation";
@@ -55,7 +55,7 @@ export async function GET(
       return NextResponse.json({ error: "La cuenta esta desactivada." }, { status: 403 });
     }
 
-    const sellerId = getSalesOrderSellerId(order);
+    const sellerId = resolveSalesOrderSellerId(order);
 
     if (!sellerId) {
       return NextResponse.json(

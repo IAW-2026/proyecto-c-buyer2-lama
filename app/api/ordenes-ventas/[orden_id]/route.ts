@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getSalesOrderSellerId } from "@/lib/checkout";
+import { resolveSalesOrderSellerId } from "@/lib/checkout";
 import { getSalesOrderById } from "@/lib/order-service";
 import { checkoutOrderParamsSchema } from "@/lib/validation";
 
@@ -25,7 +25,7 @@ export async function GET(
       return NextResponse.json({ error: "Orden no encontrada." }, { status: 404 });
     }
 
-    const sellerId = getSalesOrderSellerId(order);
+    const sellerId = resolveSalesOrderSellerId(order);
 
     return NextResponse.json({
       ...order,
