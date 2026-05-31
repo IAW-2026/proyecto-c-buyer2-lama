@@ -1,9 +1,8 @@
 import { NextResponse } from "next/server";
 import { getBuyer } from "@/lib/buyer-store";
-import { CHECKOUT_SHIPPING_AMOUNT, getCheckoutMockSellerId } from "@/lib/checkout";
+import { CHECKOUT_SHIPPING_AMOUNT, getSalesOrderSellerId } from "@/lib/checkout";
 import { ExternalApiError } from "@/lib/external-app-client";
 import { getSalesOrderById } from "@/lib/order-service";
-import { getProductsByIds } from "@/lib/seller-service";
 import { checkoutOrderParamsSchema, checkoutOrderResponseSchema } from "@/lib/validation";
 
 function logCheckoutLookupError(stage: string, error: unknown) {
@@ -56,48 +55,12 @@ export async function GET(
       return NextResponse.json({ error: "La cuenta esta desactivada." }, { status: 403 });
     }
 
-    let sellerId =
-      order.clerk_user_id_vendedor ??
-      order.vendedor_id ??
-      order.items.find((item) => item.clerk_user_id_vendedor || item.vendedor_id)?.clerk_user_id_vendedor ??
-      order.items.find((item) => item.clerk_user_id_vendedor || item.vendedor_id)?.vendedor_id;
-
-    if (!sellerId) {
-      const productIds = order.producto_ids.length
-        ? order.producto_ids
-        : order.items.map((item) => item.producto_id);
-      const products = await getProductsByIds(productIds).catch(() => []);
-      const foundProductIds = new Set(products.map((product) => product.producto_id));
-      const allProductsWereFound =
-        products.length === new Set(productIds).size &&
-        productIds.every((productId) => foundProductIds.has(productId));
-      const productSellerId = products[0]?.clerk_user_id_vendedor;
-      const allProductsBelongToSameSeller = products.every(
-        (product) => product.clerk_user_id_vendedor === productSellerId
-      );
-
-      if (allProductsWereFound && productSellerId && allProductsBelongToSameSeller) {
-        sellerId = productSellerId;
-      }
-    }
-
-    if (!sellerId) {
-      const mockSellerId = getCheckoutMockSellerId();
-
-      if (mockSellerId) {
-        console.warn("[api/ordenes/[orden_id]/checkout] Usando vendedor mock para checkout.", {
-          orden_id,
-          mockSellerId
-        });
-        sellerId = mockSellerId;
-      }
-    }
+    const sellerId = getSalesOrderSellerId(order);
 
     if (!sellerId) {
       return NextResponse.json(
         {
-          error:
-            "La orden no informa vendedor_id y no se pudo inferir desde productos activos. Para pruebas, configurar ALLOW_CHECKOUT_SELLER_MOCK=true y CHECKOUT_MOCK_SELLER_ID."
+          error: "La orden no informa vendedor_id. Seller debe devolverlo en GET /api/ordenes-ventas/{orden_id}."
         },
         { status: 502 }
       );
