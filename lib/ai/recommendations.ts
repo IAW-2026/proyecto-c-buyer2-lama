@@ -66,6 +66,7 @@ Devolvé exactamente ${limit} recomendaciones con el producto_id y una razón br
     const { object } = await generateObject({
       model: geminiModel,
       schema: aiRecommendationsResponseSchema,
+      maxRetries: 0,
       prompt
     });
 

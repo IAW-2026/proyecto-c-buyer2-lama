@@ -3,11 +3,24 @@ import { canAccessBuyerApp, getAuthContext } from "@/lib/auth";
 import { getBuyer } from "@/lib/buyer-store";
 import { createPayment } from "@/lib/payment-service";
 import { createSalesOrder } from "@/lib/order-service";
+import { ExternalApiError } from "@/lib/external-app-client";
 import { getProductsByIds } from "@/lib/seller-service";
 import { paymentSchema } from "@/lib/validation";
 
 function createOrderId() {
   return `ord_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function logPaymentError(stage: string, error: unknown) {
+  if (error instanceof ExternalApiError) {
+    console.error(`[api/pagos] ${stage}`, {
+      status: error.status,
+      body: error.body
+    });
+    return;
+  }
+
+  console.error(`[api/pagos] ${stage}`, error);
 }
 
 export async function POST(request: Request) {
@@ -73,9 +86,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Los montos de la compra no coinciden con el producto." }, { status: 422 });
   }
 
+  const orderId = createOrderId();
+  let order: Awaited<ReturnType<typeof createSalesOrder>>;
+
   try {
-    const order = await createSalesOrder({
-      ordenId: createOrderId(),
+    order = await createSalesOrder({
+      ordenId: orderId,
       clerkUserId: data.comprador.clerk_user_id_comprador,
       items: products.map((product) => ({
         producto_id: product.producto_id,
@@ -84,7 +100,12 @@ export async function POST(request: Request) {
       precioTotal: data.monto_producto,
       direccionEnvio: data.comprador.direccion_envio
     });
+  } catch (error) {
+    logPaymentError("No se pudo crear la orden en Seller.", error);
+    return NextResponse.json({ error: "No se pudo crear la orden de venta." }, { status: 502 });
+  }
 
+  try {
     await createPayment({
       ordenId: order.orden_id,
       comprador: {
@@ -97,23 +118,27 @@ export async function POST(request: Request) {
       montoEnvio: data.monto_envio,
       montoTotal: data.monto_total
     });
-
-    const now = new Date().toISOString();
-
+  } catch (error) {
+    logPaymentError("No se pudo crear el pago.", error);
     return NextResponse.json(
-      {
-        orden_id: order.orden_id,
-        producto_ids: productIds,
-        monto_total: data.monto_total,
-        estado_general: order.estado_general ?? "pendiente de pago",
-        estado_pago: order.estado_pago ?? "pendiente",
-        estado_envio: order.estado_envio ?? "pendiente",
-        fecha_creacion: order.fecha_creacion ?? now,
-        fecha_actualizacion: order.fecha_actualizacion ?? order.fecha_creacion ?? now
-      },
-      { status: 201 }
+      { error: "La orden se creo, pero no se pudo procesar el pago." },
+      { status: 502 }
     );
-  } catch {
-    return NextResponse.json({ error: "No se pudo crear la orden o procesar el pago." }, { status: 502 });
   }
+
+  const now = new Date().toISOString();
+
+  return NextResponse.json(
+    {
+      orden_id: order.orden_id,
+      producto_ids: productIds,
+      monto_total: data.monto_total,
+      estado_general: order.estado_general ?? "pendiente de pago",
+      estado_pago: order.estado_pago ?? "pendiente",
+      estado_envio: order.estado_envio ?? "pendiente",
+      fecha_creacion: order.fecha_creacion ?? now,
+      fecha_actualizacion: order.fecha_actualizacion ?? order.fecha_creacion ?? now
+    },
+    { status: 201 }
+  );
 }

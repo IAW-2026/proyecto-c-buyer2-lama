@@ -33,6 +33,7 @@ export async function getProductStyleTips(
     const { object } = await generateObject({
       model: geminiModel,
       schema: aiStyleTipsSchema,
+      maxRetries: 0,
       prompt: `Generá tips de estilo para esta prenda de un marketplace de ropa de segunda mano.
 
 Producto:

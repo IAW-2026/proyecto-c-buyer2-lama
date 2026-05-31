@@ -1,4 +1,4 @@
-import { streamText, stepCountIs } from "ai";
+import { createTextStreamResponse, streamText, stepCountIs } from "ai";
 import { geminiModel, isAIConfigured } from "@/lib/ai/config";
 import { SYSTEM_PROMPT } from "@/lib/ai/system-prompt";
 import { chatRequestSchema } from "@/lib/ai/schemas";
@@ -53,10 +53,27 @@ export async function POST(request: Request) {
       system: SYSTEM_PROMPT,
       messages: sanitizeChatMessages(parsed.data.messages),
       tools: chatTools,
-      stopWhen: stepCountIs(3)
+      stopWhen: stepCountIs(3),
+      maxRetries: 0
     });
 
-    return result.toTextStreamResponse();
+    const safeTextStream = new ReadableStream<string>({
+      async start(controller) {
+        try {
+          for await (const delta of result.textStream) {
+            controller.enqueue(delta);
+          }
+        } catch {
+          controller.enqueue(
+            "No pude responder ahora porque Gemini no tiene cuota disponible para este proyecto. Revisa la cuota o billing en Google AI Studio y proba de nuevo."
+          );
+        } finally {
+          controller.close();
+        }
+      }
+    });
+
+    return createTextStreamResponse({ textStream: safeTextStream });
   } catch {
     return Response.json(
       { error: "Error al procesar la solicitud del chat." },

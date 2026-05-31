@@ -38,6 +38,7 @@ export async function parseSearchIntent(
     const { object } = await generateObject({
       model: geminiModel,
       schema: searchIntentSchema,
+      maxRetries: 0,
       prompt: `Analizá esta búsqueda de un usuario en un marketplace de ropa de segunda mano y extraé filtros estructurados.
 
 Categorías disponibles: ${categoryNames || "No disponibles"}

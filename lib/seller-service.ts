@@ -526,18 +526,18 @@ function normalizeOrder(
 }
 
 export async function createSalesOrder(input: CreateSalesOrderInput) {
-  const response = await fetchExternalJson<SellerOrderResponse>("seller", "/api/ordenes-ventas", {
+  const response = await fetchExternalJson<SellerOrderResponse | null>("seller", "/api/ordenes-ventas", {
     method: "POST",
     body: JSON.stringify({
       orden_id: input.ordenId,
-      clerk_user_id_comprador: input.clerkUserId,
+      comprador_id: input.clerkUserId,
       items: input.items,
       precio_total: input.precioTotal,
       direccion_envio: input.direccionEnvio
     })
   });
 
-  return normalizeOrder(response, {
+  return normalizeOrder(response ?? { orden_id: input.ordenId }, {
     clerkUserId: input.clerkUserId,
     productIds: input.items.map((item) => item.producto_id),
     total: input.precioTotal,
