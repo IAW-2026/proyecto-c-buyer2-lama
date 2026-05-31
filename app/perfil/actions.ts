@@ -85,5 +85,8 @@ export async function savePreferences(_state: FormState, formData: FormData): Pr
   await upsertPreferences(parsed.data);
   revalidatePath("/perfil");
   revalidatePath("/admin");
-  return { ok: true, message: "Preferencias guardadas correctamente." };
+  return {
+    ok: true,
+    message: shouldClearPreferences ? "Preferencias limpiadas correctamente." : "Preferencias guardadas correctamente."
+  };
 }

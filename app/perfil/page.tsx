@@ -32,7 +32,7 @@ export default async function ProfilePage() {
 
   if (!authContext.userId) {
     return (
-      <PageShell title="Mi Perfil" eyebrow="Acceso">
+      <PageShell title="Mi Perfil" eyebrow="Acceso" titleClassName="font-display">
         <Card>
           <p className="font-bold">Necesitas iniciar sesion con rol comprador.</p>
         </Card>
@@ -42,7 +42,7 @@ export default async function ProfilePage() {
 
   if (!canAccessBuyerApp(authContext)) {
     return (
-      <PageShell title="Mi Perfil" eyebrow="Acceso">
+      <PageShell title="Mi Perfil" eyebrow="Acceso" titleClassName="font-display">
         <Card>
           <p className="font-bold">Este usuario ya tiene otro rol asignado y no puede acceder como comprador.</p>
         </Card>
@@ -62,7 +62,7 @@ export default async function ProfilePage() {
 
   if (!buyer.esta_activo) {
     return (
-      <PageShell title="Mi Perfil" eyebrow="Informacion personal y preferencias">
+      <PageShell title="Mi Perfil" eyebrow="Informacion personal y preferencias" titleClassName="font-display">
         <Card>
           <p className="font-bold">Tu cuenta esta desactivada.</p>
           <p className="mt-2 text-sm text-lama-ink/70">
@@ -79,7 +79,7 @@ export default async function ProfilePage() {
   ]);
 
   return (
-    <PageShell title="Mi Perfil" eyebrow="Informacion personal y preferencias">
+    <PageShell title="Mi Perfil" eyebrow="Informacion personal y preferencias" titleClassName="font-display">
       <ProfileForms
         buyer={buyer}
         categoryOptions={categories.map((category) => ({

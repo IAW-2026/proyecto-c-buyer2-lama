@@ -1,25 +1,57 @@
 "use client";
 
-import { useActionState, useEffect, useMemo, useState } from "react";
-import { RotateCcw, Save } from "lucide-react";
+import {
+  useActionState,
+  useEffect,
+  useMemo,
+  useState,
+  type Dispatch,
+  type MouseEvent,
+  type SetStateAction
+} from "react";
+import { RotateCcw, Save, Search, X } from "lucide-react";
 import { savePreferences, saveProfile, type FormState } from "@/app/perfil/actions";
 import { SubmitButton } from "@/components/ui";
 import type { BuyerWithPreferences } from "@/lib/types";
 
 const initialState: FormState = { ok: false, message: "" };
-const clothingSizes = ["XS", "S", "M", "L", "XL"];
-const shoeSizes = ["36", "37", "38", "39"];
+const adultClothingSizes = ["XS", "S", "M", "L", "XL", "XXL"];
+const childrenClothingSizes = Array.from({ length: 17 }, (_, index) => index.toString().padStart(2, "0"));
+const shoeSizes = Array.from({ length: 23 }, (_, index) => String(index + 24));
 
 type Option = {
   id: string;
   label: string;
 };
 
+type StringListSetter = Dispatch<SetStateAction<string[]>>;
+
 function fieldClass() {
   return "mt-1 w-full rounded-md border border-lama-line bg-lama-cream px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-lama-detail";
 }
 
-function PreferenceModal({
+function hiddenInputs(name: string, values: string[]) {
+  return values.map((value) => <input key={`${name}-${value}`} type="hidden" name={name} value={value} />);
+}
+
+function uniqueValues(values: string[]) {
+  return Array.from(new Set(values.filter(Boolean)));
+}
+
+function optionItems(options: Option[], selectedValues: string[]) {
+  const selected = new Set(selectedValues);
+  return options.filter((option) => selected.has(option.id));
+}
+
+function selectedItemsWithFallback(options: Option[], selectedValues: string[]) {
+  const labelsById = new Map(options.map((option) => [option.id, option.label]));
+  return selectedValues.map((value) => ({
+    id: value,
+    label: labelsById.get(value) ?? value
+  }));
+}
+
+function StatusModal({
   title,
   isLoading,
   onClose
@@ -49,39 +81,162 @@ function PreferenceModal({
   );
 }
 
-function CheckboxGroup({
+function SelectedChips({
+  items,
+  emptyText,
+  onRemove
+}: {
+  items: Option[];
+  emptyText: string;
+  onRemove: (value: string) => void;
+}) {
+  if (items.length === 0) {
+    return <p className="mt-2 text-xs font-semibold text-lama-ink/55">{emptyText}</p>;
+  }
+
+  return (
+    <div className="mt-2 flex flex-wrap gap-2">
+      {items.map((item) => (
+        <span
+          key={item.id}
+          className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-lama-line bg-lama-cream px-3 py-1 text-xs font-bold text-lama-ink"
+        >
+          <span className="truncate">{item.label}</span>
+          <button
+            type="button"
+            onClick={() => onRemove(item.id)}
+            className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-lama-ink/70 hover:bg-lama-line hover:text-lama-ink focus:outline-none focus:ring-2 focus:ring-lama-detail"
+            aria-label={`Quitar ${item.label}`}
+          >
+            <X className="h-3.5 w-3.5" aria-hidden="true" />
+          </button>
+        </span>
+      ))}
+    </div>
+  );
+}
+
+function DropdownPreferenceGroup({
   title,
-  name,
   options,
   selectedValues,
-  onToggle
+  placeholder,
+  emptyText,
+  onAdd,
+  onRemove,
+  keepSelectionOrder = false
 }: {
   title: string;
-  name: string;
   options: Option[];
   selectedValues: string[];
-  onToggle: (value: string, checked: boolean) => void;
+  placeholder: string;
+  emptyText: string;
+  onAdd: (value: string) => void;
+  onRemove: (value: string) => void;
+  keepSelectionOrder?: boolean;
 }) {
   const selected = new Set(selectedValues);
+  const allSelected = options.length > 0 && options.every((option) => selected.has(option.id));
+  const selectedItems = keepSelectionOrder
+    ? selectedItemsWithFallback(options, selectedValues)
+    : optionItems(options, selectedValues);
 
   return (
     <fieldset>
       <legend className="text-sm font-bold">{title}</legend>
-      <div className="mt-2 grid gap-2 rounded-md border border-lama-line bg-lama-cream p-3 sm:grid-cols-2">
+      <SelectedChips items={selectedItems} emptyText={emptyText} onRemove={onRemove} />
+      <select
+        className={fieldClass()}
+        value=""
+        disabled={allSelected}
+        onChange={(event) => {
+          const value = event.currentTarget.value;
+          if (value) {
+            onAdd(value);
+          }
+        }}
+      >
+        <option value="">{allSelected ? "Todas las opciones seleccionadas" : placeholder}</option>
         {options.map((option) => (
-          <label key={option.id} className="flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              name={name}
-              value={option.id}
-              checked={selected.has(option.id)}
-              onChange={(event) => onToggle(option.id, event.currentTarget.checked)}
-              className="h-4 w-4 rounded border-lama-line text-lama-detail focus:ring-lama-detail"
-            />
-            <span>{option.label}</span>
-          </label>
+          <option key={option.id} value={option.id} disabled={selected.has(option.id)}>
+            {option.label}
+          </option>
         ))}
+      </select>
+    </fieldset>
+  );
+}
+
+function SellerSearchGroup({
+  sellerOptions,
+  selectedSellers,
+  sellerSearch,
+  setSellerSearch,
+  onAdd,
+  onRemove
+}: {
+  sellerOptions: Option[];
+  selectedSellers: string[];
+  sellerSearch: string;
+  setSellerSearch: (value: string) => void;
+  onAdd: (value: string) => void;
+  onRemove: (value: string) => void;
+}) {
+  const selected = new Set(selectedSellers);
+  const search = sellerSearch.trim().toLowerCase();
+  const filteredSellerOptions = useMemo(() => {
+    if (!search) {
+      return [];
+    }
+
+    return sellerOptions.filter((seller) => seller.label.toLowerCase().includes(search));
+  }, [sellerOptions, search]);
+
+  return (
+    <fieldset>
+      <legend className="text-sm font-bold">Vendedores preferidos</legend>
+      <SelectedChips
+        items={selectedItemsWithFallback(sellerOptions, selectedSellers)}
+        emptyText="Todavia no seleccionaste vendedores."
+        onRemove={onRemove}
+      />
+      <div className="relative mt-2">
+        <label className="sr-only" htmlFor="seller-search">
+          Buscar vendedor por nombre
+        </label>
+        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-lama-ink/45" />
+        <input
+          id="seller-search"
+          className="w-full rounded-md border border-lama-line bg-lama-cream py-2 pl-9 pr-3 text-sm outline-none focus:ring-2 focus:ring-lama-detail"
+          value={sellerSearch}
+          onChange={(event) => setSellerSearch(event.currentTarget.value)}
+          placeholder="Buscar vendedor por nombre"
+        />
       </div>
+      {search ? (
+        <div className="mt-2 max-h-44 overflow-y-auto rounded-md border border-lama-line bg-lama-cream p-2">
+          {filteredSellerOptions.length > 0 ? (
+            <div className="grid gap-1">
+              {filteredSellerOptions.map((seller) => (
+                <button
+                  key={seller.id}
+                  type="button"
+                  disabled={selected.has(seller.id)}
+                  onClick={() => {
+                    onAdd(seller.id);
+                    setSellerSearch("");
+                  }}
+                  className="w-full rounded-md px-3 py-2 text-left text-sm font-semibold hover:bg-lama-card focus:outline-none focus:ring-2 focus:ring-lama-detail disabled:cursor-not-allowed disabled:text-lama-ink/40 disabled:hover:bg-transparent"
+                >
+                  {seller.label}
+                </button>
+              ))}
+            </div>
+          ) : (
+            <p className="px-3 py-2 text-sm font-semibold text-lama-ink/55">No hay vendedores con ese nombre.</p>
+          )}
+        </div>
+      ) : null}
     </fieldset>
   );
 }
@@ -95,45 +250,48 @@ export function ProfileForms({
   categoryOptions: Option[];
   sellerOptions: Option[];
 }) {
-  const [profileState, profileAction] = useActionState(saveProfile, initialState);
+  const [profileState, profileAction, profilePending] = useActionState(saveProfile, initialState);
   const [preferencesState, preferencesAction, preferencesPending] = useActionState(savePreferences, initialState);
-  const [selectedSizes, setSelectedSizes] = useState(buyer.preferencias?.talles_preferidos ?? []);
-  const [selectedCategories, setSelectedCategories] = useState(buyer.preferencias?.categorias_preferidas ?? []);
-  const [selectedSellers, setSelectedSellers] = useState(buyer.preferencias?.vendedores_preferidos ?? []);
+  const [selectedSizes, setSelectedSizes] = useState(uniqueValues(buyer.preferencias?.talles_preferidos ?? []));
+  const [selectedCategories, setSelectedCategories] = useState(
+    uniqueValues(buyer.preferencias?.categorias_preferidas ?? [])
+  );
+  const [selectedSellers, setSelectedSellers] = useState(uniqueValues(buyer.preferencias?.vendedores_preferidos ?? []));
   const [sellerSearch, setSellerSearch] = useState("");
-  const [showPreferencesSuccess, setShowPreferencesSuccess] = useState(false);
+  const [preferencesIntent, setPreferencesIntent] = useState<"save" | "clear">("save");
+  const [successMessage, setSuccessMessage] = useState("");
 
-  const filteredSellerOptions = useMemo(() => {
-    const search = sellerSearch.trim().toLowerCase();
-    if (!search) {
-      return sellerOptions;
-    }
-
-    return sellerOptions.filter((seller) => seller.label.toLowerCase().includes(search));
-  }, [sellerOptions, sellerSearch]);
+  const adultClothingOptions = adultClothingSizes.map((size) => ({ id: size, label: size }));
+  const childrenClothingOptions = childrenClothingSizes.map((size) => ({ id: size, label: size }));
+  const shoeOptions = shoeSizes.map((size) => ({ id: size, label: size }));
 
   useEffect(() => {
-    if (!preferencesState.ok) {
+    if (profileState.ok && profileState.message) {
+      setSuccessMessage(profileState.message);
+    }
+  }, [profileState]);
+
+  useEffect(() => {
+    if (preferencesState.ok && preferencesState.message) {
+      setSuccessMessage(preferencesState.message);
+    }
+  }, [preferencesState]);
+
+  useEffect(() => {
+    if (!successMessage) {
       return;
     }
 
-    setShowPreferencesSuccess(true);
-    const timeout = window.setTimeout(() => setShowPreferencesSuccess(false), 2000);
+    const timeout = window.setTimeout(() => setSuccessMessage(""), 2000);
     return () => window.clearTimeout(timeout);
-  }, [preferencesState]);
+  }, [successMessage]);
 
-  function togglePreference(
-    value: string,
-    checked: boolean,
-    setValues: (update: (current: string[]) => string[]) => void
-  ) {
-    setValues((current) => {
-      if (checked) {
-        return current.includes(value) ? current : [...current, value];
-      }
+  function addPreference(value: string, setValues: StringListSetter) {
+    setValues((current) => (current.includes(value) ? current : [...current, value]));
+  }
 
-      return current.filter((item) => item !== value);
-    });
+  function removePreference(value: string, setValues: StringListSetter) {
+    setValues((current) => current.filter((item) => item !== value));
   }
 
   function clearSelectedPreferences() {
@@ -141,6 +299,18 @@ export function ProfileForms({
     setSelectedCategories([]);
     setSelectedSellers([]);
     setSellerSearch("");
+  }
+
+  function handleClearPreferences(event: MouseEvent<HTMLButtonElement>) {
+    const confirmed = window.confirm("Seguro que queres limpiar tus preferencias?");
+
+    if (!confirmed) {
+      event.preventDefault();
+      return;
+    }
+
+    setPreferencesIntent("clear");
+    clearSelectedPreferences();
   }
 
   return (
@@ -189,8 +359,8 @@ export function ProfileForms({
             Guardar perfil
           </SubmitButton>
         </div>
-        {profileState.message ? (
-          <p className="mt-4 text-sm font-semibold" role="status">
+        {profileState.message && !profileState.ok ? (
+          <p className="mt-4 text-sm font-semibold text-red-700" role="status">
             {profileState.message}
           </p>
         ) : null}
@@ -198,53 +368,62 @@ export function ProfileForms({
 
       <form action={preferencesAction} className="rounded-lg border border-lama-line bg-lama-card p-5 shadow-soft">
         <input type="hidden" name="clerk_user_id_comprador" value={buyer.clerk_user_id_comprador} />
+        {hiddenInputs("talles_preferidos", selectedSizes)}
+        {hiddenInputs("categorias_preferidas", selectedCategories)}
+        {hiddenInputs("vendedores_preferidos", selectedSellers)}
         <h2 className="text-xl font-bold">Preferencias</h2>
 
         <div className="mt-5 grid gap-4">
-          <CheckboxGroup
-            title="Talles de ropa"
-            name="talles_preferidos"
-            options={clothingSizes.map((size) => ({ id: size, label: size }))}
+          <DropdownPreferenceGroup
+            title="Talles de ropa para adulto"
+            options={adultClothingOptions}
             selectedValues={selectedSizes}
-            onToggle={(value, checked) => togglePreference(value, checked, setSelectedSizes)}
+            placeholder="Seleccionar talle de adulto"
+            emptyText="Todavia no seleccionaste talles de adulto."
+            onAdd={(value) => addPreference(value, setSelectedSizes)}
+            onRemove={(value) => removePreference(value, setSelectedSizes)}
           />
-          <CheckboxGroup
+          <DropdownPreferenceGroup
+            title="Talles de ropa para niños"
+            options={childrenClothingOptions}
+            selectedValues={selectedSizes}
+            placeholder="Seleccionar talle de niños"
+            emptyText="Todavia no seleccionaste talles de niños."
+            onAdd={(value) => addPreference(value, setSelectedSizes)}
+            onRemove={(value) => removePreference(value, setSelectedSizes)}
+          />
+          <DropdownPreferenceGroup
             title="Talles de zapatillas"
-            name="talles_preferidos"
-            options={shoeSizes.map((size) => ({ id: size, label: size }))}
+            options={shoeOptions}
             selectedValues={selectedSizes}
-            onToggle={(value, checked) => togglePreference(value, checked, setSelectedSizes)}
+            placeholder="Seleccionar talle de zapatillas"
+            emptyText="Todavia no seleccionaste talles de zapatillas."
+            onAdd={(value) => addPreference(value, setSelectedSizes)}
+            onRemove={(value) => removePreference(value, setSelectedSizes)}
           />
-          <CheckboxGroup
-            title="Categorias preferidas"
-            name="categorias_preferidas"
+          <DropdownPreferenceGroup
+            title="Categorias"
             options={categoryOptions}
             selectedValues={selectedCategories}
-            onToggle={(value, checked) => togglePreference(value, checked, setSelectedCategories)}
+            placeholder="Seleccionar categoria"
+            emptyText="Todavia no seleccionaste categorias."
+            keepSelectionOrder
+            onAdd={(value) => addPreference(value, setSelectedCategories)}
+            onRemove={(value) => removePreference(value, setSelectedCategories)}
           />
-          <fieldset>
-            <legend className="text-sm font-bold">Vendedores preferidos</legend>
-            <label className="mt-2 block text-sm font-bold">
-              Buscar vendedor por nombre
-              <input
-                className={fieldClass()}
-                value={sellerSearch}
-                onChange={(event) => setSellerSearch(event.currentTarget.value)}
-                placeholder="Ej: Ana Vintage"
-              />
-            </label>
-            <CheckboxGroup
-              title="Resultados"
-              name="vendedores_preferidos"
-              options={filteredSellerOptions}
-              selectedValues={selectedSellers}
-              onToggle={(value, checked) => togglePreference(value, checked, setSelectedSellers)}
-            />
-          </fieldset>
+          <SellerSearchGroup
+            sellerOptions={sellerOptions}
+            selectedSellers={selectedSellers}
+            sellerSearch={sellerSearch}
+            setSellerSearch={setSellerSearch}
+            onAdd={(value) => addPreference(value, setSelectedSellers)}
+            onRemove={(value) => removePreference(value, setSelectedSellers)}
+          />
         </div>
 
         <div className="mt-5 flex flex-wrap gap-3">
           <button
+            onClick={() => setPreferencesIntent("save")}
             className="inline-flex items-center justify-center gap-2 rounded-md bg-lama-detail px-4 py-2 text-sm font-bold text-white hover:bg-lama-ink focus:outline-none focus:ring-2 focus:ring-lama-detail focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
             disabled={preferencesPending}
           >
@@ -255,7 +434,7 @@ export function ProfileForms({
             type="submit"
             name="intent"
             value="clear"
-            onClick={clearSelectedPreferences}
+            onClick={handleClearPreferences}
             disabled={preferencesPending}
             className="inline-flex items-center justify-center gap-2 rounded-md bg-lama-cream px-4 py-2 text-sm font-bold text-lama-ink hover:bg-lama-line focus:outline-none focus:ring-2 focus:ring-lama-detail focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
           >
@@ -270,10 +449,14 @@ export function ProfileForms({
         ) : null}
       </form>
 
-      {preferencesPending ? <PreferenceModal title="Guardando tus preferencias" isLoading /> : null}
-      {showPreferencesSuccess ? (
-        <PreferenceModal title="Preferencias guardadas exitosamente" onClose={() => setShowPreferencesSuccess(false)} />
+      {profilePending ? <StatusModal title="Guardando tu perfil" isLoading /> : null}
+      {preferencesPending ? (
+        <StatusModal
+          title={preferencesIntent === "clear" ? "Limpiando tus preferencias" : "Guardando tus preferencias"}
+          isLoading
+        />
       ) : null}
+      {successMessage ? <StatusModal title={successMessage} onClose={() => setSuccessMessage("")} /> : null}
     </div>
   );
 }
