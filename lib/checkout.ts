@@ -21,9 +21,7 @@ export function getSalesOrderSellerId(
 }
 
 function getCheckoutMockSellerId() {
-  const isMockAllowed =
-    process.env.NODE_ENV !== "production" &&
-    process.env.ALLOW_CHECKOUT_SELLER_MOCK?.trim().toLowerCase() === "true";
+  const isMockAllowed = process.env.ALLOW_CHECKOUT_SELLER_MOCK?.trim().toLowerCase() === "true";
 
   if (!isMockAllowed) {
     return null;
