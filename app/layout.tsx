@@ -9,9 +9,13 @@ import "./globals.css";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "LAMA — Marketplace de Moda Circular",
+  title: "LAMA — Moda Circular",
   description:
-    "Comprá y vendé moda con historia. LAMA es el marketplace premium de ropa vintage y de segunda mano en Argentina."
+    "Comprá y vendé moda con historia. LAMA es el marketplace premium de ropa vintage y de segunda mano en Argentina.",
+  icons: {
+    icon: [{ url: "/fav_icon.jpeg", type: "image/jpeg" }],
+    shortcut: ["/fav_icon.jpeg"]
+  }
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
