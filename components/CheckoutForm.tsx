@@ -1,10 +1,9 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
 import { CreditCard, Loader2 } from "lucide-react";
 import { BillingDetailsModal, type BillingDetails } from "@/components/BillingDetailsModal";
-import { savePurchase } from "@/lib/purchases-storage";
+import { CHECKOUT_SHIPPING_AMOUNT } from "@/lib/checkout";
 import type { Product } from "@/lib/types";
 
 const currency = new Intl.NumberFormat("es-AR", {
@@ -24,11 +23,10 @@ export function CheckoutForm({
   product: Product;
   buyer: CheckoutBuyer;
 }) {
-  const router = useRouter();
   const [isBillingOpen, setIsBillingOpen] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
-  const shippingAmount = 4500;
+  const shippingAmount = CHECKOUT_SHIPPING_AMOUNT;
   const total = product.precio + shippingAmount;
 
   function openBillingDetails() {
@@ -57,7 +55,7 @@ export function CheckoutForm({
         return;
       }
 
-      const response = await fetch("/api/pagos", {
+      const response = await fetch("/api/ordenes/checkout", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
@@ -81,25 +79,14 @@ export function CheckoutForm({
         return;
       }
 
-      const now = new Date().toISOString();
-      savePurchase({
-        orden_id: data.orden_id,
-        comprador_id: buyer.clerk_user_id_comprador,
-        clerk_user_id_comprador: buyer.clerk_user_id_comprador,
-        producto_ids: [product.producto_id],
-        total,
-        direccion_envio: details.direccion_envio,
-        estado_general: data.estado_general ?? "pendiente de pago",
-        estado_pago: data.estado_pago ?? "pendiente",
-        estado_envio: data.estado_envio ?? "pendiente",
-        fecha_creacion: data.fecha_creacion ?? now,
-        fecha_actualizacion: data.fecha_actualizacion ?? data.fecha_creacion ?? now,
-        products: [product]
-      });
+      if (typeof data.payment_url !== "string" || !data.payment_url) {
+        setMessage("La orden se creo, pero no se recibio la URL de pago.");
+        return;
+      }
 
       setIsBillingOpen(false);
-      setMessage("Compra realizada con exito. Te estamos llevando a Mis compras.");
-      window.setTimeout(() => router.push("/compras"), 1200);
+      setMessage("Orden creada. Te estamos llevando a Payments para completar el pago.");
+      window.location.assign(data.payment_url);
     });
   }
 

@@ -1,26 +1,33 @@
+import { z } from "zod";
 import { NextResponse } from "next/server";
 import { canAccessBuyerApp, getAuthContext } from "@/lib/auth";
 import { getBuyer } from "@/lib/buyer-store";
-import { createPayment } from "@/lib/payment-service";
-import { createSalesOrder } from "@/lib/order-service";
+import { CHECKOUT_SHIPPING_AMOUNT } from "@/lib/checkout";
 import { ExternalApiError } from "@/lib/external-app-client";
+import { createSalesOrder } from "@/lib/order-service";
+import { createPaymentUrl } from "@/lib/payment-service";
 import { getProductsByIds } from "@/lib/seller-service";
 import { paymentSchema } from "@/lib/validation";
+
+const checkoutStartResponseSchema = z.object({
+  orden_id: z.string().min(3),
+  payment_url: z.string().url()
+});
 
 function createOrderId() {
   return `ord_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 }
 
-function logPaymentError(stage: string, error: unknown) {
+function logCheckoutError(stage: string, error: unknown) {
   if (error instanceof ExternalApiError) {
-    console.error(`[api/pagos] ${stage}`, {
+    console.error(`[api/ordenes/checkout] ${stage}`, {
       status: error.status,
       body: error.body
     });
     return;
   }
 
-  console.error(`[api/pagos] ${stage}`, error);
+  console.error(`[api/ordenes/checkout] ${stage}`, error);
 }
 
 export async function POST(request: Request) {
@@ -43,7 +50,7 @@ export async function POST(request: Request) {
 
   if (!parsed.success) {
     return NextResponse.json(
-      { error: "Datos de pago invalidos.", issues: parsed.error.flatten().fieldErrors },
+      { error: "Datos de checkout invalidos.", issues: parsed.error.flatten().fieldErrors },
       { status: 400 }
     );
   }
@@ -82,15 +89,26 @@ export async function POST(request: Request) {
 
   const productsTotal = products.reduce((sum, product) => sum + product.precio, 0);
 
-  if (data.monto_producto !== productsTotal || data.monto_total !== productsTotal + data.monto_envio) {
+  if (
+    data.monto_producto !== productsTotal ||
+    data.monto_envio !== CHECKOUT_SHIPPING_AMOUNT ||
+    data.monto_total !== productsTotal + CHECKOUT_SHIPPING_AMOUNT
+  ) {
     return NextResponse.json({ error: "Los montos de la compra no coinciden con el producto." }, { status: 422 });
   }
 
   const orderId = createOrderId();
-  let order: Awaited<ReturnType<typeof createSalesOrder>>;
+  let paymentUrl: string;
 
   try {
-    order = await createSalesOrder({
+    paymentUrl = createPaymentUrl({ ordenId: orderId });
+  } catch (error) {
+    logCheckoutError("No se pudo construir la URL de pago.", error);
+    return NextResponse.json({ error: "Falta configurar la app de pagos." }, { status: 500 });
+  }
+
+  try {
+    const order = await createSalesOrder({
       ordenId: orderId,
       clerkUserId: data.comprador.clerk_user_id_comprador,
       items: products.map((product) => ({
@@ -100,45 +118,15 @@ export async function POST(request: Request) {
       precioTotal: data.monto_producto,
       direccionEnvio: data.comprador.direccion_envio
     });
+
+    const response = checkoutStartResponseSchema.parse({
+      orden_id: order.orden_id,
+      payment_url: paymentUrl
+    });
+
+    return NextResponse.json(response, { status: 201 });
   } catch (error) {
-    logPaymentError("No se pudo crear la orden en Seller.", error);
+    logCheckoutError("No se pudo crear la orden en Seller.", error);
     return NextResponse.json({ error: "No se pudo crear la orden de venta." }, { status: 502 });
   }
-
-  try {
-    await createPayment({
-      ordenId: order.orden_id,
-      comprador: {
-        clerk_user_id_comprador: data.comprador.clerk_user_id_comprador,
-        nombre: data.comprador.nombre,
-        email: data.comprador.email
-      },
-      vendedorId: sellerId,
-      montoProducto: data.monto_producto,
-      montoEnvio: data.monto_envio,
-      montoTotal: data.monto_total
-    });
-  } catch (error) {
-    logPaymentError("No se pudo crear el pago.", error);
-    return NextResponse.json(
-      { error: "La orden se creo, pero no se pudo procesar el pago." },
-      { status: 502 }
-    );
-  }
-
-  const now = new Date().toISOString();
-
-  return NextResponse.json(
-    {
-      orden_id: order.orden_id,
-      producto_ids: productIds,
-      monto_total: data.monto_total,
-      estado_general: order.estado_general ?? "pendiente de pago",
-      estado_pago: order.estado_pago ?? "pendiente",
-      estado_envio: order.estado_envio ?? "pendiente",
-      fecha_creacion: order.fecha_creacion ?? now,
-      fecha_actualizacion: order.fecha_actualizacion ?? order.fecha_creacion ?? now
-    },
-    { status: 201 }
-  );
 }

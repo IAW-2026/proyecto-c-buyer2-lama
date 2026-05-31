@@ -2,11 +2,10 @@
 
 import { useEffect, useMemo, useState, useTransition } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { CreditCard, Loader2, ShoppingBag, Trash2 } from "lucide-react";
 import { BillingDetailsModal, type BillingDetails } from "@/components/BillingDetailsModal";
 import { EmptyState, LoadingState } from "@/components/ui";
-import { savePurchase } from "@/lib/purchases-storage";
+import { CHECKOUT_SHIPPING_AMOUNT } from "@/lib/checkout";
 import type { Product } from "@/lib/types";
 
 const CART_STORAGE_KEY = "lama-cart";
@@ -40,7 +39,6 @@ export function CartClient({
 }: {
   buyer: CartBuyer;
 }) {
-  const router = useRouter();
   const [cart, setCart] = useState<Product[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
   const [isBillingOpen, setIsBillingOpen] = useState(false);
@@ -53,7 +51,7 @@ export function CartClient({
   }, []);
 
   const productsTotal = useMemo(() => cart.reduce((sum, product) => sum + product.precio, 0), [cart]);
-  const shippingAmount = cart.length ? 4500 : 0;
+  const shippingAmount = cart.length ? CHECKOUT_SHIPPING_AMOUNT : 0;
   const total = productsTotal + shippingAmount;
 
   function removeProduct(productId: string) {
@@ -93,7 +91,7 @@ export function CartClient({
         return;
       }
 
-      const response = await fetch("/api/pagos", {
+      const response = await fetch("/api/ordenes/checkout", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
@@ -117,27 +115,16 @@ export function CartClient({
         return;
       }
 
-      const now = new Date().toISOString();
-      savePurchase({
-        orden_id: data.orden_id,
-        comprador_id: buyer.clerk_user_id_comprador,
-        clerk_user_id_comprador: buyer.clerk_user_id_comprador,
-        producto_ids: cart.map((product) => product.producto_id),
-        total,
-        direccion_envio: details.direccion_envio,
-        estado_general: data.estado_general ?? "pendiente de pago",
-        estado_pago: data.estado_pago ?? "pendiente",
-        estado_envio: data.estado_envio ?? "pendiente",
-        fecha_creacion: data.fecha_creacion ?? now,
-        fecha_actualizacion: data.fecha_actualizacion ?? data.fecha_creacion ?? now,
-        products: cart
-      });
+      if (typeof data.payment_url !== "string" || !data.payment_url) {
+        setMessage("La orden se creo, pero no se recibio la URL de pago.");
+        return;
+      }
 
       setCart([]);
       saveCart([]);
       setIsBillingOpen(false);
-      setMessage("Compra realizada con exito. Te estamos llevando a Mis compras.");
-      window.setTimeout(() => router.push("/compras"), 1200);
+      setMessage("Orden creada. Te estamos llevando a Payments para completar el pago.");
+      window.location.assign(data.payment_url);
     });
   }
 

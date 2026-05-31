@@ -51,6 +51,26 @@ export const paymentSchema = z.object({
   path: ["monto_total"]
 });
 
+export const checkoutOrderParamsSchema = z.object({
+  orden_id: z.string().min(3)
+});
+
+export const checkoutOrderResponseSchema = z.object({
+  orden_id: z.string().min(3),
+  comprador: z.object({
+    comprador_id: z.string().min(3),
+    nombre: z.string().min(1),
+    email: z.string().email()
+  }),
+  vendedor_id: z.string().min(3),
+  monto_producto: z.number().min(0),
+  monto_envio: z.number().min(0),
+  monto_total: z.number().min(0)
+}).refine((data) => data.monto_total === data.monto_producto + data.monto_envio, {
+  message: "El monto total no coincide con producto mas envio.",
+  path: ["monto_total"]
+});
+
 export function splitFormList(value: FormDataEntryValue | null) {
   if (!value || typeof value !== "string") {
     return [];

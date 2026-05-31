@@ -1,0 +1,1 @@
+export const CHECKOUT_SHIPPING_AMOUNT = 4500;
