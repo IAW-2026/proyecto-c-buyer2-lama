@@ -1,8 +1,9 @@
 import Link from "next/link";
-import { Instagram, Mail, MapPin, Heart } from "lucide-react";
+import { Heart, Instagram, Mail, MapPin } from "lucide-react";
 import { canAccessAdmin, getAuthContext } from "@/lib/auth";
+import { getCategories } from "@/lib/seller-service";
 
-const footerSections = [
+const baseFooterSections = [
   {
     title: "Comprar",
     links: [
@@ -15,31 +16,23 @@ const footerSections = [
     title: "Ayuda",
     links: [
       { label: "Perfil comprador", href: "/perfil" },
-      { label: "Estado de envíos", href: "/compras" },
+      { label: "Estado de envios", href: "/compras" },
       { label: "Medios de pago", href: "/carrito" }
     ]
   },
   {
     title: "Acerca de Lama",
     links: [
-      { label: "Quiénes somos", href: "/" },
+      { label: "Quienes somos", href: "/" },
       { label: "Moda circular", href: "/" },
       { label: "Marketplace de segunda mano", href: "/" }
-    ]
-  },
-  {
-    title: "Novedades Lama",
-    links: [
-      { label: "Camperas", href: "/productos?categoria=cat_camperas" },
-      { label: "Vestidos", href: "/productos?categoria=cat_vestidos" },
-      { label: "Pantalones", href: "/productos?categoria=cat_pantalones" }
     ]
   }
 ];
 
 const legalLinks = [
-  { label: "Términos y condiciones", href: "/" },
-  { label: "Política de privacidad", href: "/" },
+  { label: "Terminos y condiciones", href: "/" },
+  { label: "Politica de privacidad", href: "/" },
   { label: "Defensa de las y los consumidores", href: "/" }
 ];
 
@@ -50,15 +43,25 @@ export async function Footer() {
     return null;
   }
 
+  const categories = await getCategories().catch(() => []);
+  const categoryLinks = categories.slice(0, 4).map((category) => ({
+    label: category.nombre,
+    href: `/productos?categoria=${encodeURIComponent(category.categoria_producto_id)}`
+  }));
+  const footerSections = [
+    ...baseFooterSections,
+    {
+      title: "Categorias",
+      links: categoryLinks.length ? categoryLinks : [{ label: "Ver productos", href: "/productos" }]
+    }
+  ];
+
   return (
     <footer className="mt-16 border-t border-white/10 bg-lama-ink/80 text-stone-100 backdrop-blur-xl dark:bg-black/70">
-      {/* Gradient accent line */}
       <div className="h-px bg-gradient-to-r from-transparent via-lama-header/50 to-transparent" aria-hidden="true" />
 
       <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
-        {/* Top row: Brand + Columns */}
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr_1fr]">
-          {/* Brand column */}
           <div>
             <Link href="/" className="inline-block">
               <span className="font-display text-3xl font-bold tracking-tight text-white">
@@ -66,10 +69,9 @@ export async function Footer() {
               </span>
             </Link>
             <p className="mt-3 max-w-xs text-sm leading-relaxed text-stone-400">
-              El marketplace de moda circular más importante de Argentina.
-              Comprá, vendé y dale nueva vida a tus prendas.
+              El marketplace de moda circular mas importante de Argentina.
+              Compra, vende y dale nueva vida a tus prendas.
             </p>
-            {/* Social icons */}
             <div className="mt-6 flex gap-2.5">
               <a
                 href="mailto:soporte@lama.test"
@@ -88,7 +90,6 @@ export async function Footer() {
             </div>
           </div>
 
-          {/* Link columns */}
           {footerSections.map((section) => (
             <section key={section.title} aria-labelledby={`footer-${section.title}`}>
               <h2
@@ -114,7 +115,6 @@ export async function Footer() {
         </div>
       </div>
 
-      {/* Bottom bar */}
       <div className="border-t border-white/5">
         <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-5 text-sm text-stone-500 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
           <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
@@ -123,12 +123,12 @@ export async function Footer() {
               Argentina
             </span>
             <span className="inline-flex items-center gap-1">
-              © 2026 Lama. Hecho con
+              (c) 2026 Lama. Hecho con
               <Heart className="h-3 w-3 text-lama-header" aria-hidden="true" />
             </span>
           </div>
 
-          <nav className="flex flex-wrap gap-x-5 gap-y-2" aria-label="Información legal">
+          <nav className="flex flex-wrap gap-x-5 gap-y-2" aria-label="Informacion legal">
             {legalLinks.map((link) => (
               <Link
                 key={link.label}
