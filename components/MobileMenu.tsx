@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { ChevronRight, Menu, X } from "lucide-react";
 
@@ -11,24 +12,34 @@ type Category = {
 
 export function MobileMenu({ categories }: { categories: Category[] }) {
   const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
-  return (
-    <div className="lg:hidden">
-      <button
-        type="button"
-        onClick={() => setOpen(!open)}
-        className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-white/70 transition hover:bg-white/10 hover:text-white focus:outline-none focus:ring-1 focus:ring-white/30"
-        aria-label={open ? "Cerrar menu" : "Abrir menu"}
-      >
-        {open ? (
-          <X className="h-5 w-5" aria-hidden="true" />
-        ) : (
-          <Menu className="h-5 w-5" aria-hidden="true" />
-        )}
-      </button>
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
-      {open ? (
-        <div className="fixed inset-0 top-0 z-[100] flex flex-col bg-neutral-950/98 text-white">
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [open]);
+
+  const menu =
+    mounted && open
+      ? createPortal(
+        <div
+          className="fixed inset-0 z-[200] flex h-dvh flex-col overflow-hidden bg-neutral-950 text-white"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Menu movil"
+        >
           <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
             <span className="font-display text-2xl font-bold">LAMA</span>
             <button
@@ -90,8 +101,28 @@ export function MobileMenu({ categories }: { categories: Category[] }) {
               Iniciar sesion
             </Link>
           </div>
-        </div>
-      ) : null}
+        </div>,
+        document.body
+      )
+      : null;
+
+  return (
+    <div className="lg:hidden">
+      <button
+        type="button"
+        onClick={() => setOpen(!open)}
+        className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-white/70 transition hover:bg-white/10 hover:text-white focus:outline-none focus:ring-1 focus:ring-white/30"
+        aria-label={open ? "Cerrar menu" : "Abrir menu"}
+        aria-expanded={open}
+      >
+        {open ? (
+          <X className="h-5 w-5" aria-hidden="true" />
+        ) : (
+          <Menu className="h-5 w-5" aria-hidden="true" />
+        )}
+      </button>
+
+      {menu}
     </div>
   );
 }
