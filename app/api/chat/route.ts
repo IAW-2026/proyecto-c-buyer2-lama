@@ -5,6 +5,18 @@ import { chatRequestSchema } from "@/lib/ai/schemas";
 import { sanitizeChatMessages } from "@/lib/ai/sanitize";
 import { chatTools } from "@/lib/ai/tools";
 import { checkAIRateLimit, getAIRateLimitKey } from "@/lib/ai/rate-limit";
+import { createCatalogSearchAnswer, isCatalogSearchRequest } from "@/lib/ai/catalog-chat";
+
+function createPlainTextStreamResponse(text: string) {
+  return createTextStreamResponse({
+    textStream: new ReadableStream<string>({
+      start(controller) {
+        controller.enqueue(text);
+        controller.close();
+      }
+    })
+  });
+}
 
 export async function POST(request: Request) {
   const rateLimit = checkAIRateLimit({
@@ -47,11 +59,19 @@ export async function POST(request: Request) {
     );
   }
 
+  const sanitizedMessages = sanitizeChatMessages(parsed.data.messages);
+  const lastUserMessage = [...sanitizedMessages].reverse().find((message) => message.role === "user");
+
   try {
+    if (lastUserMessage && isCatalogSearchRequest(lastUserMessage.content)) {
+      const answer = await createCatalogSearchAnswer(lastUserMessage.content);
+      return createPlainTextStreamResponse(answer);
+    }
+
     const result = streamText({
       model: geminiModel,
       system: SYSTEM_PROMPT,
-      messages: sanitizeChatMessages(parsed.data.messages),
+      messages: sanitizedMessages,
       tools: chatTools,
       stopWhen: stepCountIs(3),
       maxRetries: 0
