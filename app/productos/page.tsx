@@ -58,6 +58,7 @@ export default async function ProductsPage({
     search: params.search,
     categoria: params.categoria,
     talle: params.talle,
+    genero: params.genero,
     sort,
     page,
     pageSize: 8,
@@ -86,6 +87,7 @@ export default async function ProductsPage({
           search={params.search}
           categoria={params.categoria}
           talle={params.talle}
+          genero={params.genero}
           sort={sort}
           basePath="/productos"
           categoryOptions={catalog.categorias.map((category) => ({

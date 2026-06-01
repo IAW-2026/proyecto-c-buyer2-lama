@@ -24,6 +24,7 @@ export function SearchBar({
   search,
   categoria,
   talle,
+  genero,
   sort,
   categoryOptions,
   basePath = "/",
@@ -32,6 +33,7 @@ export function SearchBar({
   search?: string;
   categoria?: string;
   talle?: string;
+  genero?: string;
   sort?: ProductSort;
   categoryOptions: Option[];
   basePath?: string;
@@ -43,7 +45,7 @@ export function SearchBar({
     <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
       <form
         action={basePath}
-        className="grid gap-3 rounded-2xl border border-lama-line bg-lama-card p-4 shadow-soft sm:p-5 md:grid-cols-[minmax(260px,1fr)_150px_120px_auto_auto] md:items-center lg:basis-3/4"
+        className="grid gap-3 rounded-2xl border border-lama-line bg-lama-card p-4 shadow-soft sm:p-5 md:grid-cols-[minmax(220px,1fr)_140px_110px_130px_auto_auto] md:items-center lg:basis-3/4"
       >
         {sort && sort !== "recent" ? <input type="hidden" name="sort" value={sort} /> : null}
 
@@ -95,6 +97,23 @@ export function SearchBar({
           ))}
         </select>
 
+        <label className="sr-only" htmlFor="genero">
+          Genero
+        </label>
+        <select
+          id="genero"
+          name="genero"
+          defaultValue={genero ?? ""}
+          className="h-11 rounded-xl border border-lama-line bg-lama-cream px-3 text-sm outline-none transition-all focus:border-lama-detail/50 focus:ring-2 focus:ring-lama-detail/20"
+        >
+          <option value="">Genero</option>
+          {["Hombre", "Mujer", "Niños"].map((gender) => (
+            <option key={gender} value={gender}>
+              {gender}
+            </option>
+          ))}
+        </select>
+
         <button className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-lama-detail px-5 text-sm font-bold text-white transition-all hover:bg-lama-ink hover:shadow-md focus:outline-none focus:ring-2 focus:ring-lama-detail focus:ring-offset-2">
           <Search className="h-4 w-4" aria-hidden="true" />
           Buscar
@@ -115,6 +134,7 @@ export function SearchBar({
         {search ? <input type="hidden" name="search" value={search} /> : null}
         {categoria ? <input type="hidden" name="categoria" value={categoria} /> : null}
         {talle ? <input type="hidden" name="talle" value={talle} /> : null}
+        {genero ? <input type="hidden" name="genero" value={genero} /> : null}
         <label className="text-sm font-bold" htmlFor="sort">
           Ordenar por
         </label>
