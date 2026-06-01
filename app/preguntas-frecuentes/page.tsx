@@ -31,14 +31,14 @@ const questions = [
 
 export default function PreguntasFrecuentesPage() {
   return (
-    <main className="relative overflow-hidden">
+    <main className="relative overflow-hidden bg-lama-cream">
       <img
         src="/ayuda.png"
         alt=""
-        className="absolute inset-0 h-full w-full object-cover opacity-20"
+        className="absolute inset-0 h-full w-full object-cover opacity-40"
         aria-hidden="true"
       />
-      <div className="absolute inset-0 bg-lama-cream/85" aria-hidden="true" />
+      <div className="absolute inset-0 bg-lama-cream/55" aria-hidden="true" />
 
       <div className="relative mx-auto max-w-4xl px-4 py-12 sm:px-6 sm:py-16">
         <div className="mb-10">
@@ -60,7 +60,7 @@ export default function PreguntasFrecuentesPage() {
             return (
               <article
                 key={item.question}
-                className="rounded-lg border border-lama-line bg-lama-card/95 p-6 shadow-soft backdrop-blur-sm"
+                className="rounded-lg border border-lama-line bg-lama-card/90 p-6 shadow-soft backdrop-blur-sm"
               >
                 <div className="flex gap-4">
                   <span className="mt-1 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-lama-detail/10 text-lama-detail">

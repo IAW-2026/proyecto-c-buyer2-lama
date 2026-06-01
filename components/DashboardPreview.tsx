@@ -34,11 +34,11 @@ export function DashboardPreview() {
             </Link>
           </div>
 
-          <div className="aspect-[16/9] overflow-hidden rounded-md border border-lama-line bg-lama-cream">
+          <div className="aspect-[2.4/1] overflow-hidden rounded-md border border-lama-line bg-lama-cream p-2 sm:aspect-[3.4/1]">
             <img
               src="/carrito.png"
               alt="Vista del carrito de LAMA"
-              className="h-full w-full object-cover"
+              className="h-full w-full object-contain"
             />
           </div>
         </article>
@@ -57,11 +57,11 @@ export function DashboardPreview() {
             </Link>
           </div>
 
-          <div className="aspect-[16/9] overflow-hidden rounded-md border border-lama-line bg-lama-cream">
+          <div className="aspect-[2.4/1] overflow-hidden rounded-md border border-lama-line bg-lama-cream p-2 sm:aspect-[3.4/1]">
             <img
               src="/compras.png"
               alt="Vista de mis compras en LAMA"
-              className="h-full w-full object-cover"
+              className="h-full w-full object-contain"
             />
           </div>
         </article>
