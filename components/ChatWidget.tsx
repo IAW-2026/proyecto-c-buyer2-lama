@@ -17,6 +17,8 @@ const welcomeMessage: ChatMessage = {
     "Hola! Soy el asistente de LAMA. Puedo ayudarte a encontrar prendas y resolver dudas de talles o estilo. En que te puedo ayudar?"
 };
 
+const limitReachedMessage = "Limite de consultas alcanzado";
+
 function createMessageId() {
   return `msg_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 }
@@ -128,14 +130,18 @@ export function ChatWidget() {
     } catch (caughtError) {
       const fallbackMessage =
         caughtError instanceof Error ? caughtError.message : "Error al conectar con el asistente.";
+      const assistantFallbackMessage =
+        fallbackMessage === limitReachedMessage
+          ? limitReachedMessage
+          : "No pude responder ahora. Proba de nuevo en un momento.";
 
-      setError(fallbackMessage);
+      setError(fallbackMessage === limitReachedMessage ? null : fallbackMessage);
       setMessages((currentMessages) =>
         currentMessages.map((message) =>
           message.id === assistantMessage.id
             ? {
                 ...message,
-                content: "No pude responder ahora. Proba de nuevo en un momento."
+                content: assistantFallbackMessage
               }
             : message
         )

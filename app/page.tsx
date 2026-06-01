@@ -19,11 +19,6 @@ import {
   Users
 } from "lucide-react";
 
-const categoryImageFallbacks: Record<string, string> = {
-  // Completar manualmente con el ID exacto de cada categoria:
-  // "categoria_producto_id": "/products/imagen-de-la-categoria.jpg"
-};
-
 function ProductGrid({
   products,
   favoriteProductIds,
@@ -81,10 +76,7 @@ export default async function Home() {
 
       return {
         ...category,
-        image:
-          categoryProduct?.imagenes[0] ??
-          categoryImageFallbacks[category.categoria_producto_id] ??
-          "/products/inicio.png"
+        image: categoryProduct?.imagenes[0] ?? "/products/inicio.png"
       };
     })
   );

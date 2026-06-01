@@ -7,6 +7,8 @@ import { chatTools } from "@/lib/ai/tools";
 import { checkAIRateLimit, getAIRateLimitKey } from "@/lib/ai/rate-limit";
 import { createCatalogSearchAnswer, isCatalogSearchRequest } from "@/lib/ai/catalog-chat";
 
+const LIMIT_REACHED_MESSAGE = "Limite de consultas alcanzado";
+
 function createPlainTextStreamResponse(text: string) {
   return createTextStreamResponse({
     textStream: new ReadableStream<string>({
@@ -27,7 +29,7 @@ export async function POST(request: Request) {
 
   if (!rateLimit.allowed) {
     return Response.json(
-      { error: "Demasiados mensajes. Intenta de nuevo en unos segundos." },
+      { error: LIMIT_REACHED_MESSAGE },
       {
         status: 429,
         headers: { "Retry-After": String(rateLimit.retryAfter) }
@@ -84,9 +86,7 @@ export async function POST(request: Request) {
             controller.enqueue(delta);
           }
         } catch {
-          controller.enqueue(
-            "No pude responder ahora porque Gemini no tiene cuota disponible para este proyecto. Revisa la cuota o billing en Google AI Studio y proba de nuevo."
-          );
+          controller.enqueue(LIMIT_REACHED_MESSAGE);
         } finally {
           controller.close();
         }

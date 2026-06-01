@@ -17,7 +17,7 @@ export async function Header() {
     <header className="sticky top-0 z-50">
       {!showAdmin ? (
         <div className="bg-gradient-to-r from-lama-ink via-neutral-800 to-lama-ink px-4 py-2 text-center text-[11px] font-semibold uppercase tracking-[0.18em] text-white/90 sm:text-xs">
-          Moda Circular&nbsp;&nbsp;|&nbsp;&nbsp;3 cuotas sin interes +60K&nbsp;&nbsp;|&nbsp;&nbsp;6 cuotas sin interes +120K
+          Moda Circular&nbsp;&nbsp;|&nbsp;&nbsp;Prendas únicas&nbsp;&nbsp;|&nbsp;&nbsp;Fácil y seguro
         </div>
       ) : null}
 
