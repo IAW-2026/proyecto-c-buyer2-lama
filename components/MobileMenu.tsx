@@ -62,14 +62,6 @@ export function MobileMenu({ categories }: { categories: Category[] }) {
                 Inicio
                 <ChevronRight className="h-4 w-4 text-white/40" aria-hidden="true" />
               </Link>
-              <Link
-                href="/compras"
-                onClick={() => setOpen(false)}
-                className="flex items-center justify-between rounded-xl px-4 py-3.5 text-lg font-semibold transition hover:bg-white/10"
-              >
-                Mis Compras
-                <ChevronRight className="h-4 w-4 text-white/40" aria-hidden="true" />
-              </Link>
             </div>
 
             <div className="mt-6 border-t border-white/10 pt-6">
@@ -98,7 +90,7 @@ export function MobileMenu({ categories }: { categories: Category[] }) {
               onClick={() => setOpen(false)}
               className="block w-full rounded-full bg-lama-header py-3.5 text-center text-sm font-bold uppercase tracking-wide text-white transition hover:opacity-90"
             >
-              Iniciar sesion
+              Iniciar sesion / Registrarse
             </Link>
           </div>
         </div>,
