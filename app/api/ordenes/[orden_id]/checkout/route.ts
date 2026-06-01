@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getBuyer } from "@/lib/buyer-store";
 import { CHECKOUT_SHIPPING_AMOUNT, getSalesOrderSellerId } from "@/lib/checkout";
 import { ExternalApiError } from "@/lib/external-app-client";
-import { getSalesOrderById } from "@/lib/order-service";
+import { enrichSalesOrderItems, getSalesOrderById } from "@/lib/order-service";
 import { checkoutOrderParamsSchema, checkoutOrderResponseSchema } from "@/lib/validation";
 
 function logCheckoutLookupError(stage: string, error: unknown) {
@@ -55,7 +55,8 @@ export async function GET(
       return NextResponse.json({ error: "La cuenta esta desactivada." }, { status: 403 });
     }
 
-    const sellerId = getSalesOrderSellerId(order);
+    const orderWithItems = await enrichSalesOrderItems(order);
+    const sellerId = getSalesOrderSellerId(orderWithItems);
 
     if (!sellerId) {
       return NextResponse.json(
@@ -66,16 +67,22 @@ export async function GET(
       );
     }
 
-    const itemsTotal = order.items.reduce((sum, item) => sum + item.precio_unitario, 0);
-    const productsTotal = order.total || itemsTotal;
+    const itemsTotal = orderWithItems.items.reduce((sum, item) => sum + item.precio_unitario, 0);
+    const productsTotal = orderWithItems.total || itemsTotal;
     const response = checkoutOrderResponseSchema.parse({
-      orden_id: order.orden_id,
+      orden_id: orderWithItems.orden_id,
       comprador: {
         comprador_id: buyerId,
         nombre: buyer.nombre_comprador,
         email: buyer.email
       },
       vendedor_id: sellerId,
+      items: orderWithItems.items.map((item) => ({
+        producto_id: item.producto_id,
+        precio_unitario: item.precio_unitario,
+        titulo: item.titulo ?? "",
+        imagenes: item.imagenes ?? []
+      })),
       monto_producto: productsTotal,
       monto_envio: CHECKOUT_SHIPPING_AMOUNT,
       monto_total: productsTotal + CHECKOUT_SHIPPING_AMOUNT

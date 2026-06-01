@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getSalesOrderSellerId } from "@/lib/checkout";
-import { getSalesOrderById } from "@/lib/order-service";
+import { enrichSalesOrderItems, getSalesOrderById } from "@/lib/order-service";
 import { checkoutOrderParamsSchema } from "@/lib/validation";
 
 export async function GET(
@@ -25,14 +25,15 @@ export async function GET(
       return NextResponse.json({ error: "Orden no encontrada." }, { status: 404 });
     }
 
-    const sellerId = getSalesOrderSellerId(order);
+    const orderWithItems = await enrichSalesOrderItems(order);
+    const sellerId = getSalesOrderSellerId(orderWithItems);
 
     return NextResponse.json({
-      ...order,
+      ...orderWithItems,
       ...(sellerId
         ? {
-            vendedor_id: order.vendedor_id ?? sellerId,
-            clerk_user_id_vendedor: order.clerk_user_id_vendedor ?? sellerId
+            vendedor_id: orderWithItems.vendedor_id ?? sellerId,
+            clerk_user_id_vendedor: orderWithItems.clerk_user_id_vendedor ?? sellerId
           }
         : {})
     });

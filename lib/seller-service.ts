@@ -9,6 +9,7 @@ import type {
   Product,
   ProductSort,
   SalesOrder,
+  SalesOrderItem,
   Seller
 } from "@/lib/types";
 
@@ -64,6 +65,8 @@ type SellerProductResponse = Omit<Product, "vendedor_id" | "clerk_user_id_vended
 type SellerOrderItem = {
   producto_id: string;
   precio_unitario: number;
+  titulo?: string;
+  imagenes?: string[] | null;
   vendedor_id?: string;
   clerk_user_id_vendedor?: string;
 };
@@ -518,11 +521,15 @@ function normalizeOrder(
     order.items?.map((item) => item.producto_id) ??
     fallback?.productIds ??
     [];
-  const items: SellerOrderItem[] =
-    order.items ??
+  const items: SalesOrderItem[] =
+    order.items?.map((item) => ({
+      ...item,
+      imagenes: Array.isArray(item.imagenes) ? item.imagenes : []
+    })) ??
     productIds.map((productId) => ({
       producto_id: productId,
-      precio_unitario: 0
+      precio_unitario: 0,
+      imagenes: []
     }));
   const buyerId = order.clerk_user_id_comprador ?? order.comprador_id ?? fallback?.clerkUserId ?? "";
   const itemWithSeller = items.find((item) => item.clerk_user_id_vendedor || item.vendedor_id);

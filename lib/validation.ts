@@ -55,6 +55,13 @@ export const checkoutOrderParamsSchema = z.object({
   orden_id: z.string().min(3)
 });
 
+const checkoutOrderItemResponseSchema = z.object({
+  producto_id: z.string().min(3),
+  precio_unitario: z.number().min(0),
+  titulo: z.string(),
+  imagenes: z.array(z.string())
+});
+
 export const checkoutOrderResponseSchema = z.object({
   orden_id: z.string().min(3),
   comprador: z.object({
@@ -63,6 +70,7 @@ export const checkoutOrderResponseSchema = z.object({
     email: z.string().email()
   }),
   vendedor_id: z.string().min(3),
+  items: z.array(checkoutOrderItemResponseSchema).min(1),
   monto_producto: z.number().min(0),
   monto_envio: z.number().min(0),
   monto_total: z.number().min(0)
