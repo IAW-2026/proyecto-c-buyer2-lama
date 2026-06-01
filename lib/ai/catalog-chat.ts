@@ -57,7 +57,12 @@ const searchTriggers = new Set([
   "comprar",
   "encontrar",
   "hay",
+  "muestrame",
+  "muestre",
+  "muestren",
+  "muestres",
   "mostrame",
+  "mostrarme",
   "mostras",
   "mostrar",
   "necesito",
@@ -93,7 +98,12 @@ const stopWords = new Set([
   "mi",
   "mira",
   "mirar",
+  "muestrame",
+  "muestre",
+  "muestren",
+  "muestres",
   "mostrame",
+  "mostrarme",
   "mostras",
   "mostrar",
   "necesito",
@@ -102,6 +112,7 @@ const stopWords = new Set([
   "podes",
   "podrias",
   "por",
+  "que",
   "quiero",
   "recomendame",
   "recomendas",
@@ -152,7 +163,11 @@ function getSearchTokens(text: string) {
         return false;
       }
 
-      if (["hombre", "masculino", "mujer", "femenino", "unisex"].includes(token)) {
+      if (
+        ["hombre", "masculino", "mujer", "femenino", "unisex", "nino", "ninos", "infantil"].includes(
+          token
+        )
+      ) {
         return false;
       }
 
@@ -178,6 +193,10 @@ function extractGender(text: string) {
 
   if (/\bunisex\b/.test(normalized)) {
     return "Unisex";
+  }
+
+  if (/\b(nino|ninos|infantil)\b/.test(normalized)) {
+    return "niños";
   }
 
   return undefined;

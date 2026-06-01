@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { MessageCircle, X, Send, Bot, User, Loader2 } from "lucide-react";
 
 type ChatMessage = {
@@ -18,6 +19,30 @@ const welcomeMessage: ChatMessage = {
 
 function createMessageId() {
   return `msg_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function MessageContent({ content }: { content: string }) {
+  const productPathPattern = /\/productos\/[A-Za-z0-9_-]+/g;
+  const parts = content.split(productPathPattern);
+  const paths = content.match(productPathPattern) ?? [];
+
+  return (
+    <>
+      {parts.map((part, index) => (
+        <span key={`${part}-${index}`}>
+          {part}
+          {paths[index] ? (
+            <Link
+              href={paths[index]}
+              className="font-bold text-lama-detail underline underline-offset-2 hover:text-lama-ink"
+            >
+              Ver producto
+            </Link>
+          ) : null}
+        </span>
+      ))}
+    </>
+  );
 }
 
 export function ChatWidget() {
@@ -174,7 +199,9 @@ export function ChatWidget() {
                       : "bg-lama-card text-lama-ink"
                   }`}
                 >
-                  {message.content || (
+                  {message.content ? (
+                    <MessageContent content={message.content} />
+                  ) : (
                     <span className="inline-flex items-center gap-2 text-lama-ink/60">
                       <Loader2 className="h-3.5 w-3.5 animate-spin" />
                       Pensando...

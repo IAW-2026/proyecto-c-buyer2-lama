@@ -50,7 +50,7 @@ Reglas:
 - "search" debe contener las palabras clave relevantes para buscar productos (título, marca, tipo de prenda)
 - "categoria" debe ser el ID exacto de la categoría si se puede inferir, o null
 - "talle" debe ser uno de los talles disponibles si se menciona, o null
-- "genero" debe ser "Hombre", "Mujer" o "Unisex" si se menciona, o null
+- "genero" debe ser "hombre", "mujer", "niños" o "unisex" si se menciona, o null
 - "intent_description" es una breve descripción de lo que busca el usuario (para debug)
 - Si el usuario solo busca algo genérico como "campera", poné la palabra clave en "search" y dejá los filtros en null`
     });

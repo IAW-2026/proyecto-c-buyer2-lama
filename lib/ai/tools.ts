@@ -10,7 +10,7 @@ const searchProductsInputSchema = z.object({
     .optional()
     .describe("Texto libre de busqueda, por ejemplo 'campera de cuero' o 'vestido elegante'."),
   talle: z.string().max(10).optional().describe("Talle de la prenda, por ejemplo S, M, L, XL o 38."),
-  genero: z.string().max(20).optional().describe("Genero de la prenda: Hombre, Mujer o Unisex."),
+  genero: z.string().max(20).optional().describe("Genero de la prenda: hombre, mujer, niños o unisex."),
   pageSize: z.number().int().min(1).max(8).optional().describe("Cantidad de resultados a devolver.")
 });
 
