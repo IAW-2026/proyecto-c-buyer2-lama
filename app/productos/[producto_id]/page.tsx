@@ -8,10 +8,9 @@ import { AIStyleTipsCard } from "@/components/AIStyleTips";
 import { ButtonLink, Card, PageShell, StatusBadge } from "@/components/ui";
 import { canAccessBuyerApp } from "@/lib/auth";
 import { getBuyer } from "@/lib/buyer-store";
-import { fetchInternalApi } from "@/lib/external-client";
 import { isFavoriteProduct } from "@/lib/favorites-store";
 import { getBuyerRouteAuthContext } from "@/lib/role-guards";
-import { getCategories, getSellers } from "@/lib/seller-service";
+import { getCategories, getProductById, getSellers } from "@/lib/seller-service";
 import { getProductStyleTips } from "@/lib/ai/product-description";
 import type { Product } from "@/lib/types";
 
@@ -28,11 +27,9 @@ export default async function ProductPage({
 }) {
   const { producto_id } = await params;
   const authContext = await getBuyerRouteAuthContext();
-  let product: Product;
+  const product: Product | null = await getProductById(producto_id).catch(() => null);
 
-  try {
-    product = await fetchInternalApi<Product>(`/api/productos/${producto_id}`);
-  } catch {
+  if (!product) {
     notFound();
   }
 

@@ -5,6 +5,8 @@ import { aiStyleTipsSchema, type AIStyleTips } from "@/lib/ai/schemas";
 import { sanitizeProduct } from "@/lib/ai/sanitize";
 import type { Product } from "@/lib/types";
 
+const PRODUCT_STYLE_TIPS_TIMEOUT_MS = 3000;
+
 /**
  * Genera tips de estilo y sugerencias de outfit para un producto usando IA.
  * Si falla o no está configurada la IA, devuelve null.
@@ -34,6 +36,7 @@ export async function getProductStyleTips(
       model: geminiModel,
       schema: aiStyleTipsSchema,
       maxRetries: 0,
+      timeout: { totalMs: PRODUCT_STYLE_TIPS_TIMEOUT_MS },
       prompt: `Generá tips de estilo para esta prenda de un marketplace de ropa de segunda mano.
 
 Producto:
