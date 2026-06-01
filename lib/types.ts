@@ -72,9 +72,19 @@ export type CatalogResponse = {
 
 export type OrderStatus = {
   orden_id: string;
-  estado_general: "pendiente" | "pendiente de pago" | "pagada" | "en preparacion" | "enviada" | "cancelada";
+  estado_general:
+    | "pendiente"
+    | "pendiente_pago"
+    | "pendiente de pago"
+    | "pagada"
+    | "en_preparacion"
+    | "en preparacion"
+    | "despachada"
+    | "enviada"
+    | "finalizada"
+    | "cancelada";
   estado_pago: "pendiente" | "aprobado" | "rechazado";
-  estado_envio: "pendiente" | "en preparacion" | "despachado" | "entregado" | "cancelado";
+  estado_envio: "pendiente" | "en_preparacion" | "en preparacion" | "despachado" | "entregado" | "cancelado";
   fecha_actualizacion: string;
 };
 
@@ -104,7 +114,17 @@ export type ShippingInfo = {
   orden_id: string;
   codigo_seguimiento: string;
   empresa_logistica: string;
-  estado: "pendiente" | "en preparacion" | "despachado" | "entregado" | "cancelado";
+  estado:
+    | "pending"
+    | "in_transit"
+    | "delivered"
+    | "returned"
+    | "pendiente"
+    | "en_preparacion"
+    | "en preparacion"
+    | "despachado"
+    | "entregado"
+    | "cancelado";
   historial_estados: Array<{
     estado: string;
     fecha: string;

@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { PackageCheck, Truck } from "lucide-react";
 import { Card, EmptyState, LoadingState, StatusBadge } from "@/components/ui";
+import { formatStatusLabel } from "@/lib/status-labels";
 import type { OrderStatus, Product, ShippingInfo } from "@/lib/types";
 
 const currency = new Intl.NumberFormat("es-AR", {
@@ -169,7 +170,7 @@ export function PurchasesClient({ buyerId }: { buyerId: string }) {
             <div className="space-y-4">
               <div className="flex flex-wrap items-center gap-3">
                 <h2 className="text-xl font-bold">Orden: {purchase.orden_id}</h2>
-                <StatusBadge>{purchase.estado_general}</StatusBadge>
+                <StatusBadge className="normal-case">{formatStatusLabel(purchase.estado_general)}</StatusBadge>
               </div>
               <PurchaseProductList purchase={purchase} />
               <dl className="grid gap-3 text-sm sm:grid-cols-3">
@@ -209,7 +210,7 @@ export function PurchasesClient({ buyerId }: { buyerId: string }) {
                   <li key={`${item.estado}-${index}`} className="text-sm">
                     <div className="flex items-center gap-2 font-bold">
                       <PackageCheck className="h-4 w-4 text-lama-detail" aria-hidden="true" />
-                      {item.estado}
+                      {formatStatusLabel(item.estado)}
                     </div>
                     <p className="ml-6 text-lama-ink/75">{item.descripcion}</p>
                   </li>

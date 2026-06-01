@@ -9,6 +9,7 @@ import { canAccessAdmin, getAuthContext } from "@/lib/auth";
 import { getBuyer } from "@/lib/buyer-store";
 import { getSalesOrdersForBuyer } from "@/lib/order-service";
 import { getCategories, getProductsByIds, getSellers } from "@/lib/seller-service";
+import { formatStatusLabel } from "@/lib/status-labels";
 
 const currency = new Intl.NumberFormat("es-AR", {
   style: "currency",
@@ -183,8 +184,8 @@ export default async function AdminBuyerDetailPage({
                         <p className="mt-1 text-sm text-lama-ink/65">{formatDate(order.fecha_creacion)}</p>
                       </div>
                       <div className="flex flex-wrap gap-2">
-                        <StatusBadge>{order.estado_general}</StatusBadge>
-                        <StatusBadge>{order.estado_envio}</StatusBadge>
+                        <StatusBadge className="normal-case">{formatStatusLabel(order.estado_general)}</StatusBadge>
+                        <StatusBadge className="normal-case">{formatStatusLabel(order.estado_envio)}</StatusBadge>
                       </div>
                     </div>
 
@@ -205,7 +206,7 @@ export default async function AdminBuyerDetailPage({
                       </div>
                       <div>
                         <dt className="font-bold">Pago</dt>
-                        <dd>{order.estado_pago}</dd>
+                        <dd>{formatStatusLabel(order.estado_pago)}</dd>
                       </div>
                       <div>
                         <dt className="font-bold">Direccion</dt>
