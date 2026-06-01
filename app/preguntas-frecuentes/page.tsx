@@ -5,24 +5,24 @@ import { CreditCard, RotateCcw, Truck } from "lucide-react";
 export const metadata: Metadata = {
   title: "Preguntas frecuentes | LAMA",
   description:
-    "Informacion sobre medios de pago, envios y reembolsos en LAMA."
+    "Información sobre medios de pago, envíos y reembolsos en LAMA."
 };
 
 const questions = [
   {
-    question: "Que metodos de pago aceptan?",
+    question: "¿Qué métodos de pago aceptan?",
     answer:
       "Trabajamos con Mercado Pago. Podes pagar con los medios disponibles en la plataforma, como tarjetas, dinero en cuenta y otras opciones habilitadas.",
     icon: CreditCard
   },
   {
-    question: "Como realizan los envios?",
+    question: "¿Cómo realizan los envíos?",
     answer:
-      "Los envios se realizan mediante nuestra empresa propia de logistica. Una vez confirmada la compra, preparamos el pedido y coordinamos el envio.",
+      "Los envíos se realizan mediante una empresa de logística. Una vez confirmada la compra, el vendedor prepara la compra y coordinamos el envío.",
     icon: Truck
   },
   {
-    question: "Aceptan reembolsos?",
+    question: "¿Aceptan reembolsos?",
     answer:
       "Por el momento no realizamos reembolsos. Te recomendamos revisar bien el detalle del producto antes de confirmar la compra.",
     icon: RotateCcw
@@ -49,7 +49,7 @@ export default function PreguntasFrecuentesPage() {
             Preguntas frecuentes
           </h1>
           <p className="mt-4 max-w-2xl text-base leading-relaxed text-lama-ink/70">
-            Respuestas rapidas sobre pagos, envios y condiciones de compra dentro de LAMA.
+            Respuestas rápidas sobre pagos, envíos y condiciones de compra dentro de LAMA.
           </p>
         </div>
 

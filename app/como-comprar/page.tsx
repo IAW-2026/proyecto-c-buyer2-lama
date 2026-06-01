@@ -10,8 +10,8 @@ export const metadata: Metadata = {
 
 const steps = [
   {
-    title: "Elegi tus productos",
-    text: "Recorre el catalogo y abri el detalle de las prendas que te interesan.",
+    title: "Elegí tus productos",
+    text: "Recorré el catálogo y abri el detalle de las prendas que te interesan.",
     icon: ShoppingBag
   },
   {
@@ -20,18 +20,18 @@ const steps = [
     icon: MousePointerClick
   },
   {
-    title: "Ingresa tus datos",
-    text: "Completas la informacion de contacto y envio para que podamos preparar tu pedido.",
+    title: "Ingresá tus datos",
+    text: "Completas la información de contacto y envío para que podamos preparar tu pedido.",
     icon: UserRound
   },
   {
-    title: "Paga con Mercado Pago",
+    title: "Pagá con Mercado Pago",
     text: "Te redirigimos a Mercado Pago para finalizar el pago de forma segura.",
     icon: CreditCard
   },
   {
-    title: "Recibi la confirmacion",
-    text: "Cuando el pago se aprueba, dejamos tu compra lista y coordinamos el envio.",
+    title: "Recibí la confirmación",
+    text: "Cuando el pago se aprueba, dejamos tu compra lista y coordinamos el envío.",
     icon: CheckCircle2
   }
 ];
@@ -56,14 +56,14 @@ export default function ComoComprarPage() {
             Como comprar
           </h1>
           <p className="mt-4 text-base leading-relaxed text-lama-ink/70">
-            Comprar en LAMA es simple: elegis lo que te gusta, completas tus datos
+            Comprar en LAMA es simple: elegís lo que te gusta, completas tus datos
             y terminamos el pago con Mercado Pago.
           </p>
           <Link
             href="/productos"
             className="mt-8 inline-flex items-center justify-center rounded-md bg-lama-detail px-4 py-2 text-sm font-bold text-white transition hover:bg-lama-ink focus:outline-none focus:ring-2 focus:ring-lama-detail focus:ring-offset-2"
           >
-            Ir al catalogo
+            Ir al catálogo
           </Link>
         </section>
 

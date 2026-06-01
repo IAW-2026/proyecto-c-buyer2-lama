@@ -3,9 +3,9 @@ import Link from "next/link";
 import { Leaf, Recycle, Shirt, Sparkles } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Quienes somos | LAMA",
+  title: "Quiénes somos | LAMA",
   description:
-    "Conoce la mirada de LAMA sobre moda circular, prendas con historia y consumo mas consciente."
+    "Conocé la mirada de LAMA sobre moda circular, prendas con historia y consumo mas consciente."
 };
 
 const values = [
@@ -16,7 +16,7 @@ const values = [
   },
   {
     title: "Compra consciente",
-    text: "Buscamos que elegir segunda mano sea facil, lindo y parte de una rutina mas responsable.",
+    text: "Buscamos que elegir segunda mano sea fácil, lindo y parte de una rutina más responsable.",
     icon: Leaf
   },
   {
@@ -44,7 +44,7 @@ export default function QuienesSomosPage() {
               Acerca de LAMA
             </p>
             <h1 className="mt-4 font-display text-4xl font-bold leading-tight sm:text-6xl">
-              Quienes somos
+              Quiénes somos
             </h1>
             <p className="mt-5 text-base leading-relaxed text-white/80 sm:text-lg">
               En LAMA creemos que vestirse tambien puede ser una forma de elegir mejor.
@@ -69,7 +69,7 @@ export default function QuienesSomosPage() {
               Moda circular
             </p>
             <h2 className="mt-3 font-display text-3xl font-bold text-lama-ink sm:text-4xl">
-              Menos descarte, mas vida util para cada prenda.
+              Menos descarte, más vida útil para cada prenda.
             </h2>
           </div>
 
@@ -80,9 +80,9 @@ export default function QuienesSomosPage() {
               descartadas antes de tiempo.
             </p>
             <p>
-              Nos interesa que comprar usado sea facil, confiable y con estilo.
-              Queremos acercar una forma de consumo mas consciente, donde cada
-              eleccion tenga sentido y cada prenda pueda encontrar una nueva historia.
+              Nos interesa que comprar usado sea fácil, confiable y con estilo.
+              Queremos acercar una forma de consumo más consciente, donde cada
+              elección tenga sentido y cada prenda pueda encontrar una nueva historia.
             </p>
           </div>
         </div>
