@@ -1,7 +1,23 @@
 import { NextResponse } from "next/server";
 import { canAccessAdmin, canAccessBuyerApp, getAuthContext } from "@/lib/auth";
-import { getSalesOrdersForBuyerList } from "@/lib/order-service";
-import { getProductsByIds } from "@/lib/seller-service";
+import {
+  enrichSalesOrderItems,
+  getSalesOrderById,
+  getSalesOrdersForBuyerList
+} from "@/lib/order-service";
+import type { SalesOrder } from "@/lib/types";
+
+function hasDetailedItems(order: SalesOrder) {
+  return order.items.length > 0 && order.items.every((item) => item.titulo && item.imagenes);
+}
+
+async function getOrderWithDetailedItems(order: SalesOrder) {
+  const detailedOrder = hasDetailedItems(order)
+    ? order
+    : await getSalesOrderById(order.orden_id).catch(() => null);
+
+  return enrichSalesOrderItems(detailedOrder ?? order);
+}
 
 export async function GET(request: Request) {
   const authContext = await getAuthContext();
@@ -24,17 +40,11 @@ export async function GET(request: Request) {
 
   try {
     const orders = await getSalesOrdersForBuyerList(requestedBuyerId, { page, pageSize });
-    const products = await getProductsByIds(orders.items.flatMap((order) => order.producto_ids));
-    const productsById = new Map(products.map((product) => [product.producto_id, product]));
+    const items = await Promise.all(orders.items.map(getOrderWithDetailedItems));
 
     return NextResponse.json({
       ...orders,
-      items: orders.items.map((order) => ({
-        ...order,
-        products: order.producto_ids
-          .map((productId) => productsById.get(productId))
-          .filter((product) => product !== undefined)
-      }))
+      items
     });
   } catch {
     return NextResponse.json({ error: "No se pudieron obtener las compras." }, { status: 502 });

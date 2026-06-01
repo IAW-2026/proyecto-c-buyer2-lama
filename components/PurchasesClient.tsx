@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { PackageCheck, Truck } from "lucide-react";
-import { ProductMini } from "@/components/ProductCard";
 import { Card, EmptyState, LoadingState, StatusBadge } from "@/components/ui";
 import type { OrderStatus, Product, ShippingInfo } from "@/lib/types";
 
@@ -18,22 +17,82 @@ type PurchasesResponse =
       items?: Purchase[];
     };
 
+type PurchaseItem = {
+  producto_id: string;
+  precio_unitario: number;
+  titulo?: string;
+  imagenes?: string[];
+};
+
+type PurchaseProductSummary = {
+  id: string;
+  title: string;
+  image: string;
+};
+
 type Purchase = {
   orden_id: string;
   comprador_id?: string;
   clerk_user_id_comprador: string;
+  items?: PurchaseItem[];
   total: number;
   direccion_envio: string;
   estado_general: OrderStatus["estado_general"];
   estado_pago: OrderStatus["estado_pago"];
   estado_envio: OrderStatus["estado_envio"];
   fecha_actualizacion: string;
-  products: Product[];
+  products?: Product[];
   shipping?: ShippingInfo | null;
 };
 
 function normalizePurchasesResponse(response: PurchasesResponse) {
   return Array.isArray(response) ? response : response.items ?? [];
+}
+
+function getPurchaseProductSummaries(purchase: Purchase): PurchaseProductSummary[] {
+  const productsById = new Map((purchase.products ?? []).map((product) => [product.producto_id, product]));
+  const items = purchase.items?.length
+    ? purchase.items
+    : (purchase.products ?? []).map((product) => ({
+        producto_id: product.producto_id,
+        precio_unitario: product.precio,
+        titulo: product.titulo,
+        imagenes: product.imagenes
+      }));
+
+  return items.map((item) => {
+    const product = productsById.get(item.producto_id);
+
+    return {
+      id: item.producto_id,
+      title: item.titulo || product?.titulo || "Producto",
+      image: item.imagenes?.[0] || product?.imagenes?.[0] || "/products/inicio.png"
+    };
+  });
+}
+
+function PurchaseProductList({ purchase }: { purchase: Purchase }) {
+  const products = getPurchaseProductSummaries(purchase);
+
+  if (!products.length) {
+    return null;
+  }
+
+  return (
+    <div className="space-y-3">
+      <p className="text-sm font-bold">Productos</p>
+      <div className="grid gap-3 sm:grid-cols-2">
+        {products.map((product) => (
+          <div key={product.id} className="flex min-w-0 items-center gap-3">
+            <div className="h-14 w-14 shrink-0 overflow-hidden rounded-md bg-lama-cream">
+              <img src={product.image} alt={product.title} className="h-full w-full object-cover" />
+            </div>
+            <p className="min-w-0 text-sm font-bold text-lama-ink">{product.title}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 }
 
 export function PurchasesClient({ buyerId }: { buyerId: string }) {
@@ -112,11 +171,7 @@ export function PurchasesClient({ buyerId }: { buyerId: string }) {
                 <h2 className="text-xl font-bold">Orden: {purchase.orden_id}</h2>
                 <StatusBadge>{purchase.estado_general}</StatusBadge>
               </div>
-              <div className="space-y-3">
-                {purchase.products.map((product) => (
-                  <ProductMini key={product.producto_id} product={product} />
-                ))}
-              </div>
+              <PurchaseProductList purchase={purchase} />
               <dl className="grid gap-3 text-sm sm:grid-cols-3">
                 <div>
                   <dt className="font-bold">Total</dt>

@@ -44,9 +44,13 @@ export async function enrichSalesOrderItems(order: SalesOrder): Promise<SalesOrd
     return order;
   }
 
-  const products = await getProductsByIds(productIds).catch(() => []);
-  const productsById = new Map(products.map((product) => [product.producto_id, product]));
   const itemsByProductId = new Map(order.items.map((item) => [item.producto_id, item]));
+  const missingProductIds = productIds.filter((productId) => {
+    const item = itemsByProductId.get(productId);
+    return !item?.titulo || !item.imagenes?.length || item.precio_unitario <= 0;
+  });
+  const products = missingProductIds.length ? await getProductsByIds(missingProductIds).catch(() => []) : [];
+  const productsById = new Map(products.map((product) => [product.producto_id, product]));
   const completeItems = productIds.map<SalesOrderItem>((productId) => {
     const item = itemsByProductId.get(productId);
     const product = productsById.get(productId);
