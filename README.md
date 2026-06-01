@@ -21,6 +21,7 @@ Si se inicia con rol comprador:
 2. Agregar productos al carrito o comprar directamente desde el detalle del producto.
 3. Completar y/o modificar los datos necesarios y continuar el flujo de checkout.
 4. Revisar las compras realizadas y el estado desde la sección "Mis compras".
+5. Modificar datos de perfil y/o preferencias para luego ver en el inicio productos recomendados según las categorías favoritas.
 
 Si se inicia con rol super admin:
 
