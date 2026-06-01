@@ -19,7 +19,7 @@ export function DashboardPreview() {
         </p>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[0.92fr_1.08fr]">
+      <div className="grid gap-6">
         <article className="rounded-lg border border-lama-line bg-lama-card p-5 shadow-soft">
           <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-2">
@@ -34,7 +34,7 @@ export function DashboardPreview() {
             </Link>
           </div>
 
-          <div className="aspect-[2.4/1] overflow-hidden rounded-md border border-lama-line bg-lama-cream p-2 sm:aspect-[3.4/1]">
+          <div className="aspect-[2.2/1] overflow-hidden rounded-md border border-lama-line bg-lama-cream p-2 sm:aspect-[3.5/1]">
             <img
               src="/carrito.png"
               alt="Vista del carrito de LAMA"
@@ -57,7 +57,7 @@ export function DashboardPreview() {
             </Link>
           </div>
 
-          <div className="aspect-[2.4/1] overflow-hidden rounded-md border border-lama-line bg-lama-cream p-2 sm:aspect-[3.4/1]">
+          <div className="aspect-[2.2/1] overflow-hidden rounded-md border border-lama-line bg-lama-cream p-2 sm:aspect-[5/1]">
             <img
               src="/compras.png"
               alt="Vista de mis compras en LAMA"
