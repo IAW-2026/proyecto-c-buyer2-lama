@@ -15,8 +15,6 @@ const baseFooterSections = [
   {
     title: "Ayuda",
     links: [
-      { label: "Perfil comprador", href: "/perfil" },
-      { label: "Estado de envios", href: "/compras" },
       { label: "Preguntas frecuentes", href: "/preguntas-frecuentes" },
       { label: "Como comprar", href: "/como-comprar" }
     ]
@@ -43,14 +41,14 @@ export async function Footer() {
   }
 
   const categories = await getCategories().catch(() => []);
-  const categoryLinks = categories.slice(0, 4).map((category) => ({
+  const categoryLinks = categories.slice(0, 3).map((category) => ({
     label: category.nombre,
     href: `/productos?categoria=${encodeURIComponent(category.categoria_producto_id)}`
   }));
   const footerSections = [
     ...baseFooterSections,
     {
-      title: "Categorias",
+      title: "Novedades",
       links: categoryLinks.length ? categoryLinks : [{ label: "Ver productos", href: "/productos" }]
     }
   ];
@@ -121,9 +119,8 @@ export async function Footer() {
               <MapPin className="h-3.5 w-3.5" aria-hidden="true" />
               Argentina
             </span>
-            <span className="inline-flex items-center gap-1">
-              (c) 2026 Lama. Hecho con
-              <Heart className="h-3 w-3 text-lama-header" aria-hidden="true" />
+            <span className="inline-flex items-center gap-1 font-medium text-stone-300">
+              @ 2026 Lama. Todos los derechos reservados.
             </span>
           </div>
 

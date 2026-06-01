@@ -54,7 +54,7 @@ export function CategoryDropdown({ categories }: { categories: Category[] }) {
         aria-expanded={open}
         aria-haspopup="menu"
       >
-        Categorias
+        Categorías
         <ChevronDown
           className={`h-3.5 w-3.5 transition-transform ${open ? "rotate-180" : ""}`}
           aria-hidden="true"

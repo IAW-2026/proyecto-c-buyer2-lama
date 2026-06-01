@@ -99,7 +99,7 @@ export function CheckoutForm({
           <dd className="font-bold">{currency.format(product.precio)}</dd>
         </div>
         <div className="flex justify-between">
-          <dt>Envio</dt>
+          <dt>Envío</dt>
           <dd className="font-bold">{currency.format(shippingAmount)}</dd>
         </div>
         <div className="flex justify-between border-t border-lama-line pt-2 text-base">

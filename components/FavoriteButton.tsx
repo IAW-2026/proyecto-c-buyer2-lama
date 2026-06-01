@@ -45,7 +45,7 @@ export function FavoriteButton({
           )}
         >
           <Heart className="h-4 w-4" aria-hidden="true" />
-          Iniciar sesion para guardar
+          Iniciar sesión para guardar
         </Link>
       );
     }

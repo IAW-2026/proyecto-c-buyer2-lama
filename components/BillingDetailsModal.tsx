@@ -92,7 +92,7 @@ export function BillingDetailsModal({
             />
           </label>
           <label className="text-sm font-bold sm:col-span-2">
-            Direccion de envio
+            Dirección de envío
             <textarea
               value={details.direccion_envio}
               onChange={(event) => updateField("direccion_envio", event.target.value)}

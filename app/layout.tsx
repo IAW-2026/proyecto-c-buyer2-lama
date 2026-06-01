@@ -13,8 +13,8 @@ export const metadata: Metadata = {
   description:
     "Comprá y vendé moda con historia. LAMA es el marketplace premium de ropa vintage y de segunda mano en Argentina.",
   icons: {
-    icon: [{ url: "/fav_icon.jpeg", type: "image/jpeg" }],
-    shortcut: ["/fav_icon.jpeg"]
+    icon: [{ url: "/fav_icon.png", type: "image/png" }],
+    shortcut: ["/fav_icon.png"]
   }
 };
 

@@ -85,7 +85,7 @@ export function SearchBar({
         </div>
 
         <label className="sr-only" htmlFor="categoria">
-          Categoria
+          Categoría
         </label>
         <select
           id="categoria"
@@ -119,7 +119,7 @@ export function SearchBar({
         </select>
 
         <label className="sr-only" htmlFor="genero">
-          Genero
+          Género
         </label>
         <select
           id="genero"
@@ -127,7 +127,7 @@ export function SearchBar({
           defaultValue={normalizedGender}
           className="h-11 rounded-xl border border-lama-line bg-lama-cream px-3 text-sm outline-none transition-all focus:border-lama-detail/50 focus:ring-2 focus:ring-lama-detail/20"
         >
-          <option value="">Genero</option>
+          <option value="">Género</option>
           {genderOptions.map((gender) => (
             <option key={gender.value} value={gender.value}>
               {gender.label}

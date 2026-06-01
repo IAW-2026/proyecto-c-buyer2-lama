@@ -38,8 +38,16 @@ const steps = [
 
 export default function ComoComprarPage() {
   return (
-    <main className="mx-auto max-w-5xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
-      <div className="grid gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:items-start">
+    <main className="relative overflow-hidden">
+      <img
+        src="/ayuda.png"
+        alt=""
+        className="absolute inset-0 h-full w-full object-cover opacity-20"
+        aria-hidden="true"
+      />
+      <div className="absolute inset-0 bg-lama-cream/85" aria-hidden="true" />
+
+      <div className="relative mx-auto grid max-w-5xl gap-10 px-4 py-12 sm:px-6 sm:py-16 lg:grid-cols-[0.85fr_1.15fr] lg:items-start lg:px-8">
         <section>
           <p className="text-xs font-bold uppercase tracking-[0.25em] text-lama-detail">
             Ayuda
@@ -66,7 +74,7 @@ export default function ComoComprarPage() {
             return (
               <li
                 key={step.title}
-                className="rounded-lg border border-lama-line bg-lama-card p-5 shadow-soft"
+                className="rounded-lg border border-lama-line bg-lama-card/95 p-5 shadow-soft backdrop-blur-sm"
               >
                 <div className="flex gap-4">
                   <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-lama-detail text-sm font-bold text-white">

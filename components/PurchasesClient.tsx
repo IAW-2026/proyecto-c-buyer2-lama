@@ -67,7 +67,7 @@ function getPurchaseProductSummaries(purchase: Purchase): PurchaseProductSummary
     return {
       id: item.producto_id,
       title: item.titulo || product?.titulo || "Producto",
-      image: item.imagenes?.[0] || product?.imagenes?.[0] || "/products/inicio.png"
+      image: item.imagenes?.[0] || product?.imagenes?.[0] || "/inicio.png"
     };
   });
 }

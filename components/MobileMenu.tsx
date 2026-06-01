@@ -76,7 +76,7 @@ export function MobileMenu({ categories }: { categories: Category[] }) {
 
             <div className="mt-6 border-t border-white/10 pt-6">
               <p className="mb-3 px-4 text-[11px] font-bold uppercase tracking-[0.2em] text-white/40">
-                Categorias
+                Categorías
               </p>
               <div className="space-y-0.5">
                 <Link
@@ -120,7 +120,7 @@ export function MobileMenu({ categories }: { categories: Category[] }) {
               onClick={() => setOpen(false)}
               className="block w-full rounded-full bg-lama-header py-3.5 text-center text-sm font-bold uppercase tracking-wide text-white transition hover:opacity-90"
             >
-              Iniciar sesion / Registrarse
+              Iniciar sesión / Registrarse
             </Link>
           </div>
         </div>,

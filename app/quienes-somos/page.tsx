@@ -29,14 +29,14 @@ const values = [
 export default function QuienesSomosPage() {
   return (
     <main>
-      <section className="relative overflow-hidden bg-lama-ink text-white">
+      <section className="relative overflow-hidden bg-neutral-950 text-white">
         <img
-          src="/products/inicio.png"
+          src="/inicio.png"
           alt=""
-          className="absolute inset-0 h-full w-full object-cover opacity-35"
+          className="absolute inset-0 h-full w-full object-cover opacity-45"
           aria-hidden="true"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-lama-ink via-lama-ink/85 to-lama-ink/45" aria-hidden="true" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/65 to-black/25" aria-hidden="true" />
 
         <div className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 sm:py-24 lg:px-8">
           <div className="max-w-2xl">
@@ -53,7 +53,7 @@ export default function QuienesSomosPage() {
             </p>
             <Link
               href="/productos"
-              className="mt-8 inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-bold text-lama-ink transition hover:bg-lama-cream"
+              className="mt-8 inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-bold text-neutral-950 transition hover:bg-lama-cream"
             >
               Ver productos
               <Sparkles className="h-4 w-4" aria-hidden="true" />

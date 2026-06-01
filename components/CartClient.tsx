@@ -221,7 +221,7 @@ export function CartClient({
               aria-label={`Ver ${product.titulo}`}
             >
               <img
-                src={product.imagenes?.[0] ?? "/products/inicio.png"}
+                src={product.imagenes?.[0] ?? "/inicio.png"}
                 alt={product.titulo}
                 className="h-full w-full object-cover"
               />
@@ -266,7 +266,7 @@ export function CartClient({
             <dd className="font-bold">{currency.format(productsTotal)}</dd>
           </div>
           <div className="flex justify-between">
-            <dt>Envio</dt>
+            <dt>Envío</dt>
             <dd className="font-bold">{currency.format(shippingAmount)}</dd>
           </div>
           <div className="flex justify-between border-t border-lama-line pt-3 text-base">

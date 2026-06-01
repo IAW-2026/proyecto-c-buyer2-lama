@@ -31,51 +31,61 @@ const questions = [
 
 export default function PreguntasFrecuentesPage() {
   return (
-    <main className="mx-auto max-w-4xl px-4 py-12 sm:px-6 sm:py-16">
-      <div className="mb-10">
-        <p className="text-xs font-bold uppercase tracking-[0.25em] text-lama-detail">
-          Ayuda
-        </p>
-        <h1 className="mt-3 font-display text-4xl font-bold text-lama-ink sm:text-5xl">
-          Preguntas frecuentes
-        </h1>
-        <p className="mt-4 max-w-2xl text-base leading-relaxed text-lama-ink/70">
-          Respuestas rapidas sobre pagos, envios y condiciones de compra dentro de LAMA.
-        </p>
-      </div>
+    <main className="relative overflow-hidden">
+      <img
+        src="/ayuda.png"
+        alt=""
+        className="absolute inset-0 h-full w-full object-cover opacity-20"
+        aria-hidden="true"
+      />
+      <div className="absolute inset-0 bg-lama-cream/85" aria-hidden="true" />
 
-      <div className="space-y-4">
-        {questions.map((item) => {
-          const Icon = item.icon;
+      <div className="relative mx-auto max-w-4xl px-4 py-12 sm:px-6 sm:py-16">
+        <div className="mb-10">
+          <p className="text-xs font-bold uppercase tracking-[0.25em] text-lama-detail">
+            Ayuda
+          </p>
+          <h1 className="mt-3 font-display text-4xl font-bold text-lama-ink sm:text-5xl">
+            Preguntas frecuentes
+          </h1>
+          <p className="mt-4 max-w-2xl text-base leading-relaxed text-lama-ink/70">
+            Respuestas rapidas sobre pagos, envios y condiciones de compra dentro de LAMA.
+          </p>
+        </div>
 
-          return (
-            <article
-              key={item.question}
-              className="rounded-lg border border-lama-line bg-lama-card p-6 shadow-soft"
-            >
-              <div className="flex gap-4">
-                <span className="mt-1 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-lama-detail/10 text-lama-detail">
-                  <Icon className="h-5 w-5" aria-hidden="true" />
-                </span>
-                <div>
-                  <h2 className="text-lg font-bold text-lama-ink">{item.question}</h2>
-                  <p className="mt-2 text-sm leading-relaxed text-lama-ink/70">
-                    {item.answer}
-                  </p>
+        <div className="space-y-4">
+          {questions.map((item) => {
+            const Icon = item.icon;
+
+            return (
+              <article
+                key={item.question}
+                className="rounded-lg border border-lama-line bg-lama-card/95 p-6 shadow-soft backdrop-blur-sm"
+              >
+                <div className="flex gap-4">
+                  <span className="mt-1 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-lama-detail/10 text-lama-detail">
+                    <Icon className="h-5 w-5" aria-hidden="true" />
+                  </span>
+                  <div>
+                    <h2 className="text-lg font-bold text-lama-ink">{item.question}</h2>
+                    <p className="mt-2 text-sm leading-relaxed text-lama-ink/70">
+                      {item.answer}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            </article>
-          );
-        })}
-      </div>
+              </article>
+            );
+          })}
+        </div>
 
-      <div className="mt-8">
-        <Link
-          href="/como-comprar"
-          className="inline-flex items-center justify-center rounded-md bg-lama-detail px-4 py-2 text-sm font-bold text-white transition hover:bg-lama-ink focus:outline-none focus:ring-2 focus:ring-lama-detail focus:ring-offset-2"
-        >
-          Ver como comprar
-        </Link>
+        <div className="mt-8">
+          <Link
+            href="/como-comprar"
+            className="inline-flex items-center justify-center rounded-md bg-lama-detail px-4 py-2 text-sm font-bold text-white transition hover:bg-lama-ink focus:outline-none focus:ring-2 focus:ring-lama-detail focus:ring-offset-2"
+          >
+            Ver como comprar
+          </Link>
+        </div>
       </div>
     </main>
   );

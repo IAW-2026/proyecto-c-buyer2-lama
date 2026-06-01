@@ -34,9 +34,9 @@ export function DashboardPreview() {
             </Link>
           </div>
 
-          <div className="overflow-hidden rounded-md border border-lama-line bg-lama-cream">
+          <div className="aspect-[16/9] overflow-hidden rounded-md border border-lama-line bg-lama-cream">
             <img
-              src="/products/mi_carrito.png"
+              src="/carrito.png"
               alt="Vista del carrito de LAMA"
               className="h-full w-full object-cover"
             />
@@ -57,9 +57,9 @@ export function DashboardPreview() {
             </Link>
           </div>
 
-          <div className="overflow-hidden rounded-md border border-lama-line bg-lama-cream">
+          <div className="aspect-[16/9] overflow-hidden rounded-md border border-lama-line bg-lama-cream">
             <img
-              src="/products/mis_compras.png"
+              src="/compras.png"
               alt="Vista de mis compras en LAMA"
               className="h-full w-full object-cover"
             />

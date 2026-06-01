@@ -76,7 +76,7 @@ export default async function Home() {
 
       return {
         ...category,
-        image: categoryProduct?.imagenes?.[0] ?? "/products/inicio.png"
+        image: categoryProduct?.imagenes?.[0] ?? "/inicio.png"
       };
     })
   );
@@ -85,7 +85,7 @@ export default async function Home() {
     <div>
       <section className="relative -mt-[112px] flex min-h-[calc(85vh+112px)] items-end overflow-hidden sm:min-h-[calc(90vh+112px)] lg:-mt-[65px] lg:min-h-[calc(90vh+65px)]">
         <img
-          src="/products/inicio.png"
+          src="/inicio.png"
           alt=""
           className="absolute inset-0 h-full w-full object-cover"
           aria-hidden="true"

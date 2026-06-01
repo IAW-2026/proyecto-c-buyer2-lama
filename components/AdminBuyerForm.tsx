@@ -49,11 +49,11 @@ export function AdminBuyerEditForm({ buyer }: { buyer: BuyerWithPreferences }) {
           <input className={fieldClass()} name="DNI" defaultValue={buyer.DNI ?? ""} />
         </label>
         <label className="text-sm font-bold">
-          Telefono
+          Teléfono
           <input className={fieldClass()} name="telefono" defaultValue={buyer.telefono ?? ""} />
         </label>
         <label className="text-sm font-bold md:col-span-2">
-          Direccion de envio
+          Dirección de envío
           <textarea
             className={fieldClass()}
             name="direccion_envio"
