@@ -17,15 +17,14 @@ const baseFooterSections = [
     links: [
       { label: "Perfil comprador", href: "/perfil" },
       { label: "Estado de envios", href: "/compras" },
-      { label: "Medios de pago", href: "/carrito" }
+      { label: "Preguntas frecuentes", href: "/preguntas-frecuentes" },
+      { label: "Como comprar", href: "/como-comprar" }
     ]
   },
   {
     title: "Acerca de Lama",
     links: [
-      { label: "Quienes somos", href: "/" },
-      { label: "Moda circular", href: "/" },
-      { label: "Marketplace de segunda mano", href: "/" }
+      { label: "Quienes somos", href: "/quienes-somos" }
     ]
   }
 ];
