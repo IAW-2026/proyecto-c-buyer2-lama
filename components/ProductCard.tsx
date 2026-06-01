@@ -24,6 +24,7 @@ export function ProductCard({
   aiReason?: string;
 }) {
   const isAvailable = product.estado_publicacion === "activa";
+  const productImage = product.imagenes?.[0] ?? "/products/inicio.png";
 
   return (
     <article className="group relative h-full overflow-hidden rounded-2xl border border-lama-line bg-lama-card shadow-soft transition-all duration-300 hover:-translate-y-1 hover:border-lama-detail/40 hover:shadow-lg">
@@ -34,7 +35,7 @@ export function ProductCard({
       >
         <div className="relative aspect-[3/4] overflow-hidden bg-lama-cream">
           <img
-            src={product.imagenes[0]}
+            src={productImage}
             alt={product.titulo}
             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
@@ -99,10 +100,12 @@ export function ProductCard({
 }
 
 export function ProductMini({ product }: { product: Product }) {
+  const productImage = product.imagenes?.[0] ?? "/products/inicio.png";
+
   return (
     <div className="flex items-center gap-3">
       <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-lama-cream">
-        <img src={product.imagenes[0]} alt="" className="h-full w-full object-cover" />
+        <img src={productImage} alt="" className="h-full w-full object-cover" />
       </div>
       <div>
         <p className="font-bold">{product.titulo}</p>

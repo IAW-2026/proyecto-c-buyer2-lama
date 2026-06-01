@@ -220,7 +220,11 @@ export function CartClient({
               className="relative aspect-square overflow-hidden rounded-md bg-lama-cream"
               aria-label={`Ver ${product.titulo}`}
             >
-              <img src={product.imagenes[0]} alt={product.titulo} className="h-full w-full object-cover" />
+              <img
+                src={product.imagenes?.[0] ?? "/products/inicio.png"}
+                alt={product.titulo}
+                className="h-full w-full object-cover"
+              />
             </Link>
 
             <div className="min-w-0">

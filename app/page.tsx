@@ -76,7 +76,7 @@ export default async function Home() {
 
       return {
         ...category,
-        image: categoryProduct?.imagenes[0] ?? "/products/inicio.png"
+        image: categoryProduct?.imagenes?.[0] ?? "/products/inicio.png"
       };
     })
   );

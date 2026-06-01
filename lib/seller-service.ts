@@ -55,9 +55,10 @@ type SellerResponse = Omit<Seller, "vendedor_id" | "clerk_user_id_vendedor"> & {
   clerk_user_id_vendedor?: string;
 };
 
-type SellerProductResponse = Omit<Product, "vendedor_id" | "clerk_user_id_vendedor"> & {
+type SellerProductResponse = Omit<Product, "vendedor_id" | "clerk_user_id_vendedor" | "imagenes"> & {
   vendedor_id?: string;
   clerk_user_id_vendedor?: string;
+  imagenes?: string[] | null;
 };
 
 type SellerOrderItem = {
@@ -160,6 +161,7 @@ function normalizeProduct(product: SellerProductResponse): Product {
     ...product,
     vendedor_id: product.vendedor_id ?? sellerId,
     clerk_user_id_vendedor: sellerId,
+    imagenes: Array.isArray(product.imagenes) ? product.imagenes : [],
     genero: product.genero ?? ""
   };
 }
