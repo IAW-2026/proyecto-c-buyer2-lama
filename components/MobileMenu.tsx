@@ -10,10 +10,14 @@ type Category = {
   nombre: string;
 };
 
-const genderLinks = ["Hombre", "Mujer", "Niños"];
+const genderLinks = [
+  { label: "Hombre", value: "hombre" },
+  { label: "Mujer", value: "mujer" },
+  { label: "Niños", value: "niños" }
+];
 
-function buildGenderHref(gender: string) {
-  return `/productos?${new URLSearchParams({ genero: gender }).toString()}`;
+function buildGenderHref(value: string) {
+  return `/productos?${new URLSearchParams({ genero: value }).toString()}`;
 }
 
 export function MobileMenu({ categories }: { categories: Category[] }) {
@@ -85,12 +89,12 @@ export function MobileMenu({ categories }: { categories: Category[] }) {
                 </Link>
                 {genderLinks.map((gender) => (
                   <Link
-                    key={gender}
-                    href={buildGenderHref(gender)}
+                    key={gender.value}
+                    href={buildGenderHref(gender.value)}
                     onClick={() => setOpen(false)}
                     className="flex items-center justify-between rounded-xl px-4 py-3 text-base font-medium text-white/75 transition hover:bg-white/10 hover:text-white"
                   >
-                    {gender}
+                    {gender.label}
                     <ChevronRight className="h-3.5 w-3.5 text-white/30" aria-hidden="true" />
                   </Link>
                 ))}

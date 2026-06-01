@@ -112,15 +112,24 @@ function normalizeGenderFilter(value?: string | null) {
   const normalized = value?.trim().toLowerCase();
 
   if (normalized === "hombre") {
-    return "Hombre";
+    return "hombre";
   }
 
   if (normalized === "mujer") {
-    return "Mujer";
+    return "mujer";
   }
 
   if (normalized === "unisex") {
-    return "Unisex";
+    return "unisex";
+  }
+
+  if (
+    normalized === "niños" ||
+    normalized === "ninos" ||
+    normalized === "niño" ||
+    normalized === "nino"
+  ) {
+    return "niños";
   }
 
   return null;
@@ -200,8 +209,10 @@ function buildProductQuery({
     params.set("talle", talle);
   }
 
-  if (genero) {
-    params.set("genero", genero);
+  const normalizedGender = normalizeGenderFilter(genero);
+
+  if (normalizedGender) {
+    params.set("genero", normalizedGender);
   }
 
   params.set("sort", normalizeProductSort(sort));

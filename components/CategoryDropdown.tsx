@@ -9,10 +9,14 @@ type Category = {
   nombre: string;
 };
 
-const genderLinks = ["Hombre", "Mujer", "Niños"];
+const genderLinks = [
+  { label: "Hombre", value: "hombre" },
+  { label: "Mujer", value: "mujer" },
+  { label: "Niños", value: "niños" }
+];
 
-function buildGenderHref(gender: string) {
-  return `/productos?${new URLSearchParams({ genero: gender }).toString()}`;
+function buildGenderHref(value: string) {
+  return `/productos?${new URLSearchParams({ genero: value }).toString()}`;
 }
 
 export function CategoryDropdown({ categories }: { categories: Category[] }) {
@@ -72,13 +76,13 @@ export function CategoryDropdown({ categories }: { categories: Category[] }) {
           </Link>
           {genderLinks.map((gender) => (
             <Link
-              key={gender}
-              href={buildGenderHref(gender)}
+              key={gender.value}
+              href={buildGenderHref(gender.value)}
               onClick={() => setOpen(false)}
               className="block px-4 py-2.5 text-sm font-medium text-white/80 transition hover:bg-white/10 hover:text-white focus:bg-white/10 focus:outline-none"
               role="menuitem"
             >
-              {gender}
+              {gender.label}
             </Link>
           ))}
           <div className="my-1 border-t border-white/10" role="separator" />

@@ -20,6 +20,26 @@ const defaultSortOptions: SortOption[] = [
   { value: "recent", label: "Agregados recientemente" }
 ];
 
+const genderOptions = [
+  { label: "Hombre", value: "hombre" },
+  { label: "Mujer", value: "mujer" },
+  { label: "Niños", value: "niños" }
+];
+
+function normalizeGenderValue(value?: string) {
+  const normalized = value?.trim().toLowerCase();
+
+  if (normalized === "hombre" || normalized === "mujer" || normalized === "niños") {
+    return normalized;
+  }
+
+  if (normalized === "ninos" || normalized === "niño" || normalized === "nino") {
+    return "niños";
+  }
+
+  return "";
+}
+
 export function SearchBar({
   search,
   categoria,
@@ -40,6 +60,7 @@ export function SearchBar({
   sortOptions?: SortOption[];
 }) {
   const clearFiltersHref = sort && sort !== "recent" ? `${basePath}?sort=${sort}` : basePath;
+  const normalizedGender = normalizeGenderValue(genero);
 
   return (
     <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
@@ -103,13 +124,13 @@ export function SearchBar({
         <select
           id="genero"
           name="genero"
-          defaultValue={genero ?? ""}
+          defaultValue={normalizedGender}
           className="h-11 rounded-xl border border-lama-line bg-lama-cream px-3 text-sm outline-none transition-all focus:border-lama-detail/50 focus:ring-2 focus:ring-lama-detail/20"
         >
           <option value="">Genero</option>
-          {["Hombre", "Mujer", "Niños"].map((gender) => (
-            <option key={gender} value={gender}>
-              {gender}
+          {genderOptions.map((gender) => (
+            <option key={gender.value} value={gender.value}>
+              {gender.label}
             </option>
           ))}
         </select>
@@ -134,7 +155,7 @@ export function SearchBar({
         {search ? <input type="hidden" name="search" value={search} /> : null}
         {categoria ? <input type="hidden" name="categoria" value={categoria} /> : null}
         {talle ? <input type="hidden" name="talle" value={talle} /> : null}
-        {genero ? <input type="hidden" name="genero" value={genero} /> : null}
+        {normalizedGender ? <input type="hidden" name="genero" value={normalizedGender} /> : null}
         <label className="text-sm font-bold" htmlFor="sort">
           Ordenar por
         </label>
