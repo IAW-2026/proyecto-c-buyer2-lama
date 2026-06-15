@@ -9,14 +9,21 @@ export async function GET(request: Request) {
   }
 
   const { searchParams } = new URL(request.url);
-  const result = await listBuyers({
-    search: searchParams.get("search") ?? "",
-    estado: searchParams.get("estado") ?? "todos",
-    page: Number(searchParams.get("page") ?? 1),
-    pageSize: Number(searchParams.get("pageSize") ?? 8)
-  });
+  const page = Math.max(Number(searchParams.get("page") ?? 1), 1);
+  const pageSize = Math.min(Math.max(Number(searchParams.get("pageSize") ?? searchParams.get("page_size") ?? 20), 1), 25);
 
-  return NextResponse.json(result);
+  try {
+    const result = await listBuyers({
+      search: searchParams.get("search") ?? "",
+      estado: searchParams.get("estado") ?? "todos",
+      page,
+      pageSize
+    });
+
+    return NextResponse.json(result);
+  } catch {
+    return NextResponse.json({ error: "No se pudieron obtener los compradores." }, { status: 502 });
+  }
 }
 
 export async function POST(_request: Request) {
