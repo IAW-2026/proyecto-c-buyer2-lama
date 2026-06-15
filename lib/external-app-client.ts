@@ -7,9 +7,13 @@ const baseUrlEnvByApp: Record<ExternalAppName, string> = {
 };
 
 const apiKeyEnvByApp: Record<ExternalAppName, string> = {
-  seller: "SELLER_API_KEY",
+  seller: "BUYER_API_KEY",
   shipping: "SHIPPING_API_KEY",
   payments: "PAYMENTS_API_KEY"
+};
+
+const serviceNameByApp: Partial<Record<ExternalAppName, string>> = {
+  seller: "buyer"
 };
 
 export class ExternalApiError extends Error {
@@ -53,6 +57,11 @@ function buildExternalHeaders(app: ExternalAppName, init?: RequestInit) {
 
   if (init?.body && !headers.has("content-type")) {
     headers.set("content-type", "application/json");
+  }
+
+  const serviceName = serviceNameByApp[app];
+  if (serviceName) {
+    headers.set("x-service-name", serviceName);
   }
 
   headers.set("x-api-key", getExternalAppApiKey(app));
