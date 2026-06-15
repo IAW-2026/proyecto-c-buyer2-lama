@@ -3,8 +3,8 @@ import { NextResponse } from "next/server";
 type ServiceAppName = "payments" | "analytics";
 
 const apiKeyEnvByService: Record<ServiceAppName, string> = {
-  payments: "PAYMENTS_APP_API_KEY",
-  analytics: "ANALYTICS_APP_API_KEY"
+  payments: "PAYMENTS_API_KEY",
+  analytics: "ANALYTICS_API_KEY"
 };
 
 export function requireServiceApiKey(request: Request, service: ServiceAppName) {

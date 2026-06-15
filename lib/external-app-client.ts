@@ -7,9 +7,9 @@ const baseUrlEnvByApp: Record<ExternalAppName, string> = {
 };
 
 const apiKeyEnvByApp: Record<ExternalAppName, string> = {
-  seller: "SELLER_APP_API_KEY",
-  shipping: "SHIPPING_APP_API_KEY",
-  payments: "PAYMENTS_APP_API_KEY"
+  seller: "SELLER_API_KEY",
+  shipping: "SHIPPING_API_KEY",
+  payments: "PAYMENTS_API_KEY"
 };
 
 export class ExternalApiError extends Error {
