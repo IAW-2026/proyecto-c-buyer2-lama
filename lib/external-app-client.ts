@@ -6,6 +6,12 @@ const baseUrlEnvByApp: Record<ExternalAppName, string> = {
   payments: "PAYMENTS_APP_BASE_URL"
 };
 
+const apiKeyEnvByApp: Record<ExternalAppName, string> = {
+  seller: "SELLER_APP_API_KEY",
+  shipping: "SHIPPING_APP_API_KEY",
+  payments: "PAYMENTS_APP_API_KEY"
+};
+
 export class ExternalApiError extends Error {
   constructor(
     message: string,
@@ -27,8 +33,31 @@ function getExternalAppBaseUrl(app: ExternalAppName) {
   return baseUrl;
 }
 
+function getExternalAppApiKey(app: ExternalAppName) {
+  const envName = apiKeyEnvByApp[app];
+  const apiKey = process.env[envName]?.trim();
+
+  if (!apiKey) {
+    throw new Error(`Falta configurar ${envName}.`);
+  }
+
+  return apiKey;
+}
+
 function buildExternalUrl(app: ExternalAppName, path: string) {
   return new URL(path.replace(/^\//, ""), `${getExternalAppBaseUrl(app)}/`).toString();
+}
+
+function buildExternalHeaders(app: ExternalAppName, init?: RequestInit) {
+  const headers = new Headers(init?.headers);
+
+  if (init?.body && !headers.has("content-type")) {
+    headers.set("content-type", "application/json");
+  }
+
+  headers.set("x-api-key", getExternalAppApiKey(app));
+
+  return headers;
 }
 
 async function readResponseBody(response: Response) {
@@ -43,10 +72,7 @@ export async function fetchExternalJson<T>(
   const response = await fetch(buildExternalUrl(app, path), {
     ...init,
     cache: "no-store",
-    headers: {
-      ...(init?.body ? { "content-type": "application/json" } : {}),
-      ...init?.headers
-    }
+    headers: buildExternalHeaders(app, init)
   });
 
   if (!response.ok) {
@@ -66,10 +92,7 @@ export async function fetchExternalNoContent(
   const response = await fetch(buildExternalUrl(app, path), {
     ...init,
     cache: "no-store",
-    headers: {
-      ...(init?.body ? { "content-type": "application/json" } : {}),
-      ...init?.headers
-    }
+    headers: buildExternalHeaders(app, init)
   });
 
   if (!response.ok) {

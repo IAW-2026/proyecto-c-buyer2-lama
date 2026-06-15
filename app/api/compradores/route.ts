@@ -1,29 +1,23 @@
 import { NextResponse } from "next/server";
 import { canAccessAdmin, getAuthContext } from "@/lib/auth";
 import { listBuyers } from "@/lib/buyer-store";
+import { requireServiceApiKey } from "@/lib/service-api-key";
 
 export async function GET(request: Request) {
-  const authContext = await getAuthContext();
-  if (!canAccessAdmin(authContext)) {
-    return NextResponse.json({ error: "No autorizado." }, { status: 403 });
+  const unauthorizedResponse = requireServiceApiKey(request, "analytics");
+  if (unauthorizedResponse) {
+    return unauthorizedResponse;
   }
 
   const { searchParams } = new URL(request.url);
-  const page = Math.max(Number(searchParams.get("page") ?? 1), 1);
-  const pageSize = Math.min(Math.max(Number(searchParams.get("pageSize") ?? searchParams.get("page_size") ?? 20), 1), 25);
+  const result = await listBuyers({
+    search: searchParams.get("search") ?? "",
+    estado: searchParams.get("estado") ?? "todos",
+    page: Number(searchParams.get("page") ?? 1),
+    pageSize: Number(searchParams.get("pageSize") ?? 8)
+  });
 
-  try {
-    const result = await listBuyers({
-      search: searchParams.get("search") ?? "",
-      estado: searchParams.get("estado") ?? "todos",
-      page,
-      pageSize
-    });
-
-    return NextResponse.json(result);
-  } catch {
-    return NextResponse.json({ error: "No se pudieron obtener los compradores." }, { status: 502 });
-  }
+  return NextResponse.json(result);
 }
 
 export async function POST(_request: Request) {

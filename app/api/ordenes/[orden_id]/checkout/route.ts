@@ -3,6 +3,7 @@ import { getBuyer } from "@/lib/buyer-store";
 import { CHECKOUT_SHIPPING_AMOUNT, getSalesOrderSellerId } from "@/lib/checkout";
 import { ExternalApiError } from "@/lib/external-app-client";
 import { enrichSalesOrderItems, getSalesOrderById } from "@/lib/order-service";
+import { requireServiceApiKey } from "@/lib/service-api-key";
 import { checkoutOrderParamsSchema, checkoutOrderResponseSchema } from "@/lib/validation";
 
 function logCheckoutLookupError(stage: string, error: unknown) {
@@ -18,9 +19,14 @@ function logCheckoutLookupError(stage: string, error: unknown) {
 }
 
 export async function GET(
-  _request: Request,
+  request: Request,
   context: { params: Promise<{ orden_id: string }> }
 ) {
+  const unauthorizedResponse = requireServiceApiKey(request, "payments");
+  if (unauthorizedResponse) {
+    return unauthorizedResponse;
+  }
+
   const params = checkoutOrderParamsSchema.safeParse(await context.params);
 
   if (!params.success) {
