@@ -20,15 +20,15 @@ export function requireServiceApiKey(request: Request, service: ServiceAppName) 
 
 export function requireAnyServiceApiKey(request: Request, services: ServiceAppName[]) {
   const serviceName = request.headers.get("x-service-name")?.trim().toLowerCase();
-  const candidateServices = serviceName
-    ? services.filter((service) => serviceHeaderNameByService[service] === serviceName)
-    : services;
+  const isKnownAllowedService = serviceName
+    ? services.some((service) => serviceHeaderNameByService[service] === serviceName)
+    : true;
 
-  if (!candidateServices.length) {
+  if (!isKnownAllowedService) {
     return NextResponse.json({ error: "No autorizado." }, { status: 401 });
   }
 
-  const configuredServices = candidateServices
+  const configuredServices = services
     .map((service) => ({
       service,
       envName: apiKeyEnvByService[service],
@@ -39,7 +39,7 @@ export function requireAnyServiceApiKey(request: Request, services: ServiceAppNa
     );
 
   if (!configuredServices.length) {
-    const missingEnvNames = candidateServices.map((service) => apiKeyEnvByService[service]).join(", ");
+    const missingEnvNames = services.map((service) => apiKeyEnvByService[service]).join(", ");
     console.error(`[service-api-key] Falta configurar ${missingEnvNames}.`);
     return NextResponse.json({ error: "Servicio no configurado." }, { status: 500 });
   }
