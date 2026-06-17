@@ -1,19 +1,22 @@
-type ExternalAppName = "seller" | "shipping" | "payments";
+type ExternalAppName = "seller" | "shipping" | "payments" | "control-plane";
 
 const baseUrlEnvByApp: Record<ExternalAppName, string> = {
   seller: "SELLER_APP_BASE_URL",
   shipping: "SHIPPING_APP_BASE_URL",
-  payments: "PAYMENTS_APP_BASE_URL"
+  payments: "PAYMENTS_APP_BASE_URL",
+  "control-plane": "CONTROL_PLANE_BASE_URL"
 };
 
 const apiKeyEnvByApp: Record<ExternalAppName, string> = {
   seller: "BUYER_API_KEY",
   shipping: "SHIPPING_API_KEY",
-  payments: "PAYMENTS_API_KEY"
+  payments: "PAYMENTS_API_KEY",
+  "control-plane": "BUYER_API_KEY"
 };
 
 const serviceNameByApp: Partial<Record<ExternalAppName, string>> = {
-  seller: "buyer"
+  seller: "buyer",
+  "control-plane": "buyer"
 };
 
 export class ExternalApiError extends Error {

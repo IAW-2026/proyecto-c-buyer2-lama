@@ -35,6 +35,68 @@ export const preferencesSchema = z.object({
   vendedores_preferidos: z.array(z.string().min(1)).default([])
 });
 
+const buyerStatusTextValues = {
+  active: true,
+  activo: true,
+  activa: true,
+  enabled: true,
+  inactive: false,
+  inactivo: false,
+  inactiva: false,
+  disabled: false
+} as const;
+
+function normalizeBuyerStatusText(value?: string) {
+  if (value === undefined) {
+    return undefined;
+  }
+
+  const normalized = value.trim().toLowerCase();
+  return buyerStatusTextValues[normalized as keyof typeof buyerStatusTextValues];
+}
+
+export const buyerStatusUpdateSchema = z
+  .object({
+    esta_activo: z.boolean().optional(),
+    activo: z.boolean().optional(),
+    estado: z.string().optional()
+  })
+  .superRefine((data, context) => {
+    const statusFromText = normalizeBuyerStatusText(data.estado);
+    if (data.estado !== undefined && statusFromText === undefined) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "El estado debe ser active/inactive o activo/inactivo.",
+        path: ["estado"]
+      });
+    }
+
+    const providedStatuses = [data.esta_activo, data.activo, statusFromText].filter(
+      (status): status is boolean => typeof status === "boolean"
+    );
+
+    if (!providedStatuses.length) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Debe indicar si el comprador esta activo.",
+        path: ["esta_activo"]
+      });
+      return;
+    }
+
+    if (providedStatuses.some((status) => status !== providedStatuses[0])) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "El estado recibido es inconsistente.",
+        path: ["estado"]
+      });
+    }
+  })
+  .transform((data) => ({
+    esta_activo:
+      data.esta_activo ?? data.activo ?? normalizeBuyerStatusText(data.estado) ?? false
+  }));
+
 export const paymentSchema = z.object({
   producto_ids: z.array(z.string().min(3)).min(1),
   comprador: z.object({

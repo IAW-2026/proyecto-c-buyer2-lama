@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { canAccessAdmin, getAuthContext } from "@/lib/auth";
 import { listBuyers } from "@/lib/buyer-store";
-import { requireServiceApiKey } from "@/lib/service-api-key";
+import { requireAnyServiceApiKey } from "@/lib/service-api-key";
 
 export async function GET(request: Request) {
-  const unauthorizedResponse = requireServiceApiKey(request, "analytics");
+  const unauthorizedResponse = requireAnyServiceApiKey(request, ["analytics", "control-plane"]);
   if (unauthorizedResponse) {
     return unauthorizedResponse;
   }

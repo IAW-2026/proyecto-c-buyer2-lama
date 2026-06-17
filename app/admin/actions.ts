@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { canAccessAdmin, getAuthContext } from "@/lib/auth";
 import { setBuyerActive, updateBuyerProfile, upsertPreferences } from "@/lib/buyer-store";
+import { syncBuyerStatusWithControlPlane } from "@/lib/control-plane-service";
 import { adminBuyerUpdateSchema, preferencesSchema } from "@/lib/validation";
 
 export type AdminFormState = {
@@ -22,6 +23,18 @@ function formList(formData: FormData, name: string) {
     .getAll(name)
     .map((value) => String(value).trim())
     .filter(Boolean);
+}
+
+function parseBuyerStatusIntent(intent: FormDataEntryValue | null) {
+  if (intent === "activate") {
+    return true;
+  }
+
+  if (intent === "deactivate") {
+    return false;
+  }
+
+  throw new Error("Intent de estado invalido.");
 }
 
 export async function updateAdminBuyer(_state: AdminFormState, formData: FormData): Promise<AdminFormState> {
@@ -61,9 +74,15 @@ export async function toggleBuyerStatus(formData: FormData) {
   await ensureAdmin();
 
   const clerkUserId = String(formData.get("clerk_user_id_comprador") ?? "");
-  const isActive = formData.get("intent") === "activate";
+  const isActive = parseBuyerStatusIntent(formData.get("intent"));
 
   await setBuyerActive(clerkUserId, isActive);
+  try {
+    await syncBuyerStatusWithControlPlane(clerkUserId, isActive);
+  } catch (error) {
+    console.error("[control-plane] No se pudo sincronizar el estado del comprador.", error);
+  }
+
   revalidatePath("/admin");
   revalidatePath(`/admin/compradores/${clerkUserId}`);
 }
