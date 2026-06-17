@@ -17,7 +17,14 @@ export async function GET(request: Request) {
     pageSize: Number(searchParams.get("pageSize") ?? 8)
   });
 
-  return NextResponse.json(result);
+  return NextResponse.json({
+    ...result,
+    items: result.items.map((buyer) => ({
+      ...buyer,
+      telefono: buyer.telefono ?? null,
+      direccion_envio: buyer.direccion_envio ?? null
+    }))
+  });
 }
 
 export async function POST(_request: Request) {
