@@ -1,0 +1,123 @@
+import { ProductCard } from "@/components/ProductCard";
+import { SearchBar } from "@/components/SearchBar";
+import { Pagination } from "@/components/Pagination";
+import { EmptyState } from "@/components/ui";
+import { canAccessBuyerApp } from "@/lib/auth";
+import { getBuyer } from "@/lib/buyer-store";
+import { listFavoriteProductIds } from "@/lib/favorites-store";
+import { getCatalogProducts, normalizeProductSort } from "@/lib/seller-service";
+import { getBuyerRouteAuthContext } from "@/lib/role-guards";
+import type { Product } from "@/lib/types";
+import { Sparkles } from "lucide-react";
+
+function ProductGrid({
+  products,
+  favoriteProductIds,
+  canFavorite,
+  isAccountActive
+}: {
+  products: Product[];
+  favoriteProductIds: Set<string>;
+  canFavorite: boolean;
+  isAccountActive: boolean;
+}) {
+  return (
+    <div className="grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 lg:grid-cols-4">
+      {products.map((product) => (
+        <ProductCard
+          key={product.producto_id}
+          product={product}
+          isFavorite={favoriteProductIds.has(product.producto_id)}
+          canFavorite={canFavorite}
+          isAccountActive={isAccountActive}
+        />
+      ))}
+    </div>
+  );
+}
+
+export default async function ProductsPage({
+  searchParams
+}: {
+  searchParams: Promise<Record<string, string | undefined>>;
+}) {
+  const authContext = await getBuyerRouteAuthContext();
+  const hasBuyerRole = canAccessBuyerApp(authContext);
+  const buyer = authContext.userId && hasBuyerRole ? await getBuyer(authContext.userId) : null;
+  const isAccountActive = buyer?.esta_activo ?? true;
+  const params = await searchParams;
+  const requestedPage = Number(params.page ?? 1);
+  const page = Number.isFinite(requestedPage) ? requestedPage : 1;
+  const sort = normalizeProductSort(params.sort);
+  const favoriteProductIds =
+    authContext.userId && hasBuyerRole
+      ? new Set(await listFavoriteProductIds(authContext.userId))
+      : new Set<string>();
+
+  const catalog = await getCatalogProducts({
+    search: params.search,
+    categoria: params.categoria,
+    talle: params.talle,
+    genero: params.genero,
+    sort,
+    page,
+    pageSize: 8,
+    semanticSearch: true
+  });
+  const usedAI = Boolean(catalog.aiSearch?.used);
+
+  return (
+    <main className="mx-auto max-w-7xl px-4 py-10 sm:py-12 lg:px-6">
+      <div className="mb-8 sm:mb-10">
+        <div className="flex items-center gap-3">
+          <h1 className="font-display text-4xl font-bold text-lama-ink sm:text-5xl">
+            Productos
+          </h1>
+          {usedAI ? (
+            <span className="ai-search-badge">
+              <Sparkles className="h-3 w-3" />
+              Busqueda inteligente
+            </span>
+          ) : null}
+        </div>
+      </div>
+
+      <div className="mb-8">
+        <SearchBar
+          search={params.search}
+          categoria={params.categoria}
+          talle={params.talle}
+          genero={params.genero}
+          sort={sort}
+          basePath="/productos"
+          categoryOptions={catalog.categorias.map((category) => ({
+            id: category.categoria_producto_id,
+            label: category.nombre
+          }))}
+        />
+      </div>
+
+      {catalog.items.length ? (
+        <>
+          <ProductGrid
+            products={catalog.items}
+            favoriteProductIds={favoriteProductIds}
+            canFavorite={Boolean(authContext.userId && hasBuyerRole)}
+            isAccountActive={isAccountActive}
+          />
+          <Pagination
+            page={catalog.page}
+            pageSize={catalog.pageSize}
+            total={catalog.total}
+            searchParams={params}
+          />
+        </>
+      ) : (
+        <EmptyState
+          title="No se encontraron prendas"
+          text="Proba ajustar la busqueda, la categoria o el talle para ver mas publicaciones activas."
+        />
+      )}
+    </main>
+  );
+}
